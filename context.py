@@ -245,7 +245,7 @@ class TarballImportContext( Implicit ):
         """ See IImportContext.
         """
         if subdir is not None:
-            filename = os.path.join( subdir, filename )
+            filename = '/'.join( ( subdir, filename ) )
 
         try:
             file = self._archive.extractfile( filename )
@@ -348,7 +348,7 @@ class TarballExportContext( Implicit ):
         """ See IExportContext.
         """
         if subdir is not None:
-            filename = os.path.join( subdir, filename )
+            filename = '/'.join( ( subdir, filename ) )
 
         stream = StringIO( text )
         info = TarInfo( filename )
