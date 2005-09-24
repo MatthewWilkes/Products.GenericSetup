@@ -17,10 +17,7 @@ $Id$
 
 import unittest
 import Testing
-try:
-    import Zope2
-except ImportError: # BBB: for Zope 2.7
-    import Zope as Zope2
+import Zope2
 Zope2.startup()
 
 from OFS.Folder import Folder
@@ -28,10 +25,7 @@ from OFS.Image import File
 
 from DateTime.DateTime import DateTime
 
-#from Products.CMFCore.tests.base.testcase import SecurityRequestTest
-from Testing.ZopeTestCase import ZopeTestCase
 from common import SecurityRequestTest
-
 
 class DummySite( Folder ):
 

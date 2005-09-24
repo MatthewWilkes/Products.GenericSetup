@@ -17,10 +17,7 @@ $Id$
 
 import unittest
 import Testing
-try:
-    import Zope2
-except ImportError: # BBB: for Zope 2.7
-    import Zope as Zope2
+import Zope2
 Zope2.startup()
 
 from StringIO import StringIO
@@ -35,8 +32,6 @@ from common import DummyExportContext
 from common import DummyImportContext
 from common import FilesystemTestBase
 
-#from Products.CMFCore.tests.base.testcase import SecurityRequestTest
-from Testing.ZopeTestCase import ZopeTestCase
 from common import SecurityRequestTest
 from common import TarballTester
 from conformance import ConformsToISetupTool
