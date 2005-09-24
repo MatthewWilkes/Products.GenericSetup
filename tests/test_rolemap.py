@@ -12,7 +12,7 @@
 ##############################################################################
 """ GenericSetup rolemap export / import unit tests
 
-$Id: test_rolemap.py,v 1.1.1.1 2005/08/08 19:38:37 tseaver Exp $
+$Id$
 """
 
 import unittest

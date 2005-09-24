@@ -12,7 +12,7 @@
 ##############################################################################
 """ Unit tests for GenericSetup tool.
 
-$Id: test_tool.py,v 1.1.1.1 2005/08/08 19:38:37 tseaver Exp $
+$Id$
 """
 
 import unittest

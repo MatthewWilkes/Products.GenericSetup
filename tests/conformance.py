@@ -15,7 +15,7 @@
 Derived testcase classes should define '_getTargetClass()', which must
 return the class being tested for conformance.
 
-$Id: conformance.py,v 1.2 2005/08/09 18:49:48 tseaver Exp $
+$Id$
 """
 
 class ConformsToISetupContext:

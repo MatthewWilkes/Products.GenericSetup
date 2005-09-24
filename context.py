@@ -14,7 +14,7 @@
 
 Wrappers representing the state of an import / export operation.
 
-$Id: context.py,v 1.2 2005/08/11 21:41:36 tseaver Exp $
+$Id$
 """
 
 import os

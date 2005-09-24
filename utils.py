@@ -12,7 +12,7 @@
 ##############################################################################
 """ GenericSetup product utilities
 
-$Id: utils.py,v 1.1.1.1 2005/08/08 19:38:37 tseaver Exp $
+$Id$
 """
 
 import os

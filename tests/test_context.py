@@ -12,7 +12,7 @@
 ##############################################################################
 """ Unit tests for import / export contexts.
 
-$Id: test_context.py,v 1.2 2005/08/11 21:41:36 tseaver Exp $
+$Id$
 """
 
 import unittest

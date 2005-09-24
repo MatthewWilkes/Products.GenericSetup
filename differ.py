@@ -12,7 +12,7 @@
 ##############################################################################
 """ Diff utilities for comparing configurations.
 
-$Id: differ.py,v 1.1.1.1 2005/08/08 19:38:37 tseaver Exp $
+$Id$
 """
 
 from difflib import unified_diff

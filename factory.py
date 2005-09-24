@@ -12,7 +12,7 @@
 ##############################################################################
 """ Configured site factory implementation.
 
-$Id: factory.py,v 1.1.1.1 2005/08/08 19:38:37 tseaver Exp $
+$Id$
 """
 
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
