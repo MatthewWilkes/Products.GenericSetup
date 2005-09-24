@@ -700,7 +700,7 @@ class Test_exportToolset( _ToolsetSetup
         from Products.GenericSetup.tool import exportToolset
 
         site = self._initSite()
-        context = DummyExportContext( site )
+        context = DummyExportContext( site, tool=site.setup_tool )
 
         exportToolset( context )
 
@@ -721,7 +721,7 @@ class Test_exportToolset( _ToolsetSetup
         toolset.addRequiredTool( 'mandatory', 'path.to.one' )
         toolset.addRequiredTool( 'obligatory', 'path.to.another' )
 
-        context = DummyExportContext( site )
+        context = DummyExportContext( site, tool=site.setup_tool )
 
         exportToolset( context )
 
@@ -742,7 +742,7 @@ class Test_importToolset( _ToolsetSetup ):
         from Products.GenericSetup.tool import importToolset
 
         site = self._initSite()
-        context = DummyImportContext( site )
+        context = DummyImportContext( site, tool=site.setup_tool )
         context._files[ TOOLSET_XML ] = _REQUIRED_TOOLSET_XML
 
         importToolset( context )
@@ -769,7 +769,7 @@ class Test_importToolset( _ToolsetSetup ):
         for tool_id in TOOL_IDS:
             self.failUnless( tool_id in site.objectIds() )
 
-        context = DummyImportContext( site )
+        context = DummyImportContext( site, tool=site.setup_tool )
         context._files[ TOOLSET_XML ] = _FORBIDDEN_TOOLSET_XML
 
         importToolset( context )
@@ -786,7 +786,7 @@ class Test_importToolset( _ToolsetSetup ):
         site = self._initSite()
         self.assertEqual( len( site.objectIds() ), 1 )
 
-        context = DummyImportContext( site )
+        context = DummyImportContext( site, tool=site.setup_tool )
         context._files[ TOOLSET_XML ] = _REQUIRED_TOOLSET_XML
 
         importToolset( context )
@@ -814,7 +814,7 @@ class Test_importToolset( _ToolsetSetup ):
 
         self.assertEqual( len( site.objectIds() ), 3 )
 
-        context = DummyImportContext( site )
+        context = DummyImportContext( site, tool=site.setup_tool )
         context._files[ TOOLSET_XML ] = _REQUIRED_TOOLSET_XML
 
         importToolset( context )
@@ -840,7 +840,7 @@ class Test_importToolset( _ToolsetSetup ):
 
         self.assertEqual( len( site.objectIds() ), 3 )
 
-        context = DummyImportContext( site )
+        context = DummyImportContext( site, tool=site.setup_tool )
         context._files[ TOOLSET_XML ] = _REQUIRED_TOOLSET_XML
 
         importToolset( context )

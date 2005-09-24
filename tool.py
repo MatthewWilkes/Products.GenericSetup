@@ -51,8 +51,7 @@ def exportStepRegistries(context):
 
     """ Built-in handler for exporting import / export step registries.
     """
-    site = context.getSite()
-    setup_tool = getattr(site, 'setup_tool')
+    setup_tool = context.getSetupTool()
 
     import_steps_xml = setup_tool.getImportStepRegistry().generateXML()
     context.writeDataFile('import_steps.xml', import_steps_xml, 'text/xml')
@@ -73,7 +72,7 @@ def importToolset(context):
     if xml is None:
         return 'Toolset: Nothing to import.'
 
-    setup_tool = getattr(site, 'setup_tool')
+    setup_tool = context.getSetupTool()
     toolset = setup_tool.getToolsetRegistry()
 
     toolset.parseXML(xml, encoding)
@@ -114,8 +113,7 @@ def exportToolset(context):
 
     """ Export required / forbidden tools to XML file.
     """
-    site = context.getSite()
-    setup_tool = getattr(site, 'setup_tool')
+    setup_tool = context.getSetupTool()
     toolset = setup_tool.getToolsetRegistry()
 
     xml = toolset.generateXML()

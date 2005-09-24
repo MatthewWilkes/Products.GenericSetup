@@ -35,6 +35,11 @@ class ISetupContext( Interface ):
         """ Return the site object being configured / dumped.
         """
 
+    def getSetupTool():
+
+        """ Return the site object being configured / dumped.
+        """
+
 class IImportContext( ISetupContext ):
 
     def getEncoding():

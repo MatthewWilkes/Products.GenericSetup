@@ -176,12 +176,16 @@ class TarballTester( DOMComparator ):
 
 class DummyExportContext:
 
-    def __init__( self, site ):
+    def __init__( self, site, tool=None ):
         self._site = site
+        self._tool = tool
         self._wrote = []
 
     def getSite( self ):
         return self._site
+
+    def getSetupTool( self ):
+        return self._tool
 
     def writeDataFile( self, filename, text, content_type, subdir=None ):
         if subdir is not None:
@@ -190,14 +194,18 @@ class DummyExportContext:
 
 class DummyImportContext:
 
-    def __init__( self, site, purge=True, encoding=None ):
+    def __init__( self, site, purge=True, encoding=None, tool=None ):
         self._site = site
+        self._tool = tool
         self._purge = purge
         self._encoding = encoding
         self._files = {}
 
     def getSite( self ):
         return self._site
+
+    def getSetupTool( self ):
+        return self._tool
 
     def getEncoding( self ):
         return self._encoding
