@@ -40,6 +40,18 @@ class ISetupContext( Interface ):
         """ Return the site object being configured / dumped.
         """
 
+    def note(category, message):
+
+        """ Record a logging message from within a handler.
+
+        o 'category' is a string defining the source of the message.
+
+        o 'message' is the text of the message itself.
+
+        o XXX This API may disappear soon, to be replaced by a more
+          general annotation.
+        """
+
 class IImportContext( ISetupContext ):
 
     def getEncoding():

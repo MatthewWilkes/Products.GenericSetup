@@ -42,25 +42,15 @@ from interfaces import IExportContext
 from interfaces import IImportContext
 from permissions import ManagePortal
 
-
-class DirectoryImportContext( Implicit ):
-
-    implements(IImportContext)
+class BaseContext( Implicit ):
 
     security = ClassSecurityInfo()
 
-    def __init__( self
-                , tool
-                , profile_path
-                , should_purge=False
-                , encoding=None
-                ):
+    def __init__( self, tool ):
 
-        self._site = aq_parent( aq_inner( tool ) )
         self._tool = tool
-        self._profile_path = profile_path
-        self._should_purge = bool( should_purge )
-        self._encoding = encoding
+        self._site = aq_parent( aq_inner( tool ) )
+        self._notes = []
 
     security.declareProtected( ManagePortal, 'getSite' )
     def getSite( self ):
@@ -75,6 +65,31 @@ class DirectoryImportContext( Implicit ):
         """ See ISetupContext.
         """
         return self._tool
+
+    security.declareProtected( ManagePortal, 'notes' )
+    def note( self, category, message ):
+
+        """ See ISetupContext.
+        """
+        self._notes.append( ( category, message ) )
+
+class DirectoryImportContext( BaseContext ):
+
+    implements(IImportContext)
+
+    security = ClassSecurityInfo()
+
+    def __init__( self
+                , tool
+                , profile_path
+                , should_purge=False
+                , encoding=None
+                ):
+
+        BaseContext.__init__( self, tool )
+        self._profile_path = profile_path
+        self._should_purge = bool( should_purge )
+        self._encoding = encoding
 
     security.declareProtected( ManagePortal, 'getEncoding' )
     def getEncoding( self ):
@@ -153,7 +168,7 @@ class DirectoryImportContext( Implicit ):
 InitializeClass( DirectoryImportContext )
 
 
-class DirectoryExportContext( Implicit ):
+class DirectoryExportContext( BaseContext ):
 
     implements(IExportContext)
 
@@ -161,23 +176,8 @@ class DirectoryExportContext( Implicit ):
 
     def __init__( self, tool, profile_path ):
 
-        self._site = aq_parent( aq_inner( tool ) )
-        self._tool = tool
+        BaseContext.__init__( self, tool )
         self._profile_path = profile_path
-
-    security.declareProtected( ManagePortal, 'getSite' )
-    def getSite( self ):
-
-        """ See ISetupContext.
-        """
-        return aq_self(self._site)
-
-    security.declareProtected( ManagePortal, 'getSetupTool' )
-    def getSetupTool( self ):
-
-        """ See ISetupContext.
-        """
-        return self._tool
 
     security.declareProtected( ManagePortal, 'writeDataFile' )
     def writeDataFile( self, filename, text, content_type, subdir=None ):
@@ -203,7 +203,7 @@ class DirectoryExportContext( Implicit ):
 InitializeClass( DirectoryExportContext )
 
 
-class TarballImportContext( Implicit ):
+class TarballImportContext( BaseContext ):
 
     implements(IImportContext)
 
@@ -211,28 +211,13 @@ class TarballImportContext( Implicit ):
 
     def __init__( self, tool, archive_bits, encoding=None, should_purge=False ):
 
-        self._site = aq_parent( aq_inner( tool ) )
-        self._tool = tool
+        BaseContext.__init__( self, tool )
         timestamp = time.gmtime()
         self._archive_stream = StringIO(archive_bits)
         self._archive = TarFile.open( 'foo.bar', 'r:gz'
                                     , self._archive_stream )
         self._encoding = encoding
         self._should_purge = bool( should_purge )
-
-    security.declareProtected( ManagePortal, 'getSite' )
-    def getSite( self ):
-
-        """ See ISetupContext.
-        """
-        return aq_self(self._site)
-
-    security.declareProtected( ManagePortal, 'getSetupTool' )
-    def getSetupTool( self ):
-
-        """ See ISetupContext.
-        """
-        return self._tool
 
     def getEncoding( self ):
 
@@ -309,7 +294,7 @@ class TarballImportContext( Implicit ):
             return None
 
 
-class TarballExportContext( Implicit ):
+class TarballExportContext( BaseContext ):
 
     implements(IExportContext)
 
@@ -317,8 +302,7 @@ class TarballExportContext( Implicit ):
 
     def __init__( self, tool ):
 
-        self._site = aq_parent( aq_inner( tool ) )
-        self._tool = tool
+        BaseContext.__init__( self, tool )
         timestamp = time.gmtime()
         archive_name = ( 'setup_tool-%4d%02d%02d%02d%02d%02d.tar.gz'
                        % timestamp[:6] )
@@ -327,20 +311,6 @@ class TarballExportContext( Implicit ):
         self._archive_filename = archive_name
         self._archive = TarFile.open( archive_name, 'w:gz'
                                     , self._archive_stream )
-
-    security.declareProtected( ManagePortal, 'getSite' )
-    def getSite( self ):
-
-        """ See ISetupContext.
-        """
-        return aq_self(self._site)
-
-    security.declareProtected( ManagePortal, 'getSetupTool' )
-    def getSetupTool( self ):
-
-        """ See ISetupContext.
-        """
-        return self._tool
 
     security.declareProtected( ManagePortal, 'writeDataFile' )
     def writeDataFile( self, filename, text, content_type, subdir=None ):
@@ -374,7 +344,7 @@ class TarballExportContext( Implicit ):
 InitializeClass( TarballExportContext )
 
 
-class SnapshotExportContext( Implicit ):
+class SnapshotExportContext( BaseContext ):
 
     implements(IExportContext)
 
@@ -382,23 +352,8 @@ class SnapshotExportContext( Implicit ):
 
     def __init__( self, tool, snapshot_id ):
 
-        self._tool = tool = aq_inner( tool )
-        self._site = aq_parent( tool )
+        BaseContext.__init__( self, tool )
         self._snapshot_id = snapshot_id
-
-    security.declareProtected( ManagePortal, 'getSite' )
-    def getSite( self ):
-
-        """ See ISetupContext.
-        """
-        return aq_self(self._site)
-
-    security.declareProtected( ManagePortal, 'getSetupTool' )
-    def getSetupTool( self ):
-
-        """ See ISetupContext.
-        """
-        return self._tool
 
     security.declareProtected( ManagePortal, 'writeDataFile' )
     def writeDataFile( self, filename, text, content_type, subdir=None ):
@@ -480,7 +435,7 @@ class SnapshotExportContext( Implicit ):
 InitializeClass( SnapshotExportContext )
 
 
-class SnapshotImportContext( Implicit ):
+class SnapshotImportContext( BaseContext ):
 
     implements(IImportContext)
 
@@ -493,25 +448,10 @@ class SnapshotImportContext( Implicit ):
                 , encoding=None
                 ):
 
-        self._tool = tool = aq_inner( tool )
-        self._site = aq_parent( tool )
+        BaseContext.__init__( self, tool )
         self._snapshot_id = snapshot_id
         self._encoding = encoding
         self._should_purge = bool( should_purge )
-
-    security.declareProtected( ManagePortal, 'getSite' )
-    def getSite( self ):
-
-        """ See ISetupContext.
-        """
-        return aq_self(self._site)
-
-    security.declareProtected( ManagePortal, 'getSetupTool' )
-    def getSetupTool( self ):
-
-        """ See ISetupContext.
-        """
-        return self._tool
 
     security.declareProtected( ManagePortal, 'getEncoding' )
     def getEncoding( self ):

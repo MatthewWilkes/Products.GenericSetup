@@ -200,6 +200,7 @@ class DummyImportContext:
         self._purge = purge
         self._encoding = encoding
         self._files = {}
+        self._notes = []
 
     def getSite( self ):
         return self._site
@@ -220,6 +221,10 @@ class DummyImportContext:
     def shouldPurge( self ):
 
         return self._purge
+
+    def note( self, component, message ):
+
+        self._notes.append( ( component, message ) )
 
 def dummy_handler( context ):
 
