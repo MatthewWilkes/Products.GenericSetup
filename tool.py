@@ -128,7 +128,7 @@ class SetupTool(Folder):
     """
     implements(ISetupTool, implementedBy(Folder))
 
-    id = 'setup_tool'
+    id = 'portal_setup'
     meta_type = 'Generic Setup Tool'
 
     _import_context_id = ''
