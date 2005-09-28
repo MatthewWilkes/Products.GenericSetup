@@ -17,8 +17,6 @@ $Id$
 
 import unittest
 import Testing
-import Zope2
-Zope2.startup()
 
 from StringIO import StringIO
 
@@ -77,7 +75,7 @@ class SetupToolTests( FilesystemTestBase
 
     def test_empty( self ):
 
-        tool = self._makeOne()
+        tool = self._makeOne('setup_tool')
 
         self.assertEqual( tool.getImportContextID(), '' )
 
@@ -103,7 +101,7 @@ class SetupToolTests( FilesystemTestBase
         from test_registry import _EMPTY_TOOLSET_XML
         from common import _makeTestFile
 
-        tool = self._makeOne()
+        tool = self._makeOne('setup_tool')
 
         _makeTestFile( IMPORT_STEPS_XML
                      , self._PROFILE_PATH
@@ -127,7 +125,7 @@ class SetupToolTests( FilesystemTestBase
 
     def test_setImportContext_invalid( self ):
 
-        tool = self._makeOne()
+        tool = self._makeOne('setup_tool')
 
         self.assertRaises( KeyError
                          , tool.setImportContext
@@ -145,7 +143,7 @@ class SetupToolTests( FilesystemTestBase
         from test_registry import ONE_FUNC
         from common import _makeTestFile
 
-        tool = self._makeOne()
+        tool = self._makeOne('setup_tool')
         tool.getExportStepRegistry().clear()
 
         _makeTestFile( IMPORT_STEPS_XML
@@ -208,7 +206,7 @@ class SetupToolTests( FilesystemTestBase
 
         site = self._makeSite()
 
-        tool = self._makeOne().__of__( site )
+        tool = self._makeOne('setup_tool').__of__( site )
 
         self.assertRaises( ValueError, tool.runImportStep, 'nonesuch' )
 
@@ -217,7 +215,7 @@ class SetupToolTests( FilesystemTestBase
         TITLE = 'original title'
         site = self._makeSite( TITLE )
 
-        tool = self._makeOne().__of__( site )
+        tool = self._makeOne('setup_tool').__of__( site )
 
         registry = tool.getImportStepRegistry()
         registry.registerStep( 'simple', '1', _uppercaseSiteTitle )
@@ -237,7 +235,7 @@ class SetupToolTests( FilesystemTestBase
         TITLE = 'original title'
         site = self._makeSite( TITLE )
 
-        tool = self._makeOne().__of__( site )
+        tool = self._makeOne('setup_tool').__of__( site )
 
         registry = tool.getImportStepRegistry()
         registry.registerStep( 'dependable', '1', _underscoreSiteTitle )
@@ -262,7 +260,7 @@ class SetupToolTests( FilesystemTestBase
         TITLE = 'original title'
         site = self._makeSite( TITLE )
 
-        tool = self._makeOne().__of__( site )
+        tool = self._makeOne('setup_tool').__of__( site )
 
         registry = tool.getImportStepRegistry()
         registry.registerStep( 'dependable', '1', _underscoreSiteTitle )
@@ -283,7 +281,7 @@ class SetupToolTests( FilesystemTestBase
 
         site = self._makeSite()
 
-        tool = self._makeOne().__of__( site )
+        tool = self._makeOne('setup_tool').__of__( site )
         registry = tool.getImportStepRegistry()
         registry.registerStep( 'purging', '1', _purgeIfRequired )
 
@@ -298,7 +296,7 @@ class SetupToolTests( FilesystemTestBase
 
         site = self._makeSite()
 
-        tool = self._makeOne().__of__( site )
+        tool = self._makeOne('setup_tool').__of__( site )
         registry = tool.getImportStepRegistry()
         registry.registerStep( 'purging', '1', _purgeIfRequired )
 
@@ -313,7 +311,7 @@ class SetupToolTests( FilesystemTestBase
 
         site = self._makeSite()
 
-        tool = self._makeOne().__of__( site )
+        tool = self._makeOne('setup_tool').__of__( site )
         registry = tool.getImportStepRegistry()
         registry.registerStep( 'purging', '1', _purgeIfRequired )
 
@@ -328,7 +326,7 @@ class SetupToolTests( FilesystemTestBase
 
         site = self._makeSite()
 
-        tool = self._makeOne().__of__( site )
+        tool = self._makeOne('setup_tool').__of__( site )
 
         registry = tool.getImportStepRegistry()
         registry.registerStep( 'purging', '1', _purgeIfRequired )
@@ -341,7 +339,7 @@ class SetupToolTests( FilesystemTestBase
     def test_runAllImportSteps_empty( self ):
 
         site = self._makeSite()
-        tool = self._makeOne().__of__( site )
+        tool = self._makeOne('setup_tool').__of__( site )
 
         result = tool.runAllImportSteps()
 
@@ -351,7 +349,7 @@ class SetupToolTests( FilesystemTestBase
 
         TITLE = 'original title'
         site = self._makeSite( TITLE )
-        tool = self._makeOne().__of__( site )
+        tool = self._makeOne('setup_tool').__of__( site )
 
         registry = tool.getImportStepRegistry()
         registry.registerStep( 'dependable', '1'
@@ -383,7 +381,7 @@ class SetupToolTests( FilesystemTestBase
     def test_runAllImportSteps_sorted_explicit_purge( self ):
 
         site = self._makeSite()
-        tool = self._makeOne().__of__( site )
+        tool = self._makeOne('setup_tool').__of__( site )
 
         registry = tool.getImportStepRegistry()
         registry.registerStep( 'dependable', '1'
@@ -408,7 +406,7 @@ class SetupToolTests( FilesystemTestBase
     def test_runAllImportSteps_sorted_skip_purge( self ):
 
         site = self._makeSite()
-        tool = self._makeOne().__of__( site )
+        tool = self._makeOne('setup_tool').__of__( site )
 
         registry = tool.getImportStepRegistry()
         registry.registerStep( 'dependable', '1'
@@ -433,7 +431,7 @@ class SetupToolTests( FilesystemTestBase
     def test_runExportStep_nonesuch( self ):
 
         site = self._makeSite()
-        tool = self._makeOne().__of__( site )
+        tool = self._makeOne('setup_tool').__of__( site )
 
         self.assertRaises( ValueError, tool.runExportStep, 'nonesuch' )
 
@@ -442,7 +440,7 @@ class SetupToolTests( FilesystemTestBase
         from test_registry import _EMPTY_IMPORT_XML
 
         site = self._makeSite()
-        site.setup_tool = self._makeOne()
+        site.setup_tool = self._makeOne('setup_tool')
         tool = site.setup_tool
 
         result = tool.runExportStep( 'step_registries' )
@@ -467,7 +465,7 @@ class SetupToolTests( FilesystemTestBase
         from test_registry import _EMPTY_IMPORT_XML
 
         site = self._makeSite()
-        site.setup_tool = self._makeOne()
+        site.setup_tool = self._makeOne('setup_tool')
         tool = site.setup_tool
 
         result = tool.runAllExportSteps()
@@ -492,7 +490,7 @@ class SetupToolTests( FilesystemTestBase
         from test_registry import _EMPTY_IMPORT_XML
 
         site = self._makeSite()
-        site.setup_tool = self._makeOne()
+        site.setup_tool = self._makeOne('setup_tool')
         tool = site.setup_tool
 
         import_reg = tool.getImportStepRegistry()
@@ -545,7 +543,7 @@ class SetupToolTests( FilesystemTestBase
                     ]
 
         site = self._makeSite()
-        site.setup_tool = self._makeOne()
+        site.setup_tool = self._makeOne('setup_tool')
         tool = site.setup_tool
 
         self.assertEqual( len( tool.listSnapshotInfo() ), 0 )
@@ -687,7 +685,7 @@ class _ToolsetSetup( SecurityRequestTest ):
         site._setId( 'site' )
         self.root._setObject( 'site', site )
         site = self.root._getOb( 'site' )
-        site._setObject( 'setup_tool', SetupTool() )
+        site._setObject('setup_tool', SetupTool('setup_tool'))
         return site
 
 class Test_exportToolset( _ToolsetSetup
@@ -899,6 +897,7 @@ _REQUIRED_TOOLSET_XML = """\
     class="Products.GenericSetup.tests.test_tool.DummyTool" />
 </tool-setup>
 """
+
 
 def test_suite():
     # reimport to make sure tests are run from Products

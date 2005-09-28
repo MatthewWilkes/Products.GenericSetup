@@ -126,17 +126,17 @@ class SetupTool(Folder):
 
     """ Profile-based site configuration manager.
     """
-    implements(ISetupTool, implementedBy(Folder))
 
-    id = 'portal_setup'
+    implements(ISetupTool)
+
     meta_type = 'Generic Setup Tool'
 
     _import_context_id = ''
 
     security = ClassSecurityInfo()
 
-    def __init__(self):
-
+    def __init__(self, id):
+        self.id = str(id)
         self._import_registry = ImportStepRegistry()
         self._export_registry = ExportStepRegistry()
         self._export_registry.registerStep('step_registries',
@@ -720,12 +720,13 @@ Comparing configurations: '%s' and '%s'
 
 %s"""
 
+_TOOL_ID = 'setup_tool'
+
 addSetupToolForm = PageTemplateFile('toolAdd.zpt', _wwwdir)
 
 def addSetupTool(dispatcher, RESPONSE):
     """
     """
-    tool = SetupTool()
-    dispatcher._setObject(tool.id, tool)
+    dispatcher._setObject(_TOOL_ID, SetupTool(_TOOL_ID))
 
     RESPONSE.redirect('%s/manage_main' % dispatcher.absolute_url())
