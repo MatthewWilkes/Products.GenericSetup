@@ -758,7 +758,7 @@ class SnapshotExportContextTests( SecurityRequestTest
 
         from OFS.Image import Image
         FILENAME = 'simple.txt'
-        _CONTENT_TYPE = 'image/png'
+        CONTENT_TYPE = 'image/png'
         png_filename = os.path.join( os.path.split( __file__ )[0]
                                    , 'simple.png' )
         png_file = open( png_filename, 'rb' )
@@ -770,7 +770,7 @@ class SnapshotExportContextTests( SecurityRequestTest
         tool = site.setup_tool
         ctx = self._makeOne( tool, 'simple' )
 
-        ctx.writeDataFile( FILENAME, png_data, _CONTENT_TYPE )
+        ctx.writeDataFile( FILENAME, png_data, CONTENT_TYPE )
 
         snapshot = tool.snapshots._getOb( 'simple' )
 
@@ -781,7 +781,7 @@ class SnapshotExportContextTests( SecurityRequestTest
 
         self.assertEqual( fileobj.getId(), FILENAME )
         self.assertEqual( fileobj.meta_type, Image.meta_type )
-        self.assertEqual( fileobj.getContentType(), _CONTENT_TYPE )
+        self.assertEqual( fileobj.getContentType(), CONTENT_TYPE )
         self.assertEqual( fileobj.data, png_data )
 
     def test_writeDataFile_simple_plain_text( self ):
@@ -789,14 +789,14 @@ class SnapshotExportContextTests( SecurityRequestTest
         from string import digits
         from OFS.Image import File
         FILENAME = 'simple.txt'
-        _CONTENT_TYPE = 'text/plain'
+        CONTENT_TYPE = 'text/plain'
 
         site = DummySite( 'site' ).__of__( self.root )
         site.setup_tool = DummyTool( 'setup_tool' )
         tool = site.setup_tool
         ctx = self._makeOne( tool, 'simple' )
 
-        ctx.writeDataFile( FILENAME, digits, _CONTENT_TYPE )
+        ctx.writeDataFile( FILENAME, digits, CONTENT_TYPE )
 
         snapshot = tool.snapshots._getOb( 'simple' )
 
@@ -807,14 +807,42 @@ class SnapshotExportContextTests( SecurityRequestTest
 
         self.assertEqual( fileobj.getId(), FILENAME )
         self.assertEqual( fileobj.meta_type, File.meta_type )
-        self.assertEqual( fileobj.getContentType(), _CONTENT_TYPE )
+        self.assertEqual( fileobj.getContentType(), CONTENT_TYPE )
         self.assertEqual( str( fileobj ), digits )
+
+    def test_writeDataFile_simple_plain_text_unicode( self ):
+
+        from string import digits
+        from OFS.Image import File
+        FILENAME = 'simple.txt'
+        CONTENT_TYPE = 'text/plain'
+        CONTENT = u'Unicode, with non-ASCII: %s.' % unichr(150)
+
+        site = DummySite( 'site' ).__of__( self.root )
+        site.setup_tool = DummyTool( 'setup_tool' )
+        tool = site.setup_tool
+        ctx = self._makeOne( tool, 'simple', 'latin_1' )
+
+        ctx.writeDataFile( FILENAME, CONTENT, CONTENT_TYPE )
+
+        snapshot = tool.snapshots._getOb( 'simple' )
+
+        self.assertEqual( len( snapshot.objectIds() ), 1 )
+        self.failUnless( FILENAME in snapshot.objectIds() )
+
+        fileobj = snapshot._getOb( FILENAME )
+
+        self.assertEqual( fileobj.getId(), FILENAME )
+        self.assertEqual( fileobj.meta_type, File.meta_type )
+        self.assertEqual( fileobj.getContentType(), CONTENT_TYPE )
+        saved = fileobj.manage_FTPget().decode('latin_1')
+        self.assertEqual( saved, CONTENT )
 
     def test_writeDataFile_simple_xml( self ):
 
         from Products.PageTemplates.ZopePageTemplate import ZopePageTemplate
         FILENAME = 'simple.xml'
-        _CONTENT_TYPE = 'text/xml'
+        CONTENT_TYPE = 'text/xml'
         _XML = """<?xml version="1.0"?><simple />"""
 
         site = DummySite( 'site' ).__of__( self.root )
@@ -822,7 +850,7 @@ class SnapshotExportContextTests( SecurityRequestTest
         tool = site.setup_tool
         ctx = self._makeOne( tool, 'simple' )
 
-        ctx.writeDataFile( FILENAME, _XML, _CONTENT_TYPE )
+        ctx.writeDataFile( FILENAME, _XML, CONTENT_TYPE )
 
         snapshot = tool.snapshots._getOb( 'simple' )
 
@@ -840,7 +868,7 @@ class SnapshotExportContextTests( SecurityRequestTest
 
         from Products.PageTemplates.ZopePageTemplate import ZopePageTemplate
         FILENAME = 'simple.xml'
-        _CONTENT_TYPE = 'text/xml'
+        CONTENT_TYPE = 'text/xml'
         _XML = u"""<?xml version="1.0"?><simple />"""
 
         site = DummySite( 'site' ).__of__( self.root )
@@ -848,7 +876,7 @@ class SnapshotExportContextTests( SecurityRequestTest
         tool = site.setup_tool
         ctx = self._makeOne( tool, 'simple' )
 
-        ctx.writeDataFile( FILENAME, _XML, _CONTENT_TYPE )
+        ctx.writeDataFile( FILENAME, _XML, CONTENT_TYPE )
 
         snapshot = tool.snapshots._getOb( 'simple' )
 
@@ -866,7 +894,7 @@ class SnapshotExportContextTests( SecurityRequestTest
 
         from OFS.DTMLDocument import DTMLDocument
         FILENAME = 'simple.dtml'
-        _CONTENT_TYPE = 'text/html'
+        CONTENT_TYPE = 'text/html'
         _HTML = """<html><body><h1>HTML</h1></body></html>"""
 
         site = DummySite( 'site' ).__of__( self.root )
@@ -874,7 +902,7 @@ class SnapshotExportContextTests( SecurityRequestTest
         tool = site.setup_tool
         ctx = self._makeOne( tool, 'simple' )
 
-        ctx.writeDataFile( FILENAME, _HTML, _CONTENT_TYPE, 'sub1' )
+        ctx.writeDataFile( FILENAME, _HTML, CONTENT_TYPE, 'sub1' )
 
         snapshot = tool.snapshots._getOb( 'simple' )
         sub1 = snapshot._getOb( 'sub1' )
@@ -892,7 +920,7 @@ class SnapshotExportContextTests( SecurityRequestTest
 
         from Products.PageTemplates.ZopePageTemplate import ZopePageTemplate
         FILENAME = 'simple.html'
-        _CONTENT_TYPE = 'text/html'
+        CONTENT_TYPE = 'text/html'
         _HTML = """<html><body><h1>HTML</h1></body></html>"""
 
         site = DummySite( 'site' ).__of__( self.root )
@@ -900,7 +928,7 @@ class SnapshotExportContextTests( SecurityRequestTest
         tool = site.setup_tool
         ctx = self._makeOne( tool, 'simple' )
 
-        ctx.writeDataFile( FILENAME, _HTML, _CONTENT_TYPE, 'sub1/sub2' )
+        ctx.writeDataFile( FILENAME, _HTML, CONTENT_TYPE, 'sub1/sub2' )
 
         snapshot = tool.snapshots._getOb( 'simple' )
         sub1 = snapshot._getOb( 'sub1' )

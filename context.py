@@ -46,11 +46,12 @@ class BaseContext( Implicit ):
 
     security = ClassSecurityInfo()
 
-    def __init__( self, tool ):
+    def __init__( self, tool, encoding ):
 
         self._tool = tool
         self._site = aq_parent( aq_inner( tool ) )
         self._notes = []
+        self._encoding = encoding
 
     security.declareProtected( ManagePortal, 'getSite' )
     def getSite( self ):
@@ -65,6 +66,13 @@ class BaseContext( Implicit ):
         """ See ISetupContext.
         """
         return self._tool
+
+    security.declareProtected( ManagePortal, 'getEncoding' )
+    def getEncoding( self ):
+
+        """ See ISetupContext..
+        """
+        return self._encoding
 
     security.declareProtected( ManagePortal, 'notes' )
     def note( self, category, message ):
@@ -86,17 +94,9 @@ class DirectoryImportContext( BaseContext ):
                 , encoding=None
                 ):
 
-        BaseContext.__init__( self, tool )
+        BaseContext.__init__( self, tool, encoding )
         self._profile_path = profile_path
         self._should_purge = bool( should_purge )
-        self._encoding = encoding
-
-    security.declareProtected( ManagePortal, 'getEncoding' )
-    def getEncoding( self ):
-
-        """ See IImportContext.
-        """
-        return self._encoding
 
     security.declareProtected( ManagePortal, 'readDataFile' )
     def readDataFile( self, filename, subdir=None ):
@@ -174,9 +174,9 @@ class DirectoryExportContext( BaseContext ):
 
     security = ClassSecurityInfo()
 
-    def __init__( self, tool, profile_path ):
+    def __init__( self, tool, profile_path, encoding=None ):
 
-        BaseContext.__init__( self, tool )
+        BaseContext.__init__( self, tool, encoding )
         self._profile_path = profile_path
 
     security.declareProtected( ManagePortal, 'writeDataFile' )
@@ -211,19 +211,12 @@ class TarballImportContext( BaseContext ):
 
     def __init__( self, tool, archive_bits, encoding=None, should_purge=False ):
 
-        BaseContext.__init__( self, tool )
+        BaseContext.__init__( self, tool, encoding )
         timestamp = time.gmtime()
         self._archive_stream = StringIO(archive_bits)
         self._archive = TarFile.open( 'foo.bar', 'r:gz'
                                     , self._archive_stream )
-        self._encoding = encoding
         self._should_purge = bool( should_purge )
-
-    def getEncoding( self ):
-
-        """ See IImportContext.
-        """
-        return self._encoding
 
     def readDataFile( self, filename, subdir=None ):
 
@@ -300,9 +293,10 @@ class TarballExportContext( BaseContext ):
 
     security = ClassSecurityInfo()
 
-    def __init__( self, tool ):
+    def __init__( self, tool, encoding=None ):
 
-        BaseContext.__init__( self, tool )
+        BaseContext.__init__( self, tool, encoding )
+
         timestamp = time.gmtime()
         archive_name = ( 'setup_tool-%4d%02d%02d%02d%02d%02d.tar.gz'
                        % timestamp[:6] )
@@ -350,9 +344,9 @@ class SnapshotExportContext( BaseContext ):
 
     security = ClassSecurityInfo()
 
-    def __init__( self, tool, snapshot_id ):
+    def __init__( self, tool, snapshot_id, encoding=None ):
 
-        BaseContext.__init__( self, tool )
+        BaseContext.__init__( self, tool, encoding )
         self._snapshot_id = snapshot_id
 
     security.declareProtected( ManagePortal, 'writeDataFile' )
@@ -386,6 +380,13 @@ class SnapshotExportContext( BaseContext ):
     security.declarePrivate( '_createObjectByType' )
     def _createObjectByType( self, name, body, content_type ):
 
+        if isinstance( body, unicode ):
+            encoding = self.getEncoding()
+            if encoding is None:
+                body = body.encode()
+            else:
+                body = body.encode( encoding )
+
         if name.endswith('.py'):
 
             ob = PythonScript( name )
@@ -398,7 +399,7 @@ class SnapshotExportContext( BaseContext ):
 
         elif content_type in ('text/html', 'text/xml' ):
 
-            ob = ZopePageTemplate( name, str( body )
+            ob = ZopePageTemplate( name, body
                                  , content_type=content_type )
 
         elif content_type[:6]=='image/':
@@ -448,19 +449,10 @@ class SnapshotImportContext( BaseContext ):
                 , encoding=None
                 ):
 
-        BaseContext.__init__( self, tool )
+        BaseContext.__init__( self, tool, encoding )
         self._snapshot_id = snapshot_id
         self._encoding = encoding
         self._should_purge = bool( should_purge )
-
-    security.declareProtected( ManagePortal, 'getEncoding' )
-    def getEncoding( self ):
-
-        """ Return the encoding used in data files.
-
-        o Return None if the data should not be encoded.
-        """
-        return self._encoding
 
     security.declareProtected( ManagePortal, 'readDataFile' )
     def readDataFile( self, filename, subdir=None ):

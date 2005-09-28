@@ -40,6 +40,13 @@ class ISetupContext( Interface ):
         """ Return the site object being configured / dumped.
         """
 
+    def getEncoding():
+
+        """ Get the encoding used for configuration data within the site.
+
+        o Return None if the data should not be encoded.
+        """
+
     def note(category, message):
 
         """ Record a logging message from within a handler.
@@ -53,13 +60,6 @@ class ISetupContext( Interface ):
         """
 
 class IImportContext( ISetupContext ):
-
-    def getEncoding():
-
-        """ Get the encoding used for configuration data within the site.
-
-        o Return None if the data should not be encoded.
-        """
 
     def readDataFile( filename, subdir=None ):
 
