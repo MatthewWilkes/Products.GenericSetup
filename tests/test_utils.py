@@ -17,154 +17,99 @@ $Id$
 
 import unittest
 import Testing
-import Zope2
-Zope2.startup()
 
-from DateTime.DateTime import DateTime
-from OFS.Folder import Folder
+from xml.dom.minidom import parseString
 
-from common import BaseRegistryTests
+from Products.GenericSetup.interfaces import PURGE, UPDATE
+from Products.GenericSetup.utils import PrettyDocument
 
 
-_NORMAL_PROPERTY_NODES = """\
-  <property name="foo_boolean" type="boolean">True</property>
-  <property name="foo_date" type="date">2000/01/01</property>
-  <property name="foo_float" type="float">1.1</property>
-  <property name="foo_int" type="int">1</property>
-  <property name="foo_lines" type="lines">
-   <element value="Foo"/>
-   <element value="Lines"/></property>
-  <property name="foo_long" type="long">1</property>
-  <property name="foo_string" type="string">Foo String</property>
-  <property name="foo_text" type="text">Foo
-Text</property>
-  <property name="foo_tokens" type="tokens">
-   <element value="Foo"/>
-   <element value="Tokens"/></property>
-  <property name="foo_selection" type="selection"
-            select_variable="foobarbaz">Foo</property>
-  <property name="foo_mselection" type="multiple selection"
-            select_variable="foobarbaz">
-   <element value="Foo"/>
-   <element value="Baz"/></property>
-  <property name="foo_boolean0" type="boolean">0</property>
+_EMPTY_PROPERTY_EXPORT = """\
+<?xml version="1.0"?>
+<dummy>
+ <property name="foo_boolean" type="boolean">False</property>
+ <property name="foo_date" type="date"></property>
+ <property name="foo_float" type="float"></property>
+ <property name="foo_int" type="int"></property>
+ <property name="foo_lines" type="lines"></property>
+ <property name="foo_long" type="long"></property>
+ <property name="foo_string" type="string"></property>
+ <property name="foo_text" type="text"></property>
+ <property name="foo_tokens" type="tokens"/>
+ <property name="foo_selection" select_variable="foobarbaz" \
+type="selection"></property>
+ <property name="foo_mselection" select_variable="foobarbaz" \
+type="multiple selection"/>
+ <property name="foo_boolean0" type="boolean">False</property>
+</dummy>
 """
-
-_FIXED_PROPERTY_NODES = """\
-  <property name="foo_boolean">True</property>
-  <property name="foo_date">2000/01/01</property>
-  <property name="foo_float">1.1</property>
-  <property name="foo_int">1</property>
-  <property name="foo_lines">
-   <element value="Foo"/>
-   <element value="Lines"/></property>
-  <property name="foo_long">1</property>
-  <property name="foo_string">Foo String</property>
-  <property name="foo_text">Foo
-Text</property>
-  <property name="foo_tokens">
-   <element value="Foo"/>
-   <element value="Tokens"/></property>
-  <property name="foo_selection" type="selection"
-            select_variable="foobarbaz">Foo</property>
-  <property name="foo_mselection">
-   <element value="Foo"/>
-   <element value="Baz"/></property>
-  <property name="foo_boolean0">0</property>
-"""
-
-_NORMAL_PROPERTY_INFO = ( { 'id': 'foo_boolean',
-                            'value': True,
-                            'elements': (),
-                            'type': 'boolean',
-                            'select_variable': None },
-                          { 'id': 'foo_date',
-                            'value': DateTime('2000/01/01'),
-                            'elements': (),
-                            'type': 'date',
-                            'select_variable': None },
-                          { 'id': 'foo_float',
-                            'value': 1.1,
-                            'elements': (),
-                            'type': 'float',
-                            'select_variable': None },
-                          { 'id': 'foo_int',
-                            'value': 1,
-                            'elements': (),
-                            'type': 'int',
-                            'select_variable': None },
-                          { 'id': 'foo_lines',
-                            'value': '',
-                            'elements': ('Foo', 'Lines'),
-                            'type': 'lines',
-                            'select_variable': None },
-                          { 'id': 'foo_long',
-                            'value': 1,
-                            'elements': (),
-                            'type': 'long',
-                            'select_variable': None },
-                          { 'id': 'foo_string',
-                            'value': 'Foo String',
-                            'elements': (),
-                            'type': 'string',
-                            'select_variable': None },
-                          { 'id': 'foo_text',
-                            'value': 'Foo\nText',
-                            'elements': (),
-                            'type': 'text',
-                            'select_variable': None },
-                          { 'id': 'foo_tokens',
-                            'value': '',
-                            'elements': ('Foo', 'Tokens'),
-                            'type': 'tokens',
-                            'select_variable': None },
-                          { 'id': 'foo_selection',
-                            'value': 'Foo',
-                            'elements': (),
-                            'type': 'selection',
-                            'select_variable': 'foobarbaz' },
-                          { 'id': 'foo_mselection',
-                            'value': '',
-                            'elements': ('Foo', 'Baz'),
-                            'type': 'multiple selection',
-                            'select_variable': 'foobarbaz' },
-                          { 'id': 'foo_boolean0',
-                            'value': False, # 0 imports as False
-                            'elements': (),
-                            'type': 'boolean',
-                            'select_variable': None },
-                          )
 
 _NORMAL_PROPERTY_EXPORT = """\
 <?xml version="1.0"?>
 <dummy>
-%s
+ <property name="foo_boolean" type="boolean">True</property>
+ <property name="foo_date" type="date">2000/01/01</property>
+ <property name="foo_float" type="float">1.1</property>
+ <property name="foo_int" type="int">1</property>
+ <property name="foo_lines" type="lines">
+  <element value="Foo"/>
+  <element value="Lines"/>
+ </property>
+ <property name="foo_long" type="long">1</property>
+ <property name="foo_string" type="string">Foo String</property>
+ <property name="foo_text" type="text">Foo
+Text</property>
+ <property name="foo_tokens" type="tokens">
+  <element value="Foo"/>
+  <element value="Tokens"/>
+ </property>
+ <property name="foo_selection" select_variable="foobarbaz" \
+type="selection">Foo</property>
+ <property name="foo_mselection" select_variable="foobarbaz" \
+type="multiple selection">
+  <element value="Foo"/>
+  <element value="Baz"/>
+ </property>
+ <property name="foo_boolean0" type="boolean">False</property>
 </dummy>
-""" % _NORMAL_PROPERTY_NODES
+"""
 
 _FIXED_PROPERTY_EXPORT = """\
 <?xml version="1.0"?>
 <dummy>
-%s
+ <property name="foo_boolean">True</property>
+ <property name="foo_date">2000/01/01</property>
+ <property name="foo_float">1.1</property>
+ <property name="foo_int">1</property>
+ <property name="foo_lines">
+  <element value="Foo"/>
+  <element value="Lines"/>
+ </property>
+ <property name="foo_long">1</property>
+ <property name="foo_string">Foo String</property>
+ <property name="foo_text">Foo
+Text</property>
+ <property name="foo_tokens">
+  <element value="Foo"/>
+  <element value="Tokens"/></property>
+ <property name="foo_selection" type="selection" \
+select_variable="foobarbaz">Foo</property>
+ <property name="foo_mselection">
+  <element value="Foo"/>
+  <element value="Baz"/>
+ </property>
+ <property name="foo_boolean0">False</property>
 </dummy>
-""" % _FIXED_PROPERTY_NODES
-
-_NORMAL_OBJECT_EXPORT = """\
-<?xml version="1.0"?>
-<dummy>
- <object meta_type="Dummy Type" name="dummy">
-%s
- </object>
-</dummy>
-""" % _NORMAL_PROPERTY_NODES
+"""
 
 _SPECIAL_IMPORT = """\
 <?xml version="1.0"?>
 <dummy>
- <!-- ignore comment, allow empty description -->
- <description></description>
+ <!-- ignore comment, import 0 as False -->
+ <property name="foo_boolean0" type="boolean">0</property>
 </dummy>
 """
+
 
 def _testFunc( *args, **kw ):
 
@@ -231,282 +176,105 @@ class UtilsTests( unittest.TestCase ):
         self.assertRaises( ValueError, _getDottedName, doh )
 
 
-class DummyObject(Folder):
-
-    meta_type = 'Dummy Type'
-    _properties = ()
-
-
-class _ConfiguratorBaseTests(BaseRegistryTests):
-
-    def _initSite(self, foo=2):
-
-        self.root.site = Folder(id='site')
-        site = self.root.site
-
-        site.dummy = DummyObject(id='dummy')
-        site.dummy.foobarbaz = ('Foo', 'Bar', 'Baz')
-
-        if foo > 0:
-            site.dummy._setProperty('foo_boolean', '', 'boolean')
-            site.dummy._setProperty('foo_date', '', 'date')
-            site.dummy._setProperty('foo_float', '', 'float')
-            site.dummy._setProperty('foo_int', '', 'int')
-            site.dummy._setProperty('foo_lines', '', 'lines')
-            site.dummy._setProperty('foo_long', '', 'long')
-            site.dummy._setProperty('foo_string', '', 'string')
-            site.dummy._setProperty('foo_text', '', 'text')
-            site.dummy._setProperty('foo_tokens', (), 'tokens')
-            site.dummy._setProperty('foo_selection', 'foobarbaz', 'selection')
-            site.dummy._setProperty('foo_mselection', 'foobarbaz',
-                                    'multiple selection')
-            site.dummy._setProperty('foo_boolean0', '', 'boolean')
-
-        if foo > 1:
-            site.dummy._updateProperty('foo_boolean', 'True')
-            site.dummy._updateProperty('foo_date', '2000/01/01')
-            site.dummy._updateProperty('foo_float', '1.1')
-            site.dummy._updateProperty('foo_int', '1')
-            site.dummy._updateProperty('foo_lines', 'Foo\nLines')
-            site.dummy._updateProperty('foo_long', '1')
-            site.dummy._updateProperty('foo_string', 'Foo String')
-            site.dummy._updateProperty('foo_text', 'Foo\nText')
-            site.dummy._updateProperty( 'foo_tokens', ('Foo', 'Tokens') )
-            site.dummy._updateProperty('foo_selection', 'Foo')
-            site.dummy._updateProperty( 'foo_mselection', ('Foo', 'Baz') )
-            site.dummy.foo_boolean0 = 0
-
-        return site
-
-
-class ExportConfiguratorBaseTests(_ConfiguratorBaseTests):
+class PropertyManagerHelpersTests(unittest.TestCase):
 
     def _getTargetClass(self):
+        from Products.GenericSetup.utils import PropertyManagerHelpers
 
-        from Products.GenericSetup.utils import ExportConfiguratorBase
+        return PropertyManagerHelpers
 
-        class Configurator(ExportConfiguratorBase):
-            def _getExportTemplate(self):
-                return None
+    def _makeOne(self, *args, **kw):
+        from Products.GenericSetup.utils import NodeAdapterBase
 
-        return Configurator
+        class Foo(self._getTargetClass(), NodeAdapterBase):
 
-    def test__extractProperty_normal(self):
+            pass
 
-        site = self._initSite()
+        return Foo(*args, **kw)
 
-        EXPECTED = _NORMAL_PROPERTY_INFO
+    def setUp(self):
+        from OFS.PropertyManager import PropertyManager
 
-        configurator = self._makeOne(site)
-        prop_infos = [ configurator._extractProperty(site.dummy, prop_def)
-                       for prop_def in site.dummy._propertyMap() ]
+        obj = PropertyManager('obj')
+        obj.foobarbaz = ('Foo', 'Bar', 'Baz')
+        obj._properties = ()
+        obj._setProperty('foo_boolean', '', 'boolean')
+        obj._setProperty('foo_date', '', 'date')
+        obj._setProperty('foo_float', '', 'float')
+        obj._setProperty('foo_int', '', 'int')
+        obj._setProperty('foo_lines', '', 'lines')
+        obj._setProperty('foo_long', '', 'long')
+        obj._setProperty('foo_string', '', 'string')
+        obj._setProperty('foo_text', '', 'text')
+        obj._setProperty('foo_tokens', (), 'tokens')
+        obj._setProperty('foo_selection', 'foobarbaz', 'selection')
+        obj._setProperty('foo_mselection', 'foobarbaz', 'multiple selection')
+        obj._setProperty('foo_boolean0', '', 'boolean')
+        self.helpers = self._makeOne(obj)
 
-        self.assertEqual( len(prop_infos), len(EXPECTED) )
+    def _populate(self, obj):
+        obj._updateProperty('foo_boolean', 'True')
+        obj._updateProperty('foo_date', '2000/01/01')
+        obj._updateProperty('foo_float', '1.1')
+        obj._updateProperty('foo_int', '1')
+        obj._updateProperty('foo_lines', 'Foo\nLines')
+        obj._updateProperty('foo_long', '1')
+        obj._updateProperty('foo_string', 'Foo String')
+        obj._updateProperty('foo_text', 'Foo\nText')
+        obj._updateProperty( 'foo_tokens', ('Foo', 'Tokens') )
+        obj._updateProperty('foo_selection', 'Foo')
+        obj._updateProperty( 'foo_mselection', ('Foo', 'Baz') )
+        obj.foo_boolean0 = 0
 
-        for found, expected in zip(prop_infos, EXPECTED):
-            self.assertEqual(found, expected)
+    def test__extractProperties_empty(self):
+        doc = self.helpers._doc = PrettyDocument()
+        node = doc.createElement('dummy')
+        node.appendChild(self.helpers._extractProperties())
+        doc.appendChild(node)
 
-    def test__extractObject_normal(self):
+        self.assertEqual(doc.toprettyxml(' '), _EMPTY_PROPERTY_EXPORT)
 
-        site = self._initSite()
+    def test__extractProperties_normal(self):
+        self._populate(self.helpers.context)
+        doc = self.helpers._doc = PrettyDocument()
+        node = doc.createElement('dummy')
+        node.appendChild(self.helpers._extractProperties())
+        doc.appendChild(node)
 
-        EXPECTED = { 'id': 'dummy',
-                     'meta_type': 'Dummy Type',
-                     'properties': _NORMAL_PROPERTY_INFO,
-                     'subobjects': (),
-                     'i18n_domain' : None,
-                   }
+        self.assertEqual(doc.toprettyxml(' '), _NORMAL_PROPERTY_EXPORT)
 
-        configurator = self._makeOne(site)
-        obj_info = configurator._extractObject(site.dummy)
+    def test__initProperties_normal(self):
+        node = parseString(_NORMAL_PROPERTY_EXPORT).documentElement
+        self.helpers._initProperties(node, PURGE)
 
-        self.assertEqual( len(obj_info), len(EXPECTED) )
-        self.assertEqual(obj_info, EXPECTED)
+        doc = self.helpers._doc = PrettyDocument()
+        node = doc.createElement('dummy')
+        node.appendChild(self.helpers._extractProperties())
+        doc.appendChild(node)
 
-    def test_generatePropertyNodes_normal(self):
+        self.assertEqual(doc.toprettyxml(' '), _NORMAL_PROPERTY_EXPORT)
 
-        site = self._initSite()
-        configurator = self._makeOne(site).__of__(site)
-        prop_infos = [ configurator._extractProperty(site.dummy, prop_def)
-                       for prop_def in site.dummy._propertyMap() ]
-        nodes = configurator.generatePropertyNodes(prop_infos)
-        xml = '<?xml version="1.0"?><dummy>%s\n</dummy>' % nodes
+    def test__initProperties_fixed(self):
+        node = parseString(_FIXED_PROPERTY_EXPORT).documentElement
+        self.helpers._initProperties(node, PURGE)
 
-        self._compareDOM(xml, _NORMAL_PROPERTY_EXPORT)
+        doc = self.helpers._doc = PrettyDocument()
+        node = doc.createElement('dummy')
+        node.appendChild(self.helpers._extractProperties())
+        doc.appendChild(node)
 
-    def test_generateObjectNodes_normal(self):
+        self.assertEqual(doc.toprettyxml(' '), _NORMAL_PROPERTY_EXPORT)
 
-        site = self._initSite()
-        configurator = self._makeOne(site).__of__(site)
-        obj_infos = ( configurator._extractObject(site.dummy), )
-        nodes = configurator.generateObjectNodes(obj_infos)
-        xml = '<?xml version="1.0"?><dummy>%s\n</dummy>' % nodes
+    def test__initProperties_special(self):
+        node = parseString(_SPECIAL_IMPORT).documentElement
+        self.helpers._initProperties(node, UPDATE)
 
-        self._compareDOM(xml, _NORMAL_OBJECT_EXPORT)
+        doc = self.helpers._doc = PrettyDocument()
+        node = doc.createElement('dummy')
+        node.appendChild(self.helpers._extractProperties())
+        doc.appendChild(node)
 
-
-class ImportConfiguratorBaseTests(_ConfiguratorBaseTests):
-
-    def _getTargetClass(self):
-
-        from Products.GenericSetup.utils import ImportConfiguratorBase
-        from Products.GenericSetup.utils import CONVERTER, DEFAULT, KEY
-
-        class Configurator(ImportConfiguratorBase):
-            def _getImportMapping(self):
-                return {
-                  'dummy':
-                    { 'property':    {KEY: 'properties', DEFAULT: ()},
-                      'description': {CONVERTER: self._convertToUnique} } }
-
-        return Configurator
-
-
-    def test_parseXML_normal(self):
-
-        site = self._initSite()
-        configurator = self._makeOne(site)
-        site_info = configurator.parseXML(_NORMAL_PROPERTY_EXPORT)
-
-        self.assertEqual( len( site_info['properties'] ), 12 )
-
-        info = site_info['properties'][0]
-        self.assertEqual( info['id'], 'foo_boolean' )
-        self.assertEqual( info['value'], 'True' )
-        self.assertEqual( len( info['elements'] ), 0 )
-        self.assertEqual( info['type'], 'boolean' )
-
-        info = site_info['properties'][1]
-        self.assertEqual( info['id'], 'foo_date' )
-        self.assertEqual( info['value'], '2000/01/01' )
-        self.assertEqual( len( info['elements'] ), 0 )
-        self.assertEqual( info['type'], 'date' )
-
-        info = site_info['properties'][2]
-        self.assertEqual( info['id'], 'foo_float' )
-        self.assertEqual( info['value'], '1.1' )
-        self.assertEqual( len( info['elements'] ), 0 )
-        self.assertEqual( info['type'], 'float' )
-
-        info = site_info['properties'][3]
-        self.assertEqual( info['id'], 'foo_int' )
-        self.assertEqual( info['value'], '1' )
-        self.assertEqual( len( info['elements'] ), 0 )
-        self.assertEqual( info['type'], 'int' )
-
-        info = site_info['properties'][4]
-        self.assertEqual( info['id'], 'foo_lines' )
-        self.assertEqual( info['value'], '' )
-        self.assertEqual( len( info['elements'] ), 2 )
-        self.assertEqual( info['elements'][0], 'Foo' )
-        self.assertEqual( info['elements'][1], 'Lines' )
-        self.assertEqual( info['type'], 'lines' )
-
-        info = site_info['properties'][5]
-        self.assertEqual( info['id'], 'foo_long' )
-        self.assertEqual( info['value'], '1' )
-        self.assertEqual( len( info['elements'] ), 0 )
-        self.assertEqual( info['type'], 'long' )
-
-        info = site_info['properties'][6]
-        self.assertEqual( info['id'], 'foo_string' )
-        self.assertEqual( info['value'], 'Foo String' )
-        self.assertEqual( len( info['elements'] ), 0 )
-        self.assertEqual( info['type'], 'string' )
-
-        info = site_info['properties'][7]
-        self.assertEqual( info['id'], 'foo_text' )
-        self.assertEqual( info['value'], 'Foo\nText' )
-        self.assertEqual( len( info['elements'] ), 0 )
-        self.assertEqual( info['type'], 'text' )
-
-        info = site_info['properties'][8]
-        self.assertEqual( info['id'], 'foo_tokens' )
-        self.assertEqual( info['value'], '' )
-        self.assertEqual( len( info['elements'] ), 2 )
-        self.assertEqual( info['elements'][0], 'Foo' )
-        self.assertEqual( info['elements'][1], 'Tokens' )
-        self.assertEqual( info['type'], 'tokens' )
-
-        info = site_info['properties'][9]
-        self.assertEqual( info['id'], 'foo_selection' )
-        self.assertEqual( info['value'], 'Foo' )
-        self.assertEqual( len( info['elements'] ), 0 )
-        self.assertEqual( info['type'], 'selection' )
-        self.assertEqual( info['select_variable'], 'foobarbaz' )
-
-        info = site_info['properties'][10]
-        self.assertEqual( info['id'], 'foo_mselection' )
-        self.assertEqual( info['value'], '' )
-        self.assertEqual( len( info['elements'] ), 2 )
-        self.assertEqual( info['elements'][0], 'Foo' )
-        self.assertEqual( info['elements'][1], 'Baz' )
-        self.assertEqual( info['type'], 'multiple selection' )
-        self.assertEqual( info['select_variable'], 'foobarbaz' )
-
-        info = site_info['properties'][11]
-        self.assertEqual( info['id'], 'foo_boolean0' )
-        self.assertEqual( info['value'], '0' )
-        self.assertEqual( len( info['elements'] ), 0 )
-        self.assertEqual( info['type'], 'boolean' )
-
-    def test_parseXML_special(self):
-
-        site = self._initSite()
-        configurator = self._makeOne(site)
-        try:
-            site_info = configurator.parseXML(_SPECIAL_IMPORT)
-        except KeyError:
-            self.fail('CMF Collector issue #352 (comment or empty '
-                      'description bug): KeyError raised')
-
-        self.assertEqual( len(site_info), 2 )
-        self.assertEqual( site_info['description'], '' )
-        self.assertEqual( len(site_info['properties']), 0 )
-
-    def test_initProperty_normal(self):
-
-        EXPECTED = _NORMAL_PROPERTY_INFO
-
-        site = self._initSite(0)
-        dummy = site.dummy
-        configurator = self._makeOne(site)
-        site_info = configurator.parseXML(_NORMAL_PROPERTY_EXPORT)
-
-        self.assertEqual( len( dummy.propertyIds() ), 0 )
-
-        for prop_info in site_info['properties']:
-            configurator.initProperty(dummy, prop_info)
-
-        self.assertEqual( len( dummy.propertyIds() ), len(EXPECTED) )
-
-        for exp_info in EXPECTED:
-            exp_id = exp_info['id']
-            exp_value = exp_info['elements'] or exp_info['value']
-            self.failUnless( exp_id in dummy.propertyIds() )
-            self.assertEqual( dummy.getProperty(exp_id), exp_value )
-
-    def test_initProperty_fixed(self):
-
-        EXPECTED = _NORMAL_PROPERTY_INFO
-
-        site = self._initSite(1)
-        dummy = site.dummy
-        configurator = self._makeOne(site)
-        site_info = configurator.parseXML(_FIXED_PROPERTY_EXPORT)
-
-        self.assertEqual( len( dummy.propertyIds() ), 12 )
-
-        for prop_info in site_info['properties']:
-            configurator.initProperty(dummy, prop_info)
-
-        self.assertEqual( len( dummy.propertyIds() ), len(EXPECTED) )
-
-        for exp_info in EXPECTED:
-            exp_id = exp_info['id']
-            exp_value = exp_info['elements'] or exp_info['value']
-            self.failUnless( exp_id in dummy.propertyIds() )
-            self.assertEqual( dummy.getProperty(exp_id), exp_value )
+        self.assertEqual(doc.toprettyxml(' '), _EMPTY_PROPERTY_EXPORT)
 
 
 def test_suite():
@@ -514,9 +282,8 @@ def test_suite():
     from Products.GenericSetup.tests.test_utils import UtilsTests
 
     return unittest.TestSuite((
-        unittest.makeSuite( UtilsTests ),
-        unittest.makeSuite( ImportConfiguratorBaseTests ),
-        unittest.makeSuite( ExportConfiguratorBaseTests ),
+        unittest.makeSuite(UtilsTests),
+        unittest.makeSuite(PropertyManagerHelpersTests),
         ))
 
 if __name__ == '__main__':

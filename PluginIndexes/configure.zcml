@@ -1,0 +1,89 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    >
+
+  <adapter
+      factory=".adapters.PluggableIndexNodeAdapter"
+      provides="Products.GenericSetup.interfaces.INodeExporter"
+      for="Products.PluginIndexes.interfaces.IPluggableIndex"
+      />
+
+  <adapter
+      factory=".adapters.PluggableIndexNodeAdapter"
+      provides="Products.GenericSetup.interfaces.INodeImporter"
+      for="Products.PluginIndexes.interfaces.IPluggableIndex"
+      />
+
+  <adapter
+      factory=".adapters.DateIndexNodeAdapter"
+      provides="Products.GenericSetup.interfaces.INodeExporter"
+      for="Products.PluginIndexes.interfaces.IDateIndex"
+      />
+
+  <adapter
+      factory=".adapters.DateIndexNodeAdapter"
+      provides="Products.GenericSetup.interfaces.INodeImporter"
+      for="Products.PluginIndexes.interfaces.IDateIndex"
+      />
+
+  <adapter
+      factory=".adapters.DateRangeIndexNodeAdapter"
+      provides="Products.GenericSetup.interfaces.INodeExporter"
+      for="Products.PluginIndexes.interfaces.IDateRangeIndex"
+      />
+
+  <adapter
+      factory=".adapters.DateRangeIndexNodeAdapter"
+      provides="Products.GenericSetup.interfaces.INodeImporter"
+      for="Products.PluginIndexes.interfaces.IDateRangeIndex"
+      />
+
+  <adapter
+      factory=".adapters.PathIndexNodeAdapter"
+      provides="Products.GenericSetup.interfaces.INodeExporter"
+      for="Products.PluginIndexes.interfaces.IPathIndex"
+      />
+
+  <adapter
+      factory=".adapters.PathIndexNodeAdapter"
+      provides="Products.GenericSetup.interfaces.INodeImporter"
+      for="Products.PluginIndexes.interfaces.IPathIndex"
+      />
+
+  <adapter
+      factory=".adapters.VocabularyNodeAdapter"
+      provides="Products.GenericSetup.interfaces.INodeExporter"
+      for="Products.PluginIndexes.interfaces.IVocabulary"
+      />
+
+  <adapter
+      factory=".adapters.TextIndexNodeAdapter"
+      provides="Products.GenericSetup.interfaces.INodeExporter"
+      for="Products.PluginIndexes.interfaces.ITextIndex"
+      />
+
+  <adapter
+      factory=".adapters.FilteredSetNodeAdapter"
+      provides="Products.GenericSetup.interfaces.INodeExporter"
+      for="Products.PluginIndexes.interfaces.IFilteredSet"
+      />
+
+  <adapter
+      factory=".adapters.FilteredSetNodeAdapter"
+      provides="Products.GenericSetup.interfaces.INodeImporter"
+      for="Products.PluginIndexes.interfaces.IFilteredSet"
+      />
+
+  <adapter
+      factory=".adapters.TopicIndexNodeAdapter"
+      provides="Products.GenericSetup.interfaces.INodeExporter"
+      for="Products.PluginIndexes.interfaces.ITopicIndex"
+      />
+
+  <adapter
+      factory=".adapters.TopicIndexNodeAdapter"
+      provides="Products.GenericSetup.interfaces.INodeImporter"
+      for="Products.PluginIndexes.interfaces.ITopicIndex"
+      />
+
+</configure>

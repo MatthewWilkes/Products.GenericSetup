@@ -17,27 +17,34 @@ $Id$
 
 import os
 from inspect import getdoc
+from xml.dom.minidom import _nssplit
+from xml.dom.minidom import _write_data
+from xml.dom.minidom import Document
+from xml.dom.minidom import Element
+from xml.dom.minidom import Node
 from xml.dom.minidom import parseString as domParseString
 from xml.sax.handler import ContentHandler
 
 import Products
 from AccessControl import ClassSecurityInfo
-from Acquisition import aq_base
 from Acquisition import Implicit
 from Globals import InitializeClass
 from Globals import package_home
-from Products.PageTemplates.PageTemplateFile import PageTemplateFile
+from zope.interface import implements
 
 from exceptions import BadRequest
+from interfaces import INodeExporter
+from interfaces import INodeImporter
+from interfaces import PURGE
 from permissions import ManagePortal
 
 
 _pkgdir = package_home( globals() )
 _wwwdir = os.path.join( _pkgdir, 'www' )
-_datadir = os.path.join( _pkgdir, 'data' )
 _xmldir = os.path.join( _pkgdir, 'xml' )
 
 CONVERTER, DEFAULT, KEY = range(3)
+I18NURI = 'http://xml.zope.org/namespaces/i18n'
 
 
 def _getDottedName( named ):
@@ -241,78 +248,6 @@ class ImportConfiguratorBase(Implicit):
         assert len(val) == 1
         return val[0]
 
-    security.declareProtected(ManagePortal, 'initObject')
-    def initObject(self, parent, o_info):
-
-        obj_id = str(o_info['id'])
-        if obj_id not in parent.objectIds():
-            meta_type = o_info['meta_type']
-            for mt_info in Products.meta_types:
-                if mt_info['name'] == meta_type:
-                    parent._setObject( obj_id, mt_info['instance'](obj_id) )
-                    break
-            else:
-                raise ValueError('unknown meta_type \'%s\'' % obj_id)
-        obj = parent._getOb(obj_id)
-
-        if 'insert-before' in o_info:
-            if o_info['insert-before'] == '*':
-                parent.moveObjectsToTop(obj_id)
-            else:
-                try:
-                    position = parent.getObjectPosition(o_info['insert-before'])
-                    parent.moveObjectToPosition(obj_id, position)
-                except ValueError:
-                    pass
-        elif 'insert-after' in o_info:
-            if o_info['insert-after'] == '*':
-                parent.moveObjectsToBottom(obj_id)
-            else:
-                try:
-                    position = parent.getObjectPosition(o_info['insert-after'])
-                    parent.moveObjectToPosition(obj_id, position+1)
-                except ValueError:
-                    pass
-
-        [ self.initObject(obj, info) for info in o_info['objects'] ]
-
-        if 'i18n:domain' in o_info:
-            obj.i18n_domain = o_info['i18n:domain']
-
-        [ self.initProperty(obj, info) for info in o_info['properties'] ]
-
-    security.declareProtected(ManagePortal, 'initProperty')
-    def initProperty(self, obj, p_info):
-
-        prop_id = p_info['id']
-        prop_map = obj.propdict().get(prop_id, None)
-
-        if prop_map is None:
-            type = p_info.get('type', None)
-            if type:
-                val = p_info.get('select_variable', '')
-                obj._setProperty(prop_id, val, type)
-                prop_map = obj.propdict().get(prop_id, None)
-            else:
-                raise ValueError('undefined property \'%s\'' % prop_id)
-
-        if not 'w' in prop_map.get('mode', 'wd'):
-            raise BadRequest('%s cannot be changed' % prop_id)
-
-        if prop_map.get('type') == 'multiple selection':
-            prop_value = p_info['elements'] or ()
-        elif prop_map.get('type') == 'boolean':
-            # Make sure '0' is imported as False
-            prop_value = str(p_info['value'])
-            if prop_value == '0':
-                prop_value = ''
-        else:
-            # if we pass a *string* to _updateProperty, all other values
-            # are converted to the right type
-            prop_value = p_info['elements'] or str( p_info['value'] )
-
-        obj._updateProperty(prop_id, prop_value)
-
 InitializeClass(ImportConfiguratorBase)
 
 
@@ -334,80 +269,6 @@ class ExportConfiguratorBase(Implicit):
         """
         return self._template(**kw)
 
-    #
-    #   generic object and property support
-    #
-    _ob_nodes = PageTemplateFile('object_nodes.xml', _xmldir)
-    _prop_nodes = PageTemplateFile('property_nodes.xml', _xmldir)
-
-    security.declareProtected(ManagePortal, 'generateObjectNodes')
-    def generateObjectNodes(self, obj_infos):
-        """ Pseudo API.
-        """
-        lines = self._ob_nodes(objects=obj_infos).splitlines()
-        return '\n'.join(lines)
-
-    security.declareProtected(ManagePortal, 'generatePropertyNodes')
-    def generatePropertyNodes(self, prop_infos):
-        """ Pseudo API.
-        """
-        lines = self._prop_nodes(properties=prop_infos).splitlines()
-        return '\n'.join(lines)
-
-    def _extractObject(self, obj):
-
-        properties = []
-        subobjects = []
-        i18n_domain = getattr(obj, 'i18n_domain', None)
-
-        if getattr( aq_base(obj), '_propertyMap' ):
-            for prop_map in obj._propertyMap():
-                prop_info = self._extractProperty(obj, prop_map)
-                if i18n_domain and prop_info['id'] in ('title', 'description'):
-                    prop_info['i18ned'] = ''
-                if prop_info['id'] != 'i18n_domain':
-                    properties.append(prop_info)
-
-        if getattr( aq_base(obj), 'objectValues' ):
-            for sub in obj.objectValues():
-                subobjects.append( self._extractObject(sub) )
-
-        return { 'id': obj.getId(),
-                 'meta_type': obj.meta_type,
-                 'i18n_domain': i18n_domain or None,
-                 'properties': tuple(properties),
-                 'subobjects': tuple(subobjects) }
-
-    def _extractProperty(self, obj, prop_map):
-
-        prop_id = prop_map['id']
-        prop = obj.getProperty(prop_id)
-
-        if isinstance(prop, tuple):
-            prop_value = ''
-            prop_elements = prop
-        elif isinstance(prop, list):
-            # Backward compat for old instances that stored
-            # properties as list.
-            prop_value = ''
-            prop_elements = tuple(prop)
-        else:
-            prop_value = prop
-            prop_elements = ()
-
-        if 'd' in prop_map.get('mode', 'wd') and not prop_id == 'title':
-            type = prop_map.get('type', 'string')
-            select_variable = prop_map.get('select_variable', None)
-        else:
-            type = None
-            select_variable = None
-
-        return { 'id': prop_id,
-                 'value': prop_value,
-                 'elements': prop_elements,
-                 'type': type,
-                 'select_variable': select_variable }
-
 InitializeClass(ExportConfiguratorBase)
 
 
@@ -425,90 +286,264 @@ class ConfiguratorBase(ImportConfiguratorBase, ExportConfiguratorBase):
 InitializeClass(ConfiguratorBase)
 
 
-#
-#   deprecated DOM parsing utilities
-#
-_marker = object()
+# XXX: Is there any code available in Zope that generates pretty XML? If not,
+#      this code has to be improved.
+class _Element(Element):
 
-def _queryNodeAttribute( node, attr_name, default, encoding=None ):
-
-    """ Extract a string-valued attribute from node.
-
-    o Return 'default' if the attribute is not present.
+    """minidom element with 'pretty' XML output.
     """
-    attr_node = node.attributes.get( attr_name, _marker )
 
-    if attr_node is _marker:
-        return default
+    def writexml(self, writer, indent="", addindent="", newl=""):
+        # indent = current indentation
+        # addindent = indentation to add to higher levels
+        # newl = newline string
+        writer.write(indent+"<" + self.tagName)
 
-    value = attr_node.nodeValue
+        attrs = self._get_attributes()
+        a_names = attrs.keys()
+        a_names.sort()
+        if 'title' in a_names:
+            a_names.remove('title')
+            a_names.insert(0, 'title')
+        if 'meta_type' in a_names:
+            a_names.remove('meta_type')
+            a_names.insert(0, 'meta_type')
+        if 'name' in a_names:
+            a_names.remove('name')
+            a_names.insert(0, 'name')
 
-    if encoding is not None:
-        value = value.encode( encoding )
+        for a_name in a_names:
+            writer.write(" %s=\"" % a_name)
+            _write_data(writer, attrs[a_name].value)
+            writer.write("\"")
+        if self.childNodes:
+            if self.firstChild.nodeType == Node.TEXT_NODE:
+                writer.write(">")
+            else:
+                writer.write(">%s"%(newl))
+            for node in self.childNodes:
+                if node.nodeType == Node.TEXT_NODE:
+                    writer.write(node.data)
+                else:
+                    node.writexml(writer,indent+addindent,addindent,newl)
+            if self.lastChild.nodeType == Node.TEXT_NODE:
+                writer.write("</%s>%s" % (self.tagName,newl))
+            else:
+                writer.write("%s</%s>%s" % (indent,self.tagName,newl))
+        else:
+            writer.write("/>%s"%(newl))
 
-    return value
 
-def _getNodeAttribute( node, attr_name, encoding=None ):
+class PrettyDocument(Document):
 
-    """ Extract a string-valued attribute from node.
+    """minidom document with 'pretty' XML output.
     """
-    value = _queryNodeAttribute( node, attr_name, _marker, encoding )
 
-    if value is _marker:
-        raise ValueError, 'Invaid attribute: %s' % attr_name
+    def createElement(self, tagName):
+        e = _Element(tagName)
+        e.ownerDocument = self
+        return e
 
-    return value
+    def createElementNS(self, namespaceURI, qualifiedName):
+        prefix, localName = _nssplit(qualifiedName)
+        e = _Element(qualifiedName, namespaceURI, prefix)
+        e.ownerDocument = self
+        return e
 
-def _queryNodeAttributeBoolean( node, attr_name, default ):
+    def writexml(self, writer, indent="", addindent="", newl="",
+                 encoding = None):
+        if encoding is None:
+            writer.write('<?xml version="1.0"?>\n')
+        else:
+            writer.write('<?xml version="1.0" encoding="%s"?>\n' % encoding)
+        for node in self.childNodes:
+            node.writexml(writer, indent, addindent, newl)
 
-    """ Extract a string-valued attribute from node.
 
-    o Return 'default' if the attribute is not present.
+class NodeAdapterBase(object):
+
+    """Node im- and exporter base.
     """
-    attr_node = node.attributes.get( attr_name, _marker )
 
-    if attr_node is _marker:
-        return default
+    implements(INodeExporter, INodeImporter)
 
-    value = node.attributes[ attr_name ].nodeValue.lower()
+    def __init__(self, context):
+        self.context = context
 
-    return value in ( 'true', 'yes', '1' )
+    def exportNode(self, doc):
+        """Export the object as a DOM node.
+        """
+        self._doc = doc
+        return self._getObjectNode('object')
 
-def _getNodeAttributeBoolean( node, attr_name ):
+    def importNode(self, node, mode=PURGE):
+        """Import the object from the DOM node.
+        """
 
-    """ Extract a string-valued attribute from node.
+    def _getObjectNode(self, name):
+        node = self._doc.createElement(name)
+        node.setAttribute('name', self.context.getId())
+        node.setAttribute('meta_type', self.context.meta_type)
+        i18n_domain = getattr(self.context, 'i18n_domain', None)
+        if i18n_domain:
+            node.setAttributeNS(I18NURI, 'i18n:domain', i18n_domain)
+            self._i18n_props = ('title', 'description')
+        return node
+
+    def _getNodeText(self, node):
+        text = ''
+        for child in node.childNodes:
+            if child.nodeName != '#text':
+                continue
+            text += child.nodeValue.lstrip()
+        return text
+
+    def _getNodeTextBoolean(self, node):
+        text = self._getNodeText(node)
+        return text.lower() in ('true', 'yes', '1')
+
+
+class ObjectManagerHelpers(object):
+
+    """ObjectManager im- and export helpers.
     """
-    value = node.attributes[ attr_name ].nodeValue.lower()
 
-    return value in ( 'true', 'yes', '1' )
+    def _extractObjects(self):
+        fragment = self._doc.createDocumentFragment()
+        for obj in self.context.objectValues():
+            exporter = INodeExporter(obj, None)
+            if exporter is None:
+                continue
+            fragment.appendChild(exporter.exportNode(self._doc))
+        return fragment
 
-def _coalesceTextNodeChildren( node, encoding=None ):
+    def _purgeObjects(self):
+        for obj_id in self.context.objectIds():
+            self.context._delObject(obj_id)
 
-    """ Concatenate all childe text nodes into a single string.
+    def _initObjects(self, node, mode):
+        for child in node.childNodes:
+            if child.nodeName != 'object':
+                continue
+            if child.hasAttribute('deprecated'):
+                continue
+            parent = self.context
+
+            obj_id = str(child.getAttribute('name'))
+            if obj_id not in parent.objectIds():
+                meta_type = str(child.getAttribute('meta_type'))
+                for mt_info in Products.meta_types:
+                    if mt_info['name'] == meta_type:
+                        parent._setObject(obj_id, mt_info['instance'](obj_id))
+                        break
+                else:
+                    raise ValueError('unknown meta_type \'%s\'' % obj_id)
+
+            if child.hasAttribute('insert-before'):
+                insert_before = child.getAttribute('insert-before')
+                if insert_before == '*':
+                    parent.moveObjectsToTop(obj_id)
+                else:
+                    try:
+                        position = parent.getObjectPosition(insert_before)
+                        parent.moveObjectToPosition(obj_id, position)
+                    except ValueError:
+                        pass
+            elif child.hasAttribute('insert-after'):
+                insert_after = child.getAttribute('insert-after')
+                if insert_after == '*':
+                    parent.moveObjectsToBottom(obj_id)
+                else:
+                    try:
+                        position = parent.getObjectPosition(insert_after)
+                        parent.moveObjectToPosition(obj_id, position+1)
+                    except ValueError:
+                        pass
+
+            obj = getattr(self.context, obj_id)
+            INodeImporter(obj).importNode(child, mode)
+
+
+class PropertyManagerHelpers(object):
+
+    """PropertyManager im- and export helpers.
     """
-    from xml.dom import Node
-    fragments = []
-    node.normalize()
-    child = node.firstChild
 
-    while child is not None:
+    def _extractProperties(self):
+        fragment = self._doc.createDocumentFragment()
 
-        if child.nodeType == Node.TEXT_NODE:
-            fragments.append( child.nodeValue )
+        for prop_map in self.context._propertyMap():
+            if prop_map['id'] == 'i18n_domain':
+                continue
+            node = self._doc.createElement('property')
 
-        child = child.nextSibling
+            prop_id = prop_map['id']
+            node.setAttribute('name', prop_id)
 
-    joined = ''.join( fragments )
+            prop = self.context.getProperty(prop_id)
+            if isinstance(prop, (tuple, list)):
+                for value in prop:
+                    child = self._doc.createElement('element')
+                    child.setAttribute('value', value)
+                    node.appendChild(child)
+            else:
+                if prop_map.get('type') == 'boolean':
+                    prop = str(bool(prop))
+                elif not isinstance(prop, basestring):
+                    prop = str(prop)
+                child = self._doc.createTextNode(prop)
+                node.appendChild(child)
 
-    if encoding is not None:
-        joined = joined.encode( encoding )
+            if 'd' in prop_map.get('mode', 'wd') and not prop_id == 'title':
+                type = prop_map.get('type', 'string')
+                node.setAttribute('type', type)
+                select_variable = prop_map.get('select_variable', None)
+                if select_variable is not None:
+                    node.setAttribute('select_variable', select_variable)
 
-    return ''.join( [ line.lstrip() for line in joined.splitlines(True) ] )
+            if hasattr(self, '_i18n_props') and prop_id in self._i18n_props:
+                node.setAttribute('i18n:translate', '')
 
-def _extractDescriptionNode(parent, encoding=None):
+            fragment.appendChild(node)
 
-    d_nodes = parent.getElementsByTagName('description')
-    if d_nodes:
-        return _coalesceTextNodeChildren(d_nodes[0], encoding)
-    else:
-        return ''
+        return fragment
+
+    def _purgeProperties(self):
+        #XXX: not implemented
+        pass
+
+    def _initProperties(self, node, mode):
+        self.context.i18n_domain = node.getAttribute('i18n:domain')
+        for child in node.childNodes:
+            if child.nodeName != 'property':
+                continue
+            obj = self.context
+            prop_id = str(child.getAttribute('name'))
+            prop_map = obj.propdict().get(prop_id, None)
+
+            if prop_map is None:
+                if child.hasAttribute('type'):
+                    val = child.getAttribute('select_variable')
+                    obj._setProperty(prop_id, val, child.getAttribute('type'))
+                    prop_map = obj.propdict().get(prop_id, None)
+                else:
+                    raise ValueError('undefined property \'%s\'' % prop_id)
+
+            if not 'w' in prop_map.get('mode', 'wd'):
+                raise BadRequest('%s cannot be changed' % prop_id)
+
+            elements = []
+            for sub in child.childNodes:
+                if sub.nodeName == 'element':
+                    elements.append(sub.getAttribute('value'))
+
+            if elements or prop_map.get('type') == 'multiple selection':
+                prop_value = tuple(elements) or ()
+            elif prop_map.get('type') == 'boolean':
+                prop_value = self._getNodeTextBoolean(child)
+            else:
+                # if we pass a *string* to _updateProperty, all other values
+                # are converted to the right type
+                prop_value = self._getNodeText(child)
+
+            obj._updateProperty(prop_id, prop_value)
