@@ -32,8 +32,8 @@ _DATE_XML = """\
 """
 
 _DATERANGE_XML = """\
-<index name="foo_daterange" meta_type="DateRangeIndex" since_field="bar" \
-until_field="baz"/>
+<index name="foo_daterange" meta_type="DateRangeIndex" since_field="bar"
+   until_field="baz"/>
 """
 
 _FIELD_XML = """\

@@ -36,10 +36,10 @@ _EMPTY_PROPERTY_EXPORT = """\
  <property name="foo_string" type="string"></property>
  <property name="foo_text" type="text"></property>
  <property name="foo_tokens" type="tokens"/>
- <property name="foo_selection" select_variable="foobarbaz" \
-type="selection"></property>
- <property name="foo_mselection" select_variable="foobarbaz" \
-type="multiple selection"/>
+ <property name="foo_selection" select_variable="foobarbaz"
+    type="selection"></property>
+ <property name="foo_mselection" select_variable="foobarbaz"
+    type="multiple selection"/>
  <property name="foo_boolean0" type="boolean">False</property>
 </dummy>
 """
@@ -58,15 +58,15 @@ _NORMAL_PROPERTY_EXPORT = """\
  <property name="foo_long" type="long">1</property>
  <property name="foo_string" type="string">Foo String</property>
  <property name="foo_text" type="text">Foo
-Text</property>
+  Text</property>
  <property name="foo_tokens" type="tokens">
   <element value="Foo"/>
   <element value="Tokens"/>
  </property>
- <property name="foo_selection" select_variable="foobarbaz" \
-type="selection">Foo</property>
- <property name="foo_mselection" select_variable="foobarbaz" \
-type="multiple selection">
+ <property name="foo_selection" select_variable="foobarbaz"
+    type="selection">Foo</property>
+ <property name="foo_mselection" select_variable="foobarbaz"
+    type="multiple selection">
   <element value="Foo"/>
   <element value="Baz"/>
  </property>
@@ -88,12 +88,12 @@ _FIXED_PROPERTY_EXPORT = """\
  <property name="foo_long">1</property>
  <property name="foo_string">Foo String</property>
  <property name="foo_text">Foo
-Text</property>
+  Text</property>
  <property name="foo_tokens">
   <element value="Foo"/>
   <element value="Tokens"/></property>
- <property name="foo_selection" type="selection" \
-select_variable="foobarbaz">Foo</property>
+ <property name="foo_selection" type="selection"
+    select_variable="foobarbaz">Foo</property>
  <property name="foo_mselection">
   <element value="Foo"/>
   <element value="Baz"/>

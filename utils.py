@@ -18,7 +18,6 @@ $Id$
 import os
 from inspect import getdoc
 from xml.dom.minidom import _nssplit
-from xml.dom.minidom import _write_data
 from xml.dom.minidom import Document
 from xml.dom.minidom import Element
 from xml.dom.minidom import Node
@@ -30,6 +29,7 @@ from AccessControl import ClassSecurityInfo
 from Acquisition import Implicit
 from Globals import InitializeClass
 from Globals import package_home
+from TAL.TALDefs import attrEscape
 from zope.interface import implements
 
 from exceptions import BadRequest
@@ -286,8 +286,38 @@ class ConfiguratorBase(ImportConfiguratorBase, ExportConfiguratorBase):
 InitializeClass(ConfiguratorBase)
 
 
-# XXX: Is there any code available in Zope that generates pretty XML? If not,
-#      this code has to be improved.
+class _LineWrapper:
+
+    def __init__(self, writer, indent, newl, max):
+        self._writer = writer
+        self._indent = indent
+        self._newl = newl
+        self._max = max
+        self._length = 0
+        self._queue = self._indent
+
+    def queue(self, text):
+        self._queue += text
+
+    def write(self, text='', enforce=False):
+        self._queue += text
+
+        if 0 < self._length > self._max - len(self._queue):
+            self._writer.write(self._newl)
+            self._length = 0
+            self._queue = '%s  %s' % (self._indent, self._queue)
+
+        if self._queue != self._indent:
+            self._writer.write(self._queue)
+            self._length += len(self._queue)
+            self._queue = ''
+
+        if 0 < self._length and enforce:
+            self._writer.write(self._newl)
+            self._length = 0
+            self._queue = self._indent
+
+
 class _Element(Element):
 
     """minidom element with 'pretty' XML output.
@@ -297,8 +327,10 @@ class _Element(Element):
         # indent = current indentation
         # addindent = indentation to add to higher levels
         # newl = newline string
-        writer.write(indent+"<" + self.tagName)
+        wrapper = _LineWrapper(writer, indent, newl, 78)
+        wrapper.write('<%s' % self.tagName)
 
+        # move 'name', 'meta_type' and 'title' to the top, sort the rest 
         attrs = self._get_attributes()
         a_names = attrs.keys()
         a_names.sort()
@@ -313,25 +345,27 @@ class _Element(Element):
             a_names.insert(0, 'name')
 
         for a_name in a_names:
-            writer.write(" %s=\"" % a_name)
-            _write_data(writer, attrs[a_name].value)
-            writer.write("\"")
+            wrapper.write()
+            a_value = attrEscape(attrs[a_name].value)
+            wrapper.queue(' %s="%s"' % (a_name, a_value))
+
         if self.childNodes:
-            if self.firstChild.nodeType == Node.TEXT_NODE:
-                writer.write(">")
-            else:
-                writer.write(">%s"%(newl))
+            wrapper.queue('>')
             for node in self.childNodes:
                 if node.nodeType == Node.TEXT_NODE:
-                    writer.write(node.data)
+                    textlines = node.data.splitlines()
+                    if textlines:
+                        wrapper.queue(textlines.pop(0))
+                    if textlines:
+                        for textline in textlines:
+                            wrapper.write('', True)
+                            wrapper.queue(' %s' % textline)
                 else:
-                    node.writexml(writer,indent+addindent,addindent,newl)
-            if self.lastChild.nodeType == Node.TEXT_NODE:
-                writer.write("</%s>%s" % (self.tagName,newl))
-            else:
-                writer.write("%s</%s>%s" % (indent,self.tagName,newl))
+                    wrapper.write('', True)
+                    node.writexml(writer, indent+addindent, addindent, newl)
+            wrapper.write('</%s>' % self.tagName, True)
         else:
-            writer.write("/>%s"%(newl))
+            wrapper.write('/>', True)
 
 
 class PrettyDocument(Document):
@@ -395,7 +429,8 @@ class NodeAdapterBase(object):
         for child in node.childNodes:
             if child.nodeName != '#text':
                 continue
-            text += child.nodeValue.lstrip()
+            lines = [ line.lstrip() for line in child.nodeValue.splitlines() ]
+            text += '\n'.join(lines)
         return text
 
     def _getNodeTextBoolean(self, node):

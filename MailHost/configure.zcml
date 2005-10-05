@@ -1,0 +1,17 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    >
+
+  <adapter
+      factory=".adapters.MailHostNodeAdapter"
+      provides="Products.GenericSetup.interfaces.INodeExporter"
+      for="Products.MailHost.interfaces.IMailHost"
+      />
+
+  <adapter
+      factory=".adapters.MailHostNodeAdapter"
+      provides="Products.GenericSetup.interfaces.INodeImporter"
+      for="Products.MailHost.interfaces.IMailHost"
+      />
+
+</configure>

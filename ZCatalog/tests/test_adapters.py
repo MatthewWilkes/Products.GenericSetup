@@ -44,8 +44,8 @@ _CATALOG_XML = """\
 %s <index name="foo_date" meta_type="DateIndex">
   <property name="index_naive_time_as_local">True</property>
  </index>
- <index name="foo_daterange" meta_type="DateRangeIndex" since_field="bar" \
-until_field="baz"/>
+ <index name="foo_daterange" meta_type="DateRangeIndex" since_field="bar"
+    until_field="baz"/>
  <index name="foo_field" meta_type="FieldIndex">
   <indexed_attr value="bar"/>
  </index>
