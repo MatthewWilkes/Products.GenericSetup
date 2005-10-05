@@ -68,7 +68,10 @@ class ZCatalogNodeAdapter(NodeAdapterBase, ObjectManagerHelpers,
         indexes = self.context.getIndexObjects()[:]
         indexes.sort(lambda x,y: cmp(x.getId(), y.getId()))
         for idx in indexes:
-            fragment.appendChild(INodeExporter(idx).exportNode(self._doc))
+            exporter = INodeExporter(idx, None)
+            if exporter is None:
+                continue
+            fragment.appendChild(exporter.exportNode(self._doc))
         return fragment
 
     def _purgeIndexes(self):
