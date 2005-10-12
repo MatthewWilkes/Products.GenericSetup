@@ -433,10 +433,8 @@ class NodeAdapterBase(object):
             text += '\n'.join(lines)
         return text
 
-    def _getNodeTextBoolean(self, node):
-        text = self._getNodeText(node)
-        return text.lower() in ('true', 'yes', '1')
-
+    def _convertToBoolean(self, val):
+        return val.lower() in ('true', 'yes', '1')
 
 class ObjectManagerHelpers(object):
 
@@ -575,7 +573,7 @@ class PropertyManagerHelpers(object):
             if elements or prop_map.get('type') == 'multiple selection':
                 prop_value = tuple(elements) or ()
             elif prop_map.get('type') == 'boolean':
-                prop_value = self._getNodeTextBoolean(child)
+                prop_value = self._convertToBoolean(self._getNodeText(child))
             else:
                 # if we pass a *string* to _updateProperty, all other values
                 # are converted to the right type
