@@ -10,7 +10,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""ZCatalog node adapter unit tests.
+"""ZCatalog export / import support unit tests.
 
 $Id$
 """
@@ -79,7 +79,7 @@ _VOCABULARY_XML = """\
 class ZCatalogNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 
     def _getTargetClass(self):
-        from Products.GenericSetup.ZCatalog.adapters \
+        from Products.GenericSetup.ZCatalog.exportimport \
                 import ZCatalogNodeAdapter
 
         return ZCatalogNodeAdapter

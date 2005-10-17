@@ -10,7 +10,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""ZCTextIndex node adapters.
+"""ZCTextIndex export / import support.
 
 $Id$
 """

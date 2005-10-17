@@ -10,7 +10,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""MailHost node adapter unit tests.
+"""MailHost export / import support unit tests.
 
 $Id$
 """
@@ -34,7 +34,7 @@ _MAILHOST_XML = """\
 class MailHostNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 
     def _getTargetClass(self):
-        from Products.GenericSetup.MailHost.adapters \
+        from Products.GenericSetup.MailHost.exportimport \
                 import MailHostNodeAdapter
 
         return MailHostNodeAdapter

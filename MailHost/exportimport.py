@@ -10,7 +10,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""MailHost node adapters.
+"""MailHost export / import support.
 
 $Id$
 """

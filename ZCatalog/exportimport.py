@@ -10,7 +10,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""ZCatalog node adapters.
+"""ZCatalog export / import support.
 
 $Id$
 """

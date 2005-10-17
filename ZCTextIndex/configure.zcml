@@ -3,25 +3,25 @@
     >
 
   <adapter
-      factory=".adapters.ZCLexiconNodeAdapter"
+      factory=".exportimport.ZCLexiconNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeExporter"
       for="Products.ZCTextIndex.interfaces.IZCLexicon"
       />
 
   <adapter
-      factory=".adapters.ZCLexiconNodeAdapter"
+      factory=".exportimport.ZCLexiconNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeImporter"
       for="Products.ZCTextIndex.interfaces.IZCLexicon"
       />
 
   <adapter
-      factory=".adapters.ZCTextIndexNodeAdapter"
+      factory=".exportimport.ZCTextIndexNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeExporter"
       for="Products.ZCTextIndex.interfaces.IZCTextIndex"
       />
 
   <adapter
-      factory=".adapters.ZCTextIndexNodeAdapter"
+      factory=".exportimport.ZCTextIndexNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeImporter"
       for="Products.ZCTextIndex.interfaces.IZCTextIndex"
       />

@@ -10,7 +10,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""ZCTextIndex node adapter unit tests.
+"""ZCTextIndex export / import support unit tests.
 
 $Id$
 """
@@ -57,7 +57,7 @@ _ZCTEXT_XML = """\
 class ZCLexiconNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 
     def _getTargetClass(self):
-        from Products.GenericSetup.ZCTextIndex.adapters \
+        from Products.GenericSetup.ZCTextIndex.exportimport \
                 import ZCLexiconNodeAdapter
 
         return ZCLexiconNodeAdapter
@@ -82,7 +82,7 @@ class ZCLexiconNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 class ZCTextIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 
     def _getTargetClass(self):
-        from Products.GenericSetup.ZCTextIndex.adapters \
+        from Products.GenericSetup.ZCTextIndex.exportimport \
                 import ZCTextIndexNodeAdapter
 
         return ZCTextIndexNodeAdapter

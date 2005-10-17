@@ -3,13 +3,13 @@
     >
 
   <adapter
-      factory=".adapters.MailHostNodeAdapter"
+      factory=".exportimport.MailHostNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeExporter"
       for="Products.MailHost.interfaces.IMailHost"
       />
 
   <adapter
-      factory=".adapters.MailHostNodeAdapter"
+      factory=".exportimport.MailHostNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeImporter"
       for="Products.MailHost.interfaces.IMailHost"
       />

@@ -3,85 +3,85 @@
     >
 
   <adapter
-      factory=".adapters.PluggableIndexNodeAdapter"
+      factory=".exportimport.PluggableIndexNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeExporter"
       for="Products.PluginIndexes.interfaces.IPluggableIndex"
       />
 
   <adapter
-      factory=".adapters.PluggableIndexNodeAdapter"
+      factory=".exportimport.PluggableIndexNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeImporter"
       for="Products.PluginIndexes.interfaces.IPluggableIndex"
       />
 
   <adapter
-      factory=".adapters.DateIndexNodeAdapter"
+      factory=".exportimport.DateIndexNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeExporter"
       for="Products.PluginIndexes.interfaces.IDateIndex"
       />
 
   <adapter
-      factory=".adapters.DateIndexNodeAdapter"
+      factory=".exportimport.DateIndexNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeImporter"
       for="Products.PluginIndexes.interfaces.IDateIndex"
       />
 
   <adapter
-      factory=".adapters.DateRangeIndexNodeAdapter"
+      factory=".exportimport.DateRangeIndexNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeExporter"
       for="Products.PluginIndexes.interfaces.IDateRangeIndex"
       />
 
   <adapter
-      factory=".adapters.DateRangeIndexNodeAdapter"
+      factory=".exportimport.DateRangeIndexNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeImporter"
       for="Products.PluginIndexes.interfaces.IDateRangeIndex"
       />
 
   <adapter
-      factory=".adapters.PathIndexNodeAdapter"
+      factory=".exportimport.PathIndexNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeExporter"
       for="Products.PluginIndexes.interfaces.IPathIndex"
       />
 
   <adapter
-      factory=".adapters.PathIndexNodeAdapter"
+      factory=".exportimport.PathIndexNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeImporter"
       for="Products.PluginIndexes.interfaces.IPathIndex"
       />
 
   <adapter
-      factory=".adapters.VocabularyNodeAdapter"
+      factory=".exportimport.VocabularyNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeExporter"
       for="Products.PluginIndexes.interfaces.IVocabulary"
       />
 
   <adapter
-      factory=".adapters.TextIndexNodeAdapter"
+      factory=".exportimport.TextIndexNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeExporter"
       for="Products.PluginIndexes.interfaces.ITextIndex"
       />
 
   <adapter
-      factory=".adapters.FilteredSetNodeAdapter"
+      factory=".exportimport.FilteredSetNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeExporter"
       for="Products.PluginIndexes.interfaces.IFilteredSet"
       />
 
   <adapter
-      factory=".adapters.FilteredSetNodeAdapter"
+      factory=".exportimport.FilteredSetNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeImporter"
       for="Products.PluginIndexes.interfaces.IFilteredSet"
       />
 
   <adapter
-      factory=".adapters.TopicIndexNodeAdapter"
+      factory=".exportimport.TopicIndexNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeExporter"
       for="Products.PluginIndexes.interfaces.ITopicIndex"
       />
 
   <adapter
-      factory=".adapters.TopicIndexNodeAdapter"
+      factory=".exportimport.TopicIndexNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeImporter"
       for="Products.PluginIndexes.interfaces.ITopicIndex"
       />

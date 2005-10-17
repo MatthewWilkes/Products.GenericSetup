@@ -3,13 +3,13 @@
     >
 
   <adapter
-      factory=".adapters.ZCatalogNodeAdapter"
+      factory=".exportimport.ZCatalogNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeExporter"
       for="Products.ZCatalog.interfaces.IZCatalog"
       />
 
   <adapter
-      factory=".adapters.ZCatalogNodeAdapter"
+      factory=".exportimport.ZCatalogNodeAdapter"
       provides="Products.GenericSetup.interfaces.INodeImporter"
       for="Products.ZCatalog.interfaces.IZCatalog"
       />

@@ -10,7 +10,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""PluginIndexes node adapter unit tests.
+"""PluginIndexes export / import support unit tests.
 
 $Id$
 """
@@ -75,7 +75,7 @@ _TOPIC_XML = """\
 class DateIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 
     def _getTargetClass(self):
-        from Products.GenericSetup.PluginIndexes.adapters \
+        from Products.GenericSetup.PluginIndexes.exportimport \
                 import DateIndexNodeAdapter
 
         return DateIndexNodeAdapter
@@ -95,7 +95,7 @@ class DateIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 class DateRangeIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 
     def _getTargetClass(self):
-        from Products.GenericSetup.PluginIndexes.adapters \
+        from Products.GenericSetup.PluginIndexes.exportimport \
                 import DateRangeIndexNodeAdapter
 
         return DateRangeIndexNodeAdapter
@@ -119,7 +119,7 @@ class DateRangeIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 class FieldIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 
     def _getTargetClass(self):
-        from Products.GenericSetup.PluginIndexes.adapters \
+        from Products.GenericSetup.PluginIndexes.exportimport \
                 import PluggableIndexNodeAdapter
 
         return PluggableIndexNodeAdapter
@@ -142,7 +142,7 @@ class FieldIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 class KeywordIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 
     def _getTargetClass(self):
-        from Products.GenericSetup.PluginIndexes.adapters \
+        from Products.GenericSetup.PluginIndexes.exportimport \
                 import PluggableIndexNodeAdapter
 
         return PluggableIndexNodeAdapter
@@ -167,7 +167,7 @@ class KeywordIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 class PathIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 
     def _getTargetClass(self):
-        from Products.GenericSetup.PluginIndexes.adapters \
+        from Products.GenericSetup.PluginIndexes.exportimport \
                 import PathIndexNodeAdapter
 
         return PathIndexNodeAdapter
@@ -188,7 +188,7 @@ class PathIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 class VocabularyNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 
     def _getTargetClass(self):
-        from Products.GenericSetup.PluginIndexes.adapters \
+        from Products.GenericSetup.PluginIndexes.exportimport \
                 import VocabularyNodeAdapter
 
         return VocabularyNodeAdapter
@@ -211,7 +211,7 @@ class VocabularyNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 class TextIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 
     def _getTargetClass(self):
-        from Products.GenericSetup.PluginIndexes.adapters \
+        from Products.GenericSetup.PluginIndexes.exportimport \
                 import TextIndexNodeAdapter
 
         return TextIndexNodeAdapter
@@ -234,7 +234,7 @@ class TextIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 class FilteredSetNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 
     def _getTargetClass(self):
-        from Products.GenericSetup.PluginIndexes.adapters \
+        from Products.GenericSetup.PluginIndexes.exportimport \
                 import FilteredSetNodeAdapter
 
         return FilteredSetNodeAdapter
@@ -258,7 +258,7 @@ class FilteredSetNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 class TopicIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 
     def _getTargetClass(self):
-        from Products.GenericSetup.PluginIndexes.adapters \
+        from Products.GenericSetup.PluginIndexes.exportimport \
                 import TopicIndexNodeAdapter
 
         return TopicIndexNodeAdapter

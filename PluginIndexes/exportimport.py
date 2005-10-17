@@ -10,7 +10,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""PluginIndexes node adapters.
+"""PluginIndexes export / import support.
 
 $Id$
 """
