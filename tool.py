@@ -90,7 +90,7 @@ def importToolset(context):
         tool_id = str(info['id'])
         tool_class = _resolveDottedName(info['class'])
 
-        existing = getattr(site, tool_id, None)
+        existing = getattr(aq_base(site), tool_id, None)
         new_tool = tool_class()
 
         try:
