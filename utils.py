@@ -542,8 +542,16 @@ class PropertyManagerHelpers(object):
         return fragment
 
     def _purgeProperties(self):
-        #XXX: not implemented
-        pass
+        for prop_map in self.context._propertyMap():
+            prop_id = prop_map['id']
+            if 'd' in prop_map.get('mode', 'wd') and not prop_id == 'title':
+                self.context._delProperty(prop_id)
+            else:
+                if prop_map.get('type') == 'multiple selection':
+                    prop_value = ()
+                else:
+                    prop_value = ''
+                self.context._updateProperty(prop_id, prop_value)
 
     def _initProperties(self, node, mode):
         self.context.i18n_domain = node.getAttribute('i18n:domain')
