@@ -576,7 +576,7 @@ class PropertyManagerHelpers(object):
             elements = []
             for sub in child.childNodes:
                 if sub.nodeName == 'element':
-                    elements.append(sub.getAttribute('value'))
+                    elements.append(sub.getAttribute('value').encode('utf-8'))
 
             if elements or prop_map.get('type') == 'multiple selection':
                 prop_value = tuple(elements) or ()
@@ -585,6 +585,6 @@ class PropertyManagerHelpers(object):
             else:
                 # if we pass a *string* to _updateProperty, all other values
                 # are converted to the right type
-                prop_value = self._getNodeText(child)
+                prop_value = self._getNodeText(child).encode('utf-8')
 
             obj._updateProperty(prop_id, prop_value)

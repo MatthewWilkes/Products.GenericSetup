@@ -246,6 +246,10 @@ class PropertyManagerHelpersTests(unittest.TestCase):
     def test__initProperties_normal(self):
         node = parseString(_NORMAL_PROPERTY_EXPORT).documentElement
         self.helpers._initProperties(node, PURGE)
+        self.assertEqual(type(self.helpers.context.foo_int), int)
+        self.assertEqual(type(self.helpers.context.foo_string), str)
+        self.assertEqual(type(self.helpers.context.foo_tokens), tuple)
+        self.assertEqual(type(self.helpers.context.foo_tokens[0]), str)
 
         doc = self.helpers._doc = PrettyDocument()
         node = doc.createElement('dummy')
