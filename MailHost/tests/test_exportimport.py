@@ -18,12 +18,8 @@ $Id$
 import unittest
 import Testing
 
-import Products.Five
-import Products.GenericSetup.MailHost
-from Products.Five import zcml
 from Products.GenericSetup.testing import NodeAdapterTestCase
-from zope.app.tests.placelesssetup import PlacelessSetup
-
+from Products.GenericSetup.testing import PlacelessSetup
 
 _MAILHOST_XML = """\
 <object name="foo_mailhost" meta_type="Mail Host" smtp_host="localhost"
@@ -40,6 +36,9 @@ class MailHostNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         return MailHostNodeAdapter
 
     def setUp(self):
+        import Products.Five
+        from Products.Five import zcml
+        import Products.GenericSetup.MailHost
         from Products.MailHost.MailHost import MailHost
 
         PlacelessSetup.setUp(self)

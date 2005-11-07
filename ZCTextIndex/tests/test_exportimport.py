@@ -24,7 +24,7 @@ import Products.Five
 import Products.GenericSetup.ZCTextIndex
 from Products.Five import zcml
 from Products.GenericSetup.testing import NodeAdapterTestCase
-from zope.app.tests.placelesssetup import PlacelessSetup
+from Products.GenericSetup.testing import PlacelessSetup
 
 
 class _extra:

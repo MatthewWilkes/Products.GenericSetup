@@ -22,7 +22,7 @@ import Products.Five
 import Products.GenericSetup.PluginIndexes
 from Products.Five import zcml
 from Products.GenericSetup.testing import NodeAdapterTestCase
-from zope.app.tests.placelesssetup import PlacelessSetup
+from Products.GenericSetup.testing import PlacelessSetup
 
 
 _DATE_XML = """\

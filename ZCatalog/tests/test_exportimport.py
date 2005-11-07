@@ -24,8 +24,8 @@ import Products
 from Products.Five import zcml
 from Products.GenericSetup.interfaces import INodeExporter
 from Products.GenericSetup.testing import NodeAdapterTestCase
+from Products.GenericSetup.testing import PlacelessSetup
 from Products.GenericSetup.utils import PrettyDocument
-from zope.app.tests.placelesssetup import PlacelessSetup
 
 
 class _extra:

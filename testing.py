@@ -24,6 +24,11 @@ from interfaces import INodeExporter
 from interfaces import INodeImporter
 from utils import PrettyDocument
 
+try:
+    from zope.app.testing.placelesssetup import PlacelessSetup
+except ImportError:  # BBB, Zope3 < 3.1
+    from zope.app.tests.placelesssetup import PlacelessSetup
+
 
 class NodeAdapterTestCase(unittest.TestCase):
 
