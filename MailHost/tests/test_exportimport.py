@@ -35,6 +35,16 @@ class MailHostNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
 
         return MailHostNodeAdapter
 
+    def _verifyImport(self, obj):
+        self.assertEqual(type(obj.smtp_host), str)
+        self.assertEqual(obj.smtp_host, 'localhost')
+        self.assertEqual(type(obj.smtp_port), int)
+        self.assertEqual(obj.smtp_port, 25)
+        self.assertEqual(type(obj.smtp_pwd), str)
+        self.assertEqual(obj.smtp_pwd, '')
+        self.assertEqual(type(obj.smtp_uid), str)
+        self.assertEqual(obj.smtp_uid, '')
+
     def setUp(self):
         import Products.Five
         from Products.Five import zcml

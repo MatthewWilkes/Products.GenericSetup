@@ -44,5 +44,5 @@ class MailHostNodeAdapter(NodeAdapterBase):
         """
         self.context.smtp_host = str(node.getAttribute('smtp_host'))
         self.context.smtp_port = int(node.getAttribute('smtp_port'))
-        self.context.smtp_uid = node.getAttribute('smtp_uid')
-        self.context.smtp_pwd = node.getAttribute('smtp_pwd')
+        self.context.smtp_uid = node.getAttribute('smtp_uid').encode('utf-8')
+        self.context.smtp_pwd = node.getAttribute('smtp_pwd').encode('utf-8')

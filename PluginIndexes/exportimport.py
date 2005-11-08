@@ -55,7 +55,8 @@ class PluggableIndexNodeAdapter(NodeAdapterBase):
         indexed_attrs = []
         for child in node.childNodes:
             if child.nodeName == 'indexed_attr':
-                indexed_attrs.append(child.getAttribute('value'))
+                indexed_attrs.append(
+                                  child.getAttribute('value').encode('utf-8'))
         self.context.indexed_attrs = indexed_attrs
         self.context.clear()
 
@@ -104,8 +105,8 @@ class DateRangeIndexNodeAdapter(NodeAdapterBase):
     def importNode(self, node, mode=PURGE):
         """Import the object from the DOM node.
         """
-        self.context._edit(node.getAttribute('since_field'),
-                           node.getAttribute('until_field'))
+        self.context._edit(node.getAttribute('since_field').encode('utf-8'),
+                           node.getAttribute('until_field').encode('utf-8'))
         self.context.clear()
 
 
@@ -173,7 +174,8 @@ class FilteredSetNodeAdapter(NodeAdapterBase):
     def importNode(self, node, mode=PURGE):
         """Import the object from the DOM node.
         """
-        self.context.setExpression(node.getAttribute('expression'))
+        self.context.setExpression(
+                              node.getAttribute('expression').encode('utf-8'))
         self.context.clear()
 
 

@@ -35,6 +35,9 @@ class NodeAdapterTestCase(unittest.TestCase):
     def _populate(self, obj):
         pass
 
+    def _verifyImport(self, obj):
+        pass
+
     def test_z3interfaces(self):
         verifyClass(INodeExporter, self._getTargetClass())
         verifyClass(INodeImporter, self._getTargetClass())
@@ -47,5 +50,6 @@ class NodeAdapterTestCase(unittest.TestCase):
     def test_importNode(self):
         node = parseString(self._XML).documentElement
         self.assertEqual(INodeImporter(self._obj).importNode(node), None)
+        self._verifyImport(self._obj)
         node = INodeExporter(self._obj).exportNode(PrettyDocument())
         self.assertEqual(node.toprettyxml(' '), self._XML)
