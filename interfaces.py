@@ -544,3 +544,119 @@ class INodeImporter(Interface):
     def importNode(node, mode=PURGE):
         """Import the object from the DOM node.
         """
+
+class IFilesystemExporter(Interface):
+    """ Plugin interface for site structure export.
+    """
+    def export(export_context, subdir, root=False):
+        """ Export our 'context' using the API of 'export_context'.
+
+        o 'export_context' must implement
+          Products.GenericSupport.interfaces.IExportContext.
+
+        o 'subdir', if passed, is the relative subdirectory containing our
+          context within the site.
+
+        o 'root', if true, indicates that the current context is the
+          "root" of an import (this may be used to adjust paths when
+          interacting with the context).
+        """
+
+    def listExportableItems():
+        """ Return a sequence of the child items to be exported.
+
+        o Each item in the returned sequence will be a tuple,
+          (id, object, adapter) where adapter must implement
+          IFilesystemExporter.
+        """
+
+class IFilesystemImporter(Interface):
+    """ Plugin interface for site structure export.
+    """
+    def import_(import_context, subdir, root=False):
+        """ Import our 'context' using the API of 'import_context'.
+
+        o 'import_context' must implement
+          Products.GenericSupport.interfaces.IImportContext.
+
+        o 'subdir', if passed, is the relative subdirectory containing our
+          context within the site.
+
+        o 'root', if true, indicates that the current context is the
+          "root" of an import (this may be used to adjust paths when
+          interacting with the context).
+        """
+
+class IContentFactory(Interface):
+    """ Adapter interface for factories specific to a container.
+    """
+    def __call__(id):
+        """ Return a new instance, seated in the context under 'id'.
+        """
+
+class IContentFactoryName(Interface):
+    """ Adapter interface for finding the name of the ICF for an object.
+    """
+    def __call__():
+        """ Return a string, suitable for looking up an IContentFactory.
+        
+        o The string should allow finding a factory for our context's
+          container which would create an "empty" instance of the same
+          type as our context.
+        """
+
+class ICSVAware(Interface):
+    """ Interface for objects which dump / load 'text/comma-separated-values'.
+    """
+    def getId():
+        """ Return the Zope id of the object.
+        """
+
+    def as_csv():
+        """ Return a string representing the object as CSV.
+        """
+
+    def put_csv(fd):
+        """ Parse CSV and update the object.
+
+        o 'fd' must be a file-like object whose 'read' method returns
+          CSV text parseable by the 'csv.reader'.
+        """
+
+class IINIAware(Interface):
+    """ Interface for objects which dump / load INI-format files..
+    """
+    def getId():
+        """ Return the Zope id of the object.
+        """
+
+    def as_ini():
+        """ Return a string representing the object as INI.
+        """
+
+    def put_ini(stream_or_text):
+        """ Parse INI-formatted text and update the object.
+
+        o 'stream_or_text' must be either a string, or else a stream
+          directly parseable by ConfigParser.
+        """
+
+class IDAVAware(Interface):
+    """ Interface for objects which handle their own FTP / DAV operations.
+    """
+    def getId():
+        """ Return the Zope id of the object.
+        """
+
+    def manage_FTPget():
+        """ Return a string representing the object as a file.
+        """
+
+    def PUT(REQUEST, RESPONSE):
+        """ Parse file content and update the object.
+
+        o 'REQUEST' will have a 'get' method, which will have the 
+          content object in its "BODY" key.  It will also have 'get_header'
+          method, whose headers (e.g., "Content-Type") may affect the
+          processing of the body.
+        """

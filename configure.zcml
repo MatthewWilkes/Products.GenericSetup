@@ -10,4 +10,40 @@
 
   <include package=".ZCTextIndex"/>
 
+  <adapter
+      factory=".content.CSVAwareFileAdapter"
+      provides="Products.GenericSetup.interfaces.IFilesystemExporter"
+      for="Products.GenericSetup.interfaces.ICSVAware"
+      />
+
+  <adapter
+      factory=".content.CSVAwareFileAdapter"
+      provides="Products.GenericSetup.interfaces.IFilesystemImporter"
+      for="Products.GenericSetup.interfaces.ICSVAware"
+      />
+
+  <adapter
+      factory=".content.INIAwareFileAdapter"
+      provides="Products.GenericSetup.interfaces.IFilesystemExporter"
+      for="Products.GenericSetup.interfaces.IINIAware"
+      />
+
+  <adapter
+      factory=".content.INIAwareFileAdapter"
+      provides="Products.GenericSetup.interfaces.IFilesystemImporter"
+      for="Products.GenericSetup.interfaces.IINIAware"
+      />
+
+  <adapter
+      factory=".content.DAVAwareFileAdapter"
+      provides="Products.GenericSetup.interfaces.IFilesystemExporter"
+      for="Products.GenericSetup.interfaces.IDAVAware"
+      />
+
+  <adapter
+      factory=".content.DAVAwareFileAdapter"
+      provides="Products.GenericSetup.interfaces.IFilesystemImporter"
+      for="Products.GenericSetup.interfaces.IDAVAware"
+      />
+
 </configure>

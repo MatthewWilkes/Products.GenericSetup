@@ -98,3 +98,66 @@ class ConformsToISetupTool:
         from zope.interface.verify import verifyClass
 
         verifyClass( ISetupTool, self._getTargetClass() )
+
+class ConformsToIContentFactory:
+
+    def test_conforms_to_IContentFactory(self):
+
+        from Products.GenericSetup.interfaces import IContentFactory
+        from zope.interface.verify import verifyClass
+
+        verifyClass( IContentFactory, self._getTargetClass() )
+
+class ConformsToIContentFactoryName:
+
+    def test_conforms_to_IContentFactory(self):
+
+        from Products.GenericSetup.interfaces import IContentFactoryName
+        from zope.interface.verify import verifyClass
+
+        verifyClass( IContentFactoryName, self._getTargetClass() )
+
+class ConformsToIFilesystemExporter:
+
+    def test_conforms_to_IFilesystemExporter(self):
+
+        from Products.GenericSetup.interfaces import IFilesystemExporter
+        from zope.interface.verify import verifyClass
+
+        verifyClass( IFilesystemExporter, self._getTargetClass() )
+
+class ConformsToIFilesystemImporter:
+
+    def test_conforms_to_IFilesystemImporter(self):
+
+        from Products.GenericSetup.interfaces import IFilesystemImporter
+        from zope.interface.verify import verifyClass
+
+        verifyClass( IFilesystemImporter, self._getTargetClass() )
+
+class ConformsToIINIAware:
+
+    def test_conforms_to_IINIAware(self):
+
+        from Products.GenericSetup.interfaces import IINIAware
+        from zope.interface.verify import verifyClass
+
+        verifyClass (IINIAware, self._getTargetClass() )
+
+class ConformsToICSVAware:
+
+    def test_conforms_to_ICSVAware(self):
+
+        from Products.GenericSetup.interfaces import ICSVAware
+        from zope.interface.verify import verifyClass
+
+        verifyClass( ICSVAware, self._getTargetClass() )
+
+class ConformsToIDAVAware:
+
+    def test_conforms_to_IDAVAware(self):
+
+        from Products.GenericSetup.interfaces import IDAVAware
+        from zope.interface.verify import verifyClass
+
+        verifyClass( IDAVAware, self._getTargetClass() )
