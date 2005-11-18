@@ -60,6 +60,7 @@ def importRolemap( context ):
     """
     site = context.getSite()
     encoding = context.getEncoding()
+    logger = context.getLogger('rolemap')
 
     if context.shouldPurge():
 
@@ -102,7 +103,7 @@ def importRolemap( context ):
                                   , permission[ 'acquire' ]
                                   )
 
-    return 'Role / permission map imported.'
+    logger.info('Role / permission map imported.')
 
 
 def exportRolemap( context ):
@@ -131,12 +132,14 @@ def exportRolemap( context ):
 
     """
     site = context.getSite()
+    logger = context.getLogger('rolemap')
+
     rc = RolemapConfigurator( site ).__of__( site )
     text = rc.generateXML()
 
     context.writeDataFile( _FILENAME, text, 'text/xml' )
 
-    return 'Role / permission map exported.'
+    logger.info('Role / permission map exported.')
 
 
 class RolemapConfigurator(ConfiguratorBase):

@@ -172,9 +172,9 @@ class FolderishExporterImporter(object):
                 object = self._makeInstance(object_id, type_name,
                                             subdir, import_context)
                 if object is None:
-                    message = "Couldn't make instance: %s/%s" % (subdir,
-                                                                 object_id)
-                    import_context.note('SFWA', message)
+                    logger = import_context.getLogger('SFWA')
+                    logger.warning("Couldn't make instance: %s/%s" %
+                                   (subdir, object_id))
                     continue
 
             wrapped = context._getOb(object_id)
@@ -268,8 +268,8 @@ class CSVAwareFileAdapter(object):
         cid = self.context.getId()
         data = import_context.readDataFile('%s.csv' % cid, subdir)
         if data is None:
-            import_context.note('CSAFA',
-                                'no .csv file for %s/%s' % (subdir, cid))
+            logger = import_context.getLogger('CSAFA')
+            logger.info('no .csv file for %s/%s' % (subdir, cid))
         else:
             stream = StringIO(data)
             self.context.put_csv(stream)
@@ -303,8 +303,8 @@ class INIAwareFileAdapter(object):
         cid = self.context.getId()
         data = import_context.readDataFile('%s.ini' % cid, subdir)
         if data is None:
-            import_context.note('SGAIFA',
-                                'no .ini file for %s/%s' % (subdir, cid))
+            logger = import_context.getLogger('SGAIFA')
+            logger.info('no .ini file for %s/%s' % (subdir, cid))
         else:
             self.context.put_ini(data)
 
@@ -393,8 +393,8 @@ class DAVAwareFileAdapter(object):
         cid = self.context.getId()
         data = import_context.readDataFile('%s' % cid, subdir)
         if data is None:
-            import_context.note('SGAIFA',
-                                'no .ini file for %s/%s' % (subdir, cid))
+            logger = import_context.getLogger('SGAIFA')
+            logger.info('no .ini file for %s/%s' % (subdir, cid))
         else:
             request = FauxDAVRequest(BODY=data, BODYFILE=StringIO(data))
             response = FauxDAVResponse()

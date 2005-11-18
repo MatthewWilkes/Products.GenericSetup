@@ -448,7 +448,7 @@ class SetupToolTests( FilesystemTestBase
         self.assertEqual( len( result[ 'steps' ] ), 1 )
         self.assertEqual( result[ 'steps' ][ 0 ], 'step_registries' )
         self.assertEqual( result[ 'messages' ][ 'step_registries' ]
-                        , 'Step registries exported'
+                        , None
                         )
         fileish = StringIO( result[ 'tarball' ] )
 
@@ -473,7 +473,7 @@ class SetupToolTests( FilesystemTestBase
         self.assertEqual( len( result[ 'steps' ] ), 1 )
         self.assertEqual( result[ 'steps' ][ 0 ], 'step_registries' )
         self.assertEqual( result[ 'messages' ][ 'step_registries' ]
-                        , 'Step registries exported'
+                        , None
                         )
         fileish = StringIO( result[ 'tarball' ] )
 
@@ -516,7 +516,7 @@ class SetupToolTests( FilesystemTestBase
 
         self.failUnless( 'step_registries' in result[ 'steps' ] )
         self.assertEqual( result[ 'messages' ][ 'step_registries' ]
-                        , 'Step registries exported'
+                        , None
                         )
 
         fileish = StringIO( result[ 'tarball' ] )
@@ -553,7 +553,7 @@ class SetupToolTests( FilesystemTestBase
         self.assertEqual( len( result[ 'steps' ] ), 1 )
         self.assertEqual( result[ 'steps' ][ 0 ], 'step_registries' )
         self.assertEqual( result[ 'messages' ][ 'step_registries' ]
-                        , 'Step registries exported'
+                        , None
                         )
 
         snapshot = result[ 'snapshot' ]

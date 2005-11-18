@@ -1,1 +1,1 @@
-GenericSetup-1.0
+GenericSetup-1.0+

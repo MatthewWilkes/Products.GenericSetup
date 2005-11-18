@@ -17,6 +17,8 @@ $Id$
 
 import unittest
 import Testing
+import Zope2
+Zope2.startup()
 
 from csv import reader
 from ConfigParser import ConfigParser
@@ -576,7 +578,7 @@ class FolderishExporterImporterTests(PlacelessSetup,
         after = site.objectIds()
         self.assertEqual(len(after), 0)
         self.assertEqual(len(context._notes), len(ITEM_IDS))
-        for component, message in context._notes:
+        for level, component, message in context._notes:
             self.assertEqual(component, 'SFWA')
             self.failUnless(message.startswith("Couldn't make"))
 

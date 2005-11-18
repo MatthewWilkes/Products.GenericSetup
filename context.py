@@ -17,6 +17,7 @@ Wrappers representing the state of an import / export operation.
 $Id$
 """
 
+import logging
 import os
 import time
 from StringIO import StringIO
@@ -40,7 +41,57 @@ from zope.interface import implements
 
 from interfaces import IExportContext
 from interfaces import IImportContext
+from interfaces import IWriteLogger
 from permissions import ManagePortal
+
+
+class Logger:
+
+    implements(IWriteLogger)
+
+    def __init__(self, id, messages):
+        """Initialize the logger with a name and an optional level.
+        """
+        self._id = id
+        self._messages = messages
+        self._logger = logging.getLogger('GenericSetup.%s' % id)
+
+    def debug(self, msg, *args, **kwargs):
+        """Log 'msg % args' with severity 'DEBUG'.
+        """
+        self.log(logging.DEBUG, msg, *args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        """Log 'msg % args' with severity 'INFO'.
+        """
+        self.log(logging.INFO, msg, *args, **kwargs)
+
+    def warning(self, msg, *args, **kwargs):
+        """Log 'msg % args' with severity 'WARNING'.
+        """
+        self.log(logging.WARNING, msg, *args, **kwargs)
+
+    def error(self, msg, *args, **kwargs):
+        """Log 'msg % args' with severity 'ERROR'.
+        """
+        self.log(logging.ERROR, msg, *args, **kwargs)
+
+    def exception(self, msg, *args):
+        """Convenience method for logging an ERROR with exception information.
+        """
+        self.error(msg, *args, **{'exc_info': 1})
+
+    def critical(self, msg, *args, **kwargs):
+        """Log 'msg % args' with severity 'CRITICAL'.
+        """
+        self.log(logging.CRITICAL, msg, *args, **kwargs)
+
+    def log(self, level, msg, *args, **kwargs):
+        """Log 'msg % args' with the integer severity 'level'.
+        """
+        self._messages.append((level, self._id, msg))
+        self._logger.log(level, msg, *args, **kwargs)
+
 
 class BaseContext( Implicit ):
 
@@ -50,7 +101,8 @@ class BaseContext( Implicit ):
 
         self._tool = tool
         self._site = aq_parent( aq_inner( tool ) )
-        self._notes = []
+        self._loggers = {}
+        self._messages = []
         self._encoding = encoding
 
     security.declareProtected( ManagePortal, 'getSite' )
@@ -70,16 +122,30 @@ class BaseContext( Implicit ):
     security.declareProtected( ManagePortal, 'getEncoding' )
     def getEncoding( self ):
 
-        """ See ISetupContext..
+        """ See ISetupContext.
         """
         return self._encoding
 
-    security.declareProtected( ManagePortal, 'notes' )
-    def note( self, category, message ):
+    security.declareProtected( ManagePortal, 'getLogger' )
+    def getLogger( self, name ):
+        """ See ISetupContext.
+        """
+        return self._loggers.setdefault(name, Logger(name, self._messages))
+
+    security.declareProtected( ManagePortal, 'listNotes' )
+    def listNotes(self):
 
         """ See ISetupContext.
         """
-        self._notes.append( ( category, message ) )
+        return self._messages[:]
+
+    security.declareProtected( ManagePortal, 'clearNotes' )
+    def clearNotes(self):
+
+        """ See ISetupContext.
+        """
+        self._messages[:] = []
+
 
 class DirectoryImportContext( BaseContext ):
 

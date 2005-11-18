@@ -17,9 +17,8 @@ $Id$
 
 import unittest
 import Testing
-import Zope2
-Zope2.startup()
 
+import logging
 import os
 import time
 from StringIO import StringIO
@@ -47,6 +46,7 @@ class DummyTool( Folder ):
 
     pass
 
+
 class DirectoryImportContextTests( FilesystemTestBase
                                  , ConformsToISetupContext
                                  , ConformsToIImportContext
@@ -58,6 +58,24 @@ class DirectoryImportContextTests( FilesystemTestBase
 
         from Products.GenericSetup.context import DirectoryImportContext
         return DirectoryImportContext
+
+    def test_getLogger( self ):
+
+        site = DummySite( 'site' ).__of__( self.root )
+        ctx = self._makeOne( site, self._PROFILE_PATH )
+        self.assertEqual( len( ctx.listNotes() ), 0 )
+
+        logger = ctx.getLogger('foo')
+        logger.info('bar')
+
+        self.assertEqual( len( ctx.listNotes() ), 1 )
+        level, component, message = ctx.listNotes()[0]
+        self.assertEqual( level, logging.INFO )
+        self.assertEqual( component, 'foo' )
+        self.assertEqual( message, 'bar' )
+
+        ctx.clearNotes()
+        self.assertEqual( len( ctx.listNotes() ), 0 )
 
     def test_readDataFile_nonesuch( self ):
 
@@ -314,6 +332,7 @@ class DirectoryImportContextTests( FilesystemTestBase
         self.failUnless( 'CVS' in names )
         self.failUnless( '.svn' in names )
 
+
 class DirectoryExportContextTests( FilesystemTestBase
                                  , ConformsToISetupContext
                                  , ConformsToIExportContext
@@ -325,6 +344,24 @@ class DirectoryExportContextTests( FilesystemTestBase
 
         from Products.GenericSetup.context import DirectoryExportContext
         return DirectoryExportContext
+
+    def test_getLogger( self ):
+
+        site = DummySite( 'site' ).__of__( self.root )
+        ctx = self._makeOne( site, self._PROFILE_PATH )
+        self.assertEqual( len( ctx.listNotes() ), 0 )
+
+        logger = ctx.getLogger('foo')
+        logger.info('bar')
+
+        self.assertEqual( len( ctx.listNotes() ), 1 )
+        level, component, message = ctx.listNotes()[0]
+        self.assertEqual( level, logging.INFO )
+        self.assertEqual( component, 'foo' )
+        self.assertEqual( message, 'bar' )
+
+        ctx.clearNotes()
+        self.assertEqual( len( ctx.listNotes() ), 0 )
 
     def test_writeDataFile_simple( self ):
 
@@ -437,6 +474,23 @@ class TarballImportContextTests( SecurityRequestTest
         ctx = self._getTargetClass()( tool, bits, *args, **kw )
 
         return site, tool, ctx.__of__( tool )
+
+    def test_getLogger( self ):
+
+        site, tool, ctx = self._makeOne()
+        self.assertEqual( len( ctx.listNotes() ), 0 )
+
+        logger = ctx.getLogger('foo')
+        logger.info('bar')
+
+        self.assertEqual( len( ctx.listNotes() ), 1 )
+        level, component, message = ctx.listNotes()[0]
+        self.assertEqual( level, logging.INFO )
+        self.assertEqual( component, 'foo' )
+        self.assertEqual( message, 'bar' )
+
+        ctx.clearNotes()
+        self.assertEqual( len( ctx.listNotes() ), 0 )
 
     def test_ctorparms( self ):
 
@@ -690,6 +744,25 @@ class TarballExportContextTests( FilesystemTestBase
         from Products.GenericSetup.context import TarballExportContext
         return TarballExportContext
 
+    def test_getLogger( self ):
+
+        site = DummySite( 'site' ).__of__( self.root )
+        ctx = self._getTargetClass()( site )
+
+        self.assertEqual( len( ctx.listNotes() ), 0 )
+
+        logger = ctx.getLogger('foo')
+        logger.info('bar')
+
+        self.assertEqual( len( ctx.listNotes() ), 1 )
+        level, component, message = ctx.listNotes()[0]
+        self.assertEqual( level, logging.INFO )
+        self.assertEqual( component, 'foo' )
+        self.assertEqual( message, 'bar' )
+
+        ctx.clearNotes()
+        self.assertEqual( len( ctx.listNotes() ), 0 )
+
     def test_writeDataFile_simple( self ):
 
         from string import printable
@@ -753,6 +826,27 @@ class SnapshotExportContextTests( SecurityRequestTest
     def _makeOne( self, *args, **kw ):
 
         return self._getTargetClass()( *args, **kw )
+
+    def test_getLogger( self ):
+
+        site = DummySite( 'site' ).__of__( self.root )
+        site.setup_tool = DummyTool( 'setup_tool' )
+        tool = site.setup_tool
+        ctx = self._makeOne( tool, 'simple' )
+
+        self.assertEqual( len( ctx.listNotes() ), 0 )
+
+        logger = ctx.getLogger('foo')
+        logger.info('bar')
+
+        self.assertEqual( len( ctx.listNotes() ), 1 )
+        level, component, message = ctx.listNotes()[0]
+        self.assertEqual( level, logging.INFO )
+        self.assertEqual( component, 'foo' )
+        self.assertEqual( message, 'bar' )
+
+        ctx.clearNotes()
+        self.assertEqual( len( ctx.listNotes() ), 0 )
 
     def test_writeDataFile_simple_image( self ):
 
@@ -1023,6 +1117,25 @@ class SnapshotImportContextTests( SecurityRequestTest
             file.bobobase_modification_time = __faux_mod_time
 
         return folder._getOb( filename )
+
+    def test_getLogger( self ):
+
+        SNAPSHOT_ID = 'note'
+        site, tool, ctx = self._makeOne( SNAPSHOT_ID )
+
+        self.assertEqual( len( ctx.listNotes() ), 0 )
+
+        logger = ctx.getLogger('foo')
+        logger.info('bar')
+
+        self.assertEqual( len( ctx.listNotes() ), 1 )
+        level, component, message = ctx.listNotes()[0]
+        self.assertEqual( level, logging.INFO )
+        self.assertEqual( component, 'foo' )
+        self.assertEqual( message, 'bar' )
+
+        ctx.clearNotes()
+        self.assertEqual( len( ctx.listNotes() ), 0 )
 
     def test_ctorparms( self ):
 

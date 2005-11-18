@@ -174,12 +174,26 @@ class TarballTester( DOMComparator ):
         self._compareDOM( found, data )
 
 
+class DummyLogger:
+
+    def __init__(self, id, messages):
+        self._id = id
+        self._messages = messages
+
+    def info(self, msg, *args, **kwargs):
+        self._messages.append((20, self._id, msg))
+
+    def warning(self, msg, *args, **kwargs):
+        self._messages.append((30, self._id, msg))
+
+
 class DummyExportContext:
 
     def __init__( self, site, tool=None ):
         self._site = site
         self._tool = tool
         self._wrote = []
+        self._notes = []
 
     def getSite( self ):
         return self._site
@@ -187,10 +201,14 @@ class DummyExportContext:
     def getSetupTool( self ):
         return self._tool
 
+    def getLogger(self, name):
+        return DummyLogger(name, self._notes)
+
     def writeDataFile( self, filename, text, content_type, subdir=None ):
         if subdir is not None:
             filename = '%s/%s' % ( subdir, filename )
         self._wrote.append( ( filename, text, content_type ) )
+
 
 class DummyImportContext:
 
@@ -211,6 +229,9 @@ class DummyImportContext:
     def getEncoding( self ):
         return self._encoding
 
+    def getLogger(self, name):
+        return DummyLogger(name, self._notes)
+
     def readDataFile( self, filename, subdir=None ):
 
         if subdir is not None:
@@ -222,9 +243,6 @@ class DummyImportContext:
 
         return self._purge
 
-    def note( self, component, message ):
-
-        self._notes.append( ( component, message ) )
 
 def dummy_handler( context ):
 

@@ -23,6 +23,7 @@ from AccessControl import ClassSecurityInfo
 from Acquisition import aq_base
 from Globals import InitializeClass
 from OFS.Folder import Folder
+from OFS.Image import File
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 from zope.interface import implements
 from zope.interface import implementedBy
@@ -52,6 +53,7 @@ def exportStepRegistries(context):
     """ Built-in handler for exporting import / export step registries.
     """
     setup_tool = context.getSetupTool()
+    logger = context.getLogger('registries')
 
     import_steps_xml = setup_tool.getImportStepRegistry().generateXML()
     context.writeDataFile('import_steps.xml', import_steps_xml, 'text/xml')
@@ -59,7 +61,7 @@ def exportStepRegistries(context):
     export_steps_xml = setup_tool.getExportStepRegistry().generateXML()
     context.writeDataFile('export_steps.xml', export_steps_xml, 'text/xml')
 
-    return 'Step registries exported'
+    logger.info('Step registries exported.')
 
 def importToolset(context):
 
@@ -67,10 +69,12 @@ def importToolset(context):
     """
     site = context.getSite()
     encoding = context.getEncoding()
+    logger = context.getLogger('toolset')
 
     xml = context.readDataFile(TOOLSET_XML)
     if xml is None:
-        return 'Toolset: Nothing to import.'
+        logger.info('Nothing to import.')
+        return
 
     setup_tool = context.getSetupTool()
     toolset = setup_tool.getToolsetRegistry()
@@ -107,7 +111,7 @@ def importToolset(context):
                 site._delObject(tool_id)
                 site._setObject(tool_id, tool_class())
 
-    return 'Toolset imported.'
+    logger.info('Toolset imported.')
 
 def exportToolset(context):
 
@@ -115,11 +119,12 @@ def exportToolset(context):
     """
     setup_tool = context.getSetupTool()
     toolset = setup_tool.getToolsetRegistry()
+    logger = context.getLogger('toolset')
 
     xml = toolset.generateXML()
     context.writeDataFile(TOOLSET_XML, xml, 'text/xml')
 
-    return 'Toolset exported.'
+    logger.info('Toolset exported.')
 
 
 class SetupTool(Folder):
@@ -219,7 +224,9 @@ class SetupTool(Folder):
                     steps.append(dependency)
 
         message = self._doRunImportStep(step_id, context)
-        messages[step_id] = message
+        message_list = filter(None, [message])
+        message_list.extend( ['%s: %s' % x[1:] for x in context.listNotes()] )
+        messages[step_id] = '\n'.join(message_list)
         steps.append(step_id)
 
         return { 'steps' : steps, 'messages' : messages }
@@ -236,7 +243,11 @@ class SetupTool(Folder):
 
         for step in steps:
             message = self._doRunImportStep(step, context)
-            messages[step] = message
+            message_list = filter(None, [message])
+            message_list.extend( ['%s: %s' % x[1:]
+                                  for x in context.listNotes()] )
+            messages[step] = '\n'.join(message_list)
+            context.clearNotes()
 
         return { 'steps' : steps, 'messages' : messages }
 
@@ -389,33 +400,44 @@ class SetupTool(Folder):
                                    ids,
                                    run_dependencies,
                                    RESPONSE,
+                                   create_report=True,
                                   ):
         """ Import the steps selected by the user.
         """
         if not ids:
-            message = 'No+steps+selected.'
+            summary = 'No+steps+selected.'
 
         else:
             steps_run = []
+            messages = {}
             for step_id in ids:
                 result = self.runImportStep(step_id, run_dependencies)
                 steps_run.extend(result['steps'])
+                messages.update(result['messages'])
 
-            message = 'Steps+run:%s' % '+,'.join(steps_run)
+            summary = 'Steps+run:%s' % '+,'.join(steps_run)
 
-        RESPONSE.redirect('%s/manage_importSteps?manage_tabs_message=%s'
-                         % (self.absolute_url(), message))
+        if create_report:
+            name = self._mangleTimestampName('import-selected', 'log')
+            self._createReport(name, result['steps'], result['messages'])
+
+        return self.manage_importSteps(manage_tabs_message=summary,
+                                       messages=messages)
 
     security.declareProtected(ManagePortal, 'manage_importSelectedSteps')
-    def manage_importAllSteps(self, RESPONSE):
+    def manage_importAllSteps(self, RESPONSE, create_report=True):
 
         """ Import all steps.
         """
         result = self.runAllImportSteps()
-        message = 'Steps+run:%s' % '+,'.join(result['steps'])
+        steps_run = 'Steps+run:%s' % '+,'.join(result['steps'])
 
-        RESPONSE.redirect('%s/manage_importSteps?manage_tabs_message=%s'
-                         % (self.absolute_url(), message))
+        if create_report:
+            name = self._mangleTimestampName('import-all', 'log')
+            self._createReport(name, result['steps'], result['messages'])
+
+        return self.manage_importSteps(manage_tabs_message=steps_run,
+                                       messages=result['messages'])
 
     security.declareProtected(ManagePortal, 'manage_exportSteps')
     manage_exportSteps = PageTemplateFile('sutExportSteps', _wwwdir)
@@ -517,8 +539,7 @@ class SetupTool(Folder):
         o If no ID is passed, generate one.
         """
         if snapshot_id is None:
-            timestamp = time.gmtime()
-            snapshot_id = 'snapshot-%4d%02d%02d%02d%02d%02d' % timestamp[:6]
+            snapshot_id = self._mangleTimestampName('snapshot')
 
         self.createSnapshot(snapshot_id)
 
@@ -712,6 +733,48 @@ class SetupTool(Folder):
                , 'tarball' : context.getArchive()
                , 'filename' : context.getArchiveFilename()
                }
+
+    security.declarePrivate('_mangleTimestampName')
+    def _mangleTimestampName(self, prefix, ext=None):
+
+        """ Create a mangled ID using a timestamp.
+        """
+        timestamp = time.gmtime()
+        items = (prefix,) + timestamp[:6]
+
+        if ext is None:
+            fmt = '%s-%4d%02d%02d%02d%02d%02d'
+        else:
+            fmt = '%s-%4d%02d%02d%02d%02d%02d.%s'
+            items += (ext,)
+
+        return fmt % items
+
+    security.declarePrivate('_createReport')
+    def _createReport(self, name, steps, messages):
+
+        """ Record the results of a run.
+        """
+        lines = []
+        # Create report
+        for step in steps:
+            lines.append('=' * 65)
+            lines.append('Step: %s' % step)
+            lines.append('=' * 65)
+            msg = messages[step]
+            lines.extend(msg.split('\n'))
+            lines.append('')
+
+        report = '\n'.join(lines)
+        if isinstance(report, unicode):
+            report = report.encode('latin-1')
+
+        file = File(id=name,
+                    title='',
+                    file=report,
+                    content_type='text/plain'
+                   )
+        self._setObject(name, file)
 
 InitializeClass(SetupTool)
 
