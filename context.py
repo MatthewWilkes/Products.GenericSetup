@@ -420,6 +420,13 @@ class SnapshotExportContext( BaseContext ):
 
         """ See IExportContext.
         """
+        if subdir is not None:
+            filename = '/'.join( ( subdir, filename ) )
+
+        sep = filename.rfind('/')
+        if sep != -1:
+            subdir = filename[:sep]
+            filename = filename[sep+1:]
         folder = self._ensureSnapshotsFolder( subdir )
 
         # TODO: switch on content_type
@@ -525,6 +532,13 @@ class SnapshotImportContext( BaseContext ):
 
         """ See IImportContext.
         """
+        if subdir is not None:
+            filename = '/'.join( ( subdir, filename ) )
+
+        sep = filename.rfind('/')
+        if sep != -1:
+            subdir = filename[:sep]
+            filename = filename[sep+1:]
         try:
             snapshot = self._getSnapshotFolder( subdir )
             object = snapshot._getOb( filename )

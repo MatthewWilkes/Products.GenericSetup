@@ -1010,6 +1010,9 @@ class SnapshotExportContextTests( SecurityRequestTest
         self.assertEqual( template.meta_type, DTMLDocument.meta_type )
         self.assertEqual( template.read(), _HTML )
 
+        ctx.writeDataFile( 'sub1/%s2' % FILENAME, _HTML, CONTENT_TYPE)
+        self.assertEqual( len( sub1.objectIds() ), 2 )
+
     def test_writeDataFile_nested_subdirs_html( self ):
 
         from Products.PageTemplates.ZopePageTemplate import ZopePageTemplate
@@ -1198,6 +1201,8 @@ class SnapshotImportContextTests( SecurityRequestTest
                       , subdir=SUBDIR )
 
         self.assertEqual( ctx.readDataFile( FILENAME, SUBDIR ), printable )
+        self.assertEqual( ctx.readDataFile( '%s/%s' % (SUBDIR, FILENAME) ),
+                                            printable )
 
     def test_getLastModified_nonesuch( self ):
 
