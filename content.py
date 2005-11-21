@@ -139,8 +139,7 @@ class FolderishExporterImporter(object):
                 prop_adapter.put_ini(prop_text)
 
         preserve = import_context.readDataFile('.preserve', subdir)
-        tool_items = [x for x in context.objectItems()
-                        if ISetupTool.providedBy(x[1])]
+        must_preserve = self._mustPreserve()
 
         prior = context.objectIds()
 
@@ -149,7 +148,7 @@ class FolderishExporterImporter(object):
         else:
             preserve = _globtest(preserve, prior)
 
-        preserve.extend([x[0] for x in tool_items])
+        preserve.extend([x[0] for x in must_preserve])
 
         for id in prior:
             if id not in preserve:
@@ -224,6 +223,10 @@ class FolderishExporterImporter(object):
             context._setObject(instance_id, instance) 
 
         return context._getOb(instance_id)
+
+    def _mustPreserve(self):
+        return [x for x in self.context.objectItems()
+                        if ISetupTool.providedBy(x[1])]
  
 
 def _globtest(globpattern, namelist):
