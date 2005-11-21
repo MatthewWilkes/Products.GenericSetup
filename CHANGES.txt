@@ -2,6 +2,12 @@ GenericSetup Product Changelog
 
   After GenericSetup 1.0
 
+    - Added 'for_' argument to profile registry operations.
+      A profile may be registered and queried as appropriate to a specific
+      site interface;  the default value, 'None', indicates that the profile
+      is relevant to any site.  Note that this is essentially an adapter
+      lookup;  perhaps we should reimplement it so.
+
     - Forward ported changes from GenericSetup 0.11 and 0.12 (which were
       created in a separate repository).
 
