@@ -23,6 +23,7 @@ Zope2.startup()
 from OFS.Folder import Folder
 from Products.GenericSetup.tests.common import BaseRegistryTests
 from Products.GenericSetup import EXTENSION
+from zope.interface import Interface
 
 from conformance import ConformsToIStepRegistry
 from conformance import ConformsToIImportStepRegistry
@@ -1024,6 +1025,16 @@ _CONFUSED_TOOLSET_XML = """\
 </tool-setup>
 """
 
+class ISite(Interface):
+    pass
+
+class IDerivedSite(ISite):
+    pass
+
+class IAnotherSite(Interface):
+    pass
+
+
 class ProfileRegistryTests( BaseRegistryTests
                           , ConformsToIProfileRegistry
                           ):
@@ -1071,19 +1082,84 @@ class ProfileRegistryTests( BaseRegistryTests
         self.assertEqual( info[ 'path' ], PATH )
         self.assertEqual( info[ 'product' ], PRODUCT )
         self.assertEqual( info[ 'type' ], PROFILE_TYPE )
+        self.assertEqual( info[ 'for' ], None )
 
     def test_registerProfile_duplicate( self ):
 
-        PROFILE_ID = 'one'
+        NAME = 'one'
         TITLE = 'One'
         DESCRIPTION = 'One profile'
         PATH = '/path/to/one'
 
         registry = self._makeOne()
-        registry.registerProfile( PROFILE_ID, TITLE, DESCRIPTION, PATH )
+        registry.registerProfile( NAME, TITLE, DESCRIPTION, PATH )
         self.assertRaises( KeyError
                          , registry.registerProfile
-                         , PROFILE_ID, TITLE, DESCRIPTION, PATH )
+                         , NAME, TITLE, DESCRIPTION, PATH )
+
+
+    def test_registerProfile_site_type( self ):
+
+        NAME = 'one'
+        TITLE = 'One'
+        DESCRIPTION = 'One profile'
+        PATH = '/path/to/one'
+        PRODUCT = 'TestProduct'
+        PROFILE_ID = 'TestProduct:one'
+        PROFILE_TYPE = EXTENSION
+        FOR = ISite
+        NOT_FOR = IAnotherSite
+        DERIVED_FOR = IDerivedSite
+
+        registry = self._makeOne()
+        registry.registerProfile( NAME
+                                , TITLE
+                                , DESCRIPTION
+                                , PATH
+                                , PRODUCT
+                                , PROFILE_TYPE
+                                , for_=FOR
+                                )
+
+
+        self.assertEqual( len( registry.listProfiles() ), 1 )
+        self.assertEqual( len( registry.listProfiles( for_=FOR ) ), 1 )
+        self.assertEqual( len( registry.listProfiles( for_=DERIVED_FOR ) )
+                        , 1 )
+        self.assertEqual( len( registry.listProfiles( for_=NOT_FOR ) )
+                        , 0 )
+
+        self.assertEqual( len( registry.listProfileInfo() ), 1 )
+        self.assertEqual( len( registry.listProfileInfo( for_=FOR ) ), 1 )
+        self.assertEqual( len( registry.listProfileInfo( for_=DERIVED_FOR ) )
+                        , 1 )
+        self.assertEqual( len( registry.listProfileInfo( for_=NOT_FOR ) )
+                        , 0 )
+
+        # Verify that these lookups succeed...
+        info1 = registry.getProfileInfo( PROFILE_ID )
+        info2 = registry.getProfileInfo( PROFILE_ID, for_=FOR )
+        info3 = registry.getProfileInfo( PROFILE_ID, for_=DERIVED_FOR )
+
+        self.assertEqual(info1, info2)
+        self.assertEqual(info1, info3)
+
+        # ...and that this one fails.
+        self.assertRaises( KeyError
+                         , registry.getProfileInfo
+                         , PROFILE_ID
+                         , for_=NOT_FOR
+                         )
+
+        info = registry.getProfileInfo( PROFILE_ID , for_=FOR )
+
+        self.assertEqual( info[ 'id' ], PROFILE_ID )
+        self.assertEqual( info[ 'title' ], TITLE )
+        self.assertEqual( info[ 'description' ], DESCRIPTION )
+        self.assertEqual( info[ 'path' ], PATH )
+        self.assertEqual( info[ 'product' ], PRODUCT )
+        self.assertEqual( info[ 'type' ], PROFILE_TYPE )
+        self.assertEqual( info[ 'for' ], FOR )
 
 
 def test_suite():

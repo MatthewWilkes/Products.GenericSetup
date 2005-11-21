@@ -531,26 +531,37 @@ class ProfileRegistry( Implicit ):
         self.clear()
 
     security.declareProtected( ManagePortal, '' )
-    def getProfileInfo( self, profile_id ):
+    def getProfileInfo( self, profile_id, for_=None ):
 
         """ See IProfileRegistry.
         """
         result = self._profile_info[ profile_id ]
+        if for_ is not None:
+            if not issubclass( for_, result['for'] ):
+                raise KeyError, profile_id
         return result.copy()
 
     security.declareProtected( ManagePortal, 'listProfiles' )
-    def listProfiles( self ):
+    def listProfiles( self, for_=None ):
 
         """ See IProfileRegistry.
         """
-        return tuple( self._profile_ids )
+        result = []
+        for profile_id in self._profile_ids:
+            info = self.getProfileInfo( profile_id )
+            if for_ is None or issubclass( for_, info['for'] ):
+                result.append( profile_id )
+        return tuple( result )
 
     security.declareProtected( ManagePortal, 'listProfileInfo' )
-    def listProfileInfo( self ):
+    def listProfileInfo( self, for_=None ):
 
         """ See IProfileRegistry.
         """
-        return [ self.getProfileInfo( id ) for id in self.listProfiles() ]
+        candidates = [ self.getProfileInfo( id )
+                        for id in self.listProfiles() ]
+        return [ x for x in candidates
+                    if for_ is None or issubclass( for_, x['for'] ) ]
 
     security.declareProtected( ManagePortal, 'registerProfile' )
     def registerProfile( self
@@ -560,6 +571,7 @@ class ProfileRegistry( Implicit ):
                        , path
                        , product=None
                        , profile_type=BASE
+                       , for_=None
                        ):
         """ See IProfileRegistry.
         """
@@ -575,6 +587,7 @@ class ProfileRegistry( Implicit ):
                , 'path' : path
                , 'product' : product
                , 'type': profile_type
+               , 'for': for_
                }
 
         self._profile_info[ profile_id ] = info

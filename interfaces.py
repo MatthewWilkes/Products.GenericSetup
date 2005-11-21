@@ -352,7 +352,7 @@ class IProfileRegistry( Interface ):
 
     """ API for profile registry.
     """
-    def getProfileInfo( profile_id ):
+    def getProfileInfo( profile_id, for_=None ):
 
         """ Return a mapping describing a registered filesystem profile.
 
@@ -370,18 +370,36 @@ class IProfileRegistry( Interface ):
              relative (None for absolute paths).
 
           'type' -- either BASE or EXTENSION
+        
+        o 'for_', if passed, should be the interface specifying the "site
+            type" for which the profile is relevant, e.g.
+            Products.CMFCore.interfaces.ISiteRoot or
+            Products.PluggableAuthService.interfaces.IPluggableAuthService.
+            If 'None', list all profiles.
         """
 
-    def listProfiles():
+    def listProfiles( for_=None ):
 
         """ Return a list of IDs for registered profiles.
+        
+        o 'for_', if passed, should be the interface specifying the "site
+            type" for which the profile is relevant, e.g.
+            Products.CMFCore.interfaces.ISiteRoot or
+            Products.PluggableAuthService.interfaces.IPluggableAuthService.
+            If 'None', list all profiles.
         """
 
-    def listProfileInfo():
+    def listProfileInfo( for_=None ):
 
         """ Return a list of mappings describing registered profiles.
 
         o See 'getProfileInfo' for a description of the mappings' keys.
+        
+        o 'for_', if passed, should be the interface specifying the "site
+            type" for which the profile is relevant, e.g.
+            Products.CMFCore.interfaces.ISiteRoot or
+            Products.PluggableAuthService.interfaces.IPluggableAuthService.
+            If 'None', list all profiles.
         """
 
     def registerProfile( name
@@ -390,6 +408,7 @@ class IProfileRegistry( Interface ):
                        , path
                        , product=None
                        , profile_type=BASE
+                       , for_=None
                        ):
         """ Add a new profile to the registry.
 
@@ -398,6 +417,12 @@ class IProfileRegistry( Interface ):
 
         o If 'product' is passed, then 'path' should be interpreted as
           relative to the corresponding product directory.
+        
+        o 'for_', if passed, should be the interface specifying the "site
+          type" for which the profile is relevant, e.g.
+          Products.CMFCore.interfaces.ISiteRoot or
+          Products.PluggableAuthService.interfaces.IPluggableAuthService.
+          If 'None', the profile might be used in any site.
         """
 
 class ISetupTool( Interface ):
