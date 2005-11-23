@@ -21,6 +21,11 @@ from tarfile import TarFile
 
 from Acquisition import Implicit
 from Testing.ZopeTestCase import ZopeTestCase
+from zope.interface import implements
+
+from Products.GenericSetup.interfaces import IExportContext
+from Products.GenericSetup.interfaces import IImportContext
+
 
 class OmnipotentUser(Implicit):
     """ Omnipotent User for unit testing purposes.
@@ -189,6 +194,8 @@ class DummyLogger:
 
 class DummyExportContext:
 
+    implements(IExportContext)
+
     def __init__( self, site, tool=None ):
         self._site = site
         self._tool = tool
@@ -211,6 +218,8 @@ class DummyExportContext:
 
 
 class DummyImportContext:
+
+    implements(IImportContext)
 
     def __init__( self, site, purge=True, encoding=None, tool=None ):
         self._site = site

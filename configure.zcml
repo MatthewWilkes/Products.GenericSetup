@@ -6,6 +6,8 @@
 
   <include package=".PluginIndexes"/>
 
+  <include package=".PythonScripts"/>
+
   <include package=".ZCatalog"/>
 
   <include package=".ZCTextIndex"/>

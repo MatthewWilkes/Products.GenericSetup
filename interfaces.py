@@ -16,7 +16,8 @@ $Id$
 """
 
 from zope.interface import Interface
-
+from zope.schema import Text
+from zope.schema import TextLine
 
 BASE, EXTENSION = range(1, 3)
 PURGE, UPDATE = range(1, 3)
@@ -587,6 +588,18 @@ class IWriteLogger(Interface):
         """
 
 
+class IBody(Interface):
+
+    """Body im- and exporter.
+    """
+
+    body = Text(description=u'Im- and export the object as a file body.')
+
+    mime_type = TextLine(description=u'MIME type of the file body.')
+
+    suffix = TextLine(description=u'Suffix for the file.')
+
+
 class INodeExporter(Interface):
 
     """Node exporter.
@@ -605,6 +618,7 @@ class INodeImporter(Interface):
     def importNode(node, mode=PURGE):
         """Import the object from the DOM node.
         """
+
 
 class IFilesystemExporter(Interface):
     """ Plugin interface for site structure export.
