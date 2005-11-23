@@ -560,8 +560,8 @@ class ProfileRegistry( Implicit ):
         """
         candidates = [ self.getProfileInfo( id )
                         for id in self.listProfiles() ]
-        return [ x for x in candidates
-                    if for_ is None or issubclass( for_, x['for'] ) ]
+        return [ x for x in candidates if for_ is None or x['for'] is None or
+                 issubclass( for_, x['for'] ) ]
 
     security.declareProtected( ManagePortal, 'registerProfile' )
     def registerProfile( self
