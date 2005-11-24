@@ -29,6 +29,11 @@ from AccessControl import ClassSecurityInfo
 from Acquisition import Implicit
 from Globals import InitializeClass
 from Globals import package_home
+try:
+    from OFS.interfaces import IOrderedContainer
+except:
+    #BBB: for Zope 2.8
+    from Products.Five.bbb.OFS_interfaces import IOrderedContainer
 from TAL.TALDefs import attrEscape
 from zope.app import zapi
 from zope.interface import implements
@@ -501,11 +506,18 @@ class ObjectManagerHelpers(object):
 
     def _extractObjects(self):
         fragment = self._doc.createDocumentFragment()
-        for obj in self.context.objectValues():
+        objects = self.context.objectValues()
+        if not IOrderedContainer.providedBy(self.context):
+            objects.sort(lambda x,y: cmp(x.getId(), y.getId()))
+        for obj in objects:
             exporter = INodeExporter(obj, None)
             if exporter is None:
-                continue
-            fragment.appendChild(exporter.exportNode(self._doc))
+                node = self._doc.createElement('object')
+                node.setAttribute('name', obj.getId())
+                node.setAttribute('meta_type', obj.meta_type)
+            else:
+                node = exporter.exportNode(self._doc)
+            fragment.appendChild(node)
         return fragment
 
     def _purgeObjects(self):
@@ -528,7 +540,7 @@ class ObjectManagerHelpers(object):
                         parent._setObject(obj_id, mt_info['instance'](obj_id))
                         break
                 else:
-                    raise ValueError('unknown meta_type \'%s\'' % obj_id)
+                    raise ValueError('unknown meta_type \'%s\'' % meta_type)
 
             if child.hasAttribute('insert-before'):
                 insert_before = child.getAttribute('insert-before')
