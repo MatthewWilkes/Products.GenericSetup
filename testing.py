@@ -47,6 +47,7 @@ class BodyAdapterTestCase(PlacelessSetup, unittest.TestCase):
     def setUp(self):
         PlacelessSetup.setUp(self)
         zcml.load_config('meta.zcml', Products.Five)
+        zcml.load_config('permissions.zcml', Products.Five)
 
     def test_z3interfaces(self):
         verifyClass(IBody, self._getTargetClass())
