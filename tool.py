@@ -160,7 +160,7 @@ class SetupTool(Folder):
         """
         return 'ascii'
 
-    security.declareProtected(ManagePortal, 'getImportContextId')
+    security.declareProtected(ManagePortal, 'getImportContextID')
     def getImportContextID(self):
 
         """ See ISetupTool.
@@ -199,7 +199,7 @@ class SetupTool(Folder):
         """
         return self._toolset_registry
 
-    security.declareProtected(ManagePortal, 'executeStep')
+    security.declareProtected(ManagePortal, 'runImportStep')
     def runImportStep(self, step_id, run_dependencies=True, purge_old=None):
 
         """ See ISetupTool.
@@ -231,7 +231,7 @@ class SetupTool(Folder):
 
         return { 'steps' : steps, 'messages' : messages }
 
-    security.declareProtected(ManagePortal, 'runAllSetupSteps')
+    security.declareProtected(ManagePortal, 'runAllImportSteps')
     def runAllImportSteps(self, purge_old=None):
 
         """ See ISetupTool.
