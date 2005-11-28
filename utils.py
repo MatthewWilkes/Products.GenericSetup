@@ -37,11 +37,13 @@ except:
 from TAL.TALDefs import attrEscape
 from zope.app import zapi
 from zope.interface import implements
+from zope.interface import providedBy
 
 from exceptions import BadRequest
 from interfaces import IBody
 from interfaces import INodeExporter
 from interfaces import INodeImporter
+from interfaces import ISetupContext
 from interfaces import PURGE, UPDATE
 from permissions import ManagePortal
 
@@ -511,13 +513,16 @@ class ObjectManagerHelpers(object):
             objects.sort(lambda x,y: cmp(x.getId(), y.getId()))
         for obj in objects:
             exporter = INodeExporter(obj, None)
-            if exporter is None:
-                node = self._doc.createElement('object')
-                node.setAttribute('name', obj.getId())
-                node.setAttribute('meta_type', obj.meta_type)
-            else:
+            if exporter:
                 node = exporter.exportNode(self._doc)
-            fragment.appendChild(node)
+                fragment.appendChild(node)
+            else:
+                adapters = zapi.getService(zapi.servicenames.Adapters)
+                if adapters.lookup((providedBy(obj), ISetupContext), IBody):
+                    node = self._doc.createElement('object')
+                    node.setAttribute('name', obj.getId())
+                    node.setAttribute('meta_type', obj.meta_type)
+                    fragment.appendChild(node)
         return fragment
 
     def _purgeObjects(self):
@@ -671,7 +676,9 @@ def exportObjects(parent, parent_path, context):
         exporter = zapi.queryMultiAdapter((obj, context), IBody)
         if exporter:
             filename = '%s%s' % (path, exporter.suffix)
-            context.writeDataFile(filename, exporter.body, exporter.mime_type)
+            body = exporter.body
+            if body is not None:
+                context.writeDataFile(filename, body, exporter.mime_type)
 
         if getattr(obj, 'objectValues', False):
             exportObjects(obj, path, context)
@@ -686,7 +693,7 @@ def importObjects(parent, parent_path, context):
         if importer:
             filename = '%s%s' % (path, importer.suffix)
             body = context.readDataFile(filename)
-            if body:
+            if body is not None:
                 importer.body = body
 
         if getattr(obj, 'objectValues', False):

@@ -4,6 +4,8 @@
 
   <include package=".MailHost"/>
 
+  <include package=".OFSP"/>
+
   <include package=".PluginIndexes"/>
 
   <include package=".PythonScripts"/>
