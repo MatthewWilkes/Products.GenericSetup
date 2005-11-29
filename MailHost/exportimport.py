@@ -16,17 +16,19 @@ $Id$
 """
 
 from Products.GenericSetup.interfaces import PURGE
-from Products.GenericSetup.utils import NodeAdapterBase
+from Products.GenericSetup.utils import XMLAdapterBase
 
 from Products.MailHost.interfaces import IMailHost
 
 
-class MailHostNodeAdapter(NodeAdapterBase):
+class MailHostXMLAdapter(XMLAdapterBase):
 
-    """Node im- and exporter for MailHost.
+    """XML im- and exporter for MailHost.
     """
 
     __used_for__ = IMailHost
+
+    _LOGGER_ID = 'mailhost'
 
     def exportNode(self, doc):
         """Export the object as a DOM node.
@@ -37,6 +39,8 @@ class MailHostNodeAdapter(NodeAdapterBase):
         node.setAttribute('smtp_port', str(self.context.smtp_port))
         node.setAttribute('smtp_uid', self.context.smtp_uid)
         node.setAttribute('smtp_pwd', self.context.smtp_pwd)
+
+        self._logger.info('Mailhost exported.')
         return node
 
     def importNode(self, node, mode=PURGE):
@@ -46,3 +50,5 @@ class MailHostNodeAdapter(NodeAdapterBase):
         self.context.smtp_port = int(node.getAttribute('smtp_port'))
         self.context.smtp_uid = node.getAttribute('smtp_uid').encode('utf-8')
         self.context.smtp_pwd = node.getAttribute('smtp_pwd').encode('utf-8')
+
+        self._logger.info('Mailhost imported.')

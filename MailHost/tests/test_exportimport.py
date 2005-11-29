@@ -18,22 +18,24 @@ $Id$
 import unittest
 import Testing
 
-from Products.GenericSetup.testing import NodeAdapterTestCase
-from Products.GenericSetup.testing import PlacelessSetup
+from Products.Five import zcml
 
-_MAILHOST_XML = """\
+from Products.GenericSetup.testing import BodyAdapterTestCase
+
+_MAILHOST_BODY = """\
+<?xml version="1.0"?>
 <object name="foo_mailhost" meta_type="Mail Host" smtp_host="localhost"
    smtp_port="25" smtp_pwd="" smtp_uid=""/>
 """
 
 
-class MailHostNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
+class MailHostXMLAdapterTests(BodyAdapterTestCase):
 
     def _getTargetClass(self):
         from Products.GenericSetup.MailHost.exportimport \
-                import MailHostNodeAdapter
+                import MailHostXMLAdapter
 
-        return MailHostNodeAdapter
+        return MailHostXMLAdapter
 
     def _verifyImport(self, obj):
         self.assertEqual(type(obj.smtp_host), str)
@@ -46,22 +48,19 @@ class MailHostNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         self.assertEqual(obj.smtp_uid, '')
 
     def setUp(self):
-        import Products.Five
-        from Products.Five import zcml
         import Products.GenericSetup.MailHost
         from Products.MailHost.MailHost import MailHost
 
-        PlacelessSetup.setUp(self)
-        zcml.load_config('meta.zcml', Products.Five)
+        BodyAdapterTestCase.setUp(self)
         zcml.load_config('configure.zcml', Products.GenericSetup.MailHost)
 
         self._obj = MailHost('foo_mailhost')
-        self._XML = _MAILHOST_XML
+        self._BODY = _MAILHOST_BODY
 
 
 def test_suite():
     return unittest.TestSuite((
-        unittest.makeSuite(MailHostNodeAdapterTests),
+        unittest.makeSuite(MailHostXMLAdapterTests),
         ))
 
 if __name__ == '__main__':

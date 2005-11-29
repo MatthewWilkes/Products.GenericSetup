@@ -31,6 +31,8 @@ class FolderXMLAdapter(XMLAdapterBase, ObjectManagerHelpers,
 
     __used_for__ = IFolder
 
+    _LOGGER_ID = 'ofs'
+
     def exportNode(self, doc):
         """Export the object as a DOM node.
         """
@@ -38,6 +40,8 @@ class FolderXMLAdapter(XMLAdapterBase, ObjectManagerHelpers,
         node = self._getObjectNode('object')
         node.appendChild(self._extractProperties())
         node.appendChild(self._extractObjects())
+
+        self._logger.info('Folder exported.')
         return node
 
     def importNode(self, node, mode=PURGE):
@@ -49,6 +53,8 @@ class FolderXMLAdapter(XMLAdapterBase, ObjectManagerHelpers,
 
         self._initProperties(node, mode)
         self._initObjects(node, mode)
+
+        self._logger.info('Folder imported.')
 
     def _exportBody(self):
         """Export the object as a file body.

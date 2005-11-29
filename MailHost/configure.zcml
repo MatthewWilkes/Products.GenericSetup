@@ -3,15 +3,10 @@
     >
 
   <adapter
-      factory=".exportimport.MailHostNodeAdapter"
-      provides="Products.GenericSetup.interfaces.INodeExporter"
-      for="Products.MailHost.interfaces.IMailHost"
-      />
-
-  <adapter
-      factory=".exportimport.MailHostNodeAdapter"
-      provides="Products.GenericSetup.interfaces.INodeImporter"
-      for="Products.MailHost.interfaces.IMailHost"
+      factory=".exportimport.MailHostXMLAdapter"
+      provides="Products.GenericSetup.interfaces.IBody"
+      for="Products.MailHost.interfaces.IMailHost
+           Products.GenericSetup.interfaces.ISetupContext"
       />
 
 </configure>

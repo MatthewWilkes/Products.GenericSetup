@@ -18,9 +18,9 @@ $Id$
 from Products.GenericSetup.interfaces import INodeExporter
 from Products.GenericSetup.interfaces import INodeImporter
 from Products.GenericSetup.interfaces import PURGE
-from Products.GenericSetup.utils import NodeAdapterBase
 from Products.GenericSetup.utils import ObjectManagerHelpers
 from Products.GenericSetup.utils import PropertyManagerHelpers
+from Products.GenericSetup.utils import XMLAdapterBase
 
 from Products.ZCatalog.interfaces import IZCatalog
 
@@ -30,13 +30,15 @@ class _extra:
     pass
 
 
-class ZCatalogNodeAdapter(NodeAdapterBase, ObjectManagerHelpers,
-                          PropertyManagerHelpers):
+class ZCatalogXMLAdapter(XMLAdapterBase, ObjectManagerHelpers,
+                         PropertyManagerHelpers):
 
-    """Node im- and exporter for ZCatalog.
+    """XML im- and exporter for ZCatalog.
     """
 
     __used_for__ = IZCatalog
+
+    _LOGGER_ID = 'catalog'
 
     def exportNode(self, doc):
         """Export the object as a DOM node.
@@ -47,6 +49,8 @@ class ZCatalogNodeAdapter(NodeAdapterBase, ObjectManagerHelpers,
         node.appendChild(self._extractObjects())
         node.appendChild(self._extractIndexes())
         node.appendChild(self._extractColumns())
+
+        self._logger.info('Catalog exported.')
         return node
 
     def importNode(self, node, mode=PURGE):
@@ -62,6 +66,8 @@ class ZCatalogNodeAdapter(NodeAdapterBase, ObjectManagerHelpers,
         self._initObjects(node, mode)
         self._initIndexes(node, mode)
         self._initColumns(node, mode)
+
+        self._logger.info('Catalog imported.')
 
     def _extractIndexes(self):
         fragment = self._doc.createDocumentFragment()

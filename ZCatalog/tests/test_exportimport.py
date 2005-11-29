@@ -20,12 +20,12 @@ import Testing
 import Zope2
 Zope2.startup()
 
-import Products
 from Products.Five import zcml
-from Products.GenericSetup.interfaces import INodeExporter
-from Products.GenericSetup.testing import NodeAdapterTestCase
-from Products.GenericSetup.testing import PlacelessSetup
-from Products.GenericSetup.utils import PrettyDocument
+from zope.app import zapi
+
+from Products.GenericSetup.interfaces import IBody
+from Products.GenericSetup.testing import BodyAdapterTestCase
+from Products.GenericSetup.tests.common import DummyExportContext
 
 
 class _extra:
@@ -33,7 +33,8 @@ class _extra:
     pass
 
 
-_CATALOG_XML = """\
+_CATALOG_BODY = """\
+<?xml version="1.0"?>
 <object name="foo_catalog" meta_type="ZCatalog">
  <property name="title"></property>
  <object name="foo_plexicon" meta_type="ZCTextIndex Lexicon">
@@ -76,13 +77,13 @@ _VOCABULARY_XML = """\
 """
 
 
-class ZCatalogNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
+class ZCatalogXMLAdapterTests(BodyAdapterTestCase):
 
     def _getTargetClass(self):
         from Products.GenericSetup.ZCatalog.exportimport \
-                import ZCatalogNodeAdapter
+                import ZCatalogXMLAdapter
 
-        return ZCatalogNodeAdapter
+        return ZCatalogXMLAdapter
 
     def _populate(self, obj):
         from Products.ZCTextIndex.Lexicon import CaseNormalizer
@@ -131,28 +132,29 @@ class ZCatalogNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         obj.addIndex('foo_text', 'TextIndex')
 
     def setUp(self):
+        import Products.GenericSetup
         from Products.ZCatalog.ZCatalog import ZCatalog
 
-        PlacelessSetup.setUp(self)
-        zcml.load_config('meta.zcml', Products.Five)
+        BodyAdapterTestCase.setUp(self)
         zcml.load_config('configure.zcml',
                          Products.GenericSetup.PluginIndexes)
         zcml.load_config('configure.zcml', Products.GenericSetup.ZCatalog)
         zcml.load_config('configure.zcml', Products.GenericSetup.ZCTextIndex)
 
         self._obj = ZCatalog('foo_catalog')
-        self._XML = _CATALOG_XML % ('', '')
+        self._BODY = _CATALOG_BODY % ('', '')
 
-    def test_exportNode_special(self):
+    def test_body_get_special(self):
         self._populate_special(self._obj)
-        node = INodeExporter(self._obj).exportNode(PrettyDocument())
-        self.assertEqual(node.toprettyxml(' '),
-                         _CATALOG_XML % (_VOCABULARY_XML, _TEXT_XML))
+        context = DummyExportContext(None)
+        exporter = zapi.getMultiAdapter((self._obj, context), IBody)
+        self.assertEqual(exporter.body,
+                         _CATALOG_BODY % (_VOCABULARY_XML, _TEXT_XML))
 
 
 def test_suite():
     return unittest.TestSuite((
-        unittest.makeSuite(ZCatalogNodeAdapterTests),
+        unittest.makeSuite(ZCatalogXMLAdapterTests),
         ))
 
 if __name__ == '__main__':

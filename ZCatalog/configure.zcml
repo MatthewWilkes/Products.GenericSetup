@@ -3,15 +3,10 @@
     >
 
   <adapter
-      factory=".exportimport.ZCatalogNodeAdapter"
-      provides="Products.GenericSetup.interfaces.INodeExporter"
-      for="Products.ZCatalog.interfaces.IZCatalog"
-      />
-
-  <adapter
-      factory=".exportimport.ZCatalogNodeAdapter"
-      provides="Products.GenericSetup.interfaces.INodeImporter"
-      for="Products.ZCatalog.interfaces.IZCatalog"
+      factory=".exportimport.ZCatalogXMLAdapter"
+      provides="Products.GenericSetup.interfaces.IBody"
+      for="Products.ZCatalog.interfaces.IZCatalog
+           Products.GenericSetup.interfaces.ISetupContext"
       />
 
 </configure>
