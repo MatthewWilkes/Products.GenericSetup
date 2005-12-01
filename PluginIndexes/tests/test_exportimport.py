@@ -18,12 +18,8 @@ $Id$
 import unittest
 import Testing
 
-import Products.Five
-import Products.GenericSetup.PluginIndexes
 from Products.Five import zcml
 from Products.GenericSetup.testing import NodeAdapterTestCase
-from Products.GenericSetup.testing import PlacelessSetup
-
 
 _DATE_XML = """\
 <index name="foo_date" meta_type="DateIndex">
@@ -72,7 +68,7 @@ _TOPIC_XML = """\
 """
 
 
-class DateIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
+class DateIndexNodeAdapterTests(NodeAdapterTestCase):
 
     def _getTargetClass(self):
         from Products.GenericSetup.PluginIndexes.exportimport \
@@ -81,10 +77,10 @@ class DateIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         return DateIndexNodeAdapter
 
     def setUp(self):
+        import Products.GenericSetup.PluginIndexes
         from Products.PluginIndexes.DateIndex.DateIndex import DateIndex
 
-        PlacelessSetup.setUp(self)
-        zcml.load_config('meta.zcml', Products.Five)
+        NodeAdapterTestCase.setUp(self)
         zcml.load_config('configure.zcml',
                          Products.GenericSetup.PluginIndexes)
 
@@ -92,7 +88,7 @@ class DateIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         self._XML = _DATE_XML
 
 
-class DateRangeIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
+class DateRangeIndexNodeAdapterTests(NodeAdapterTestCase):
 
     def _getTargetClass(self):
         from Products.GenericSetup.PluginIndexes.exportimport \
@@ -104,11 +100,11 @@ class DateRangeIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         obj._edit('bar', 'baz')
 
     def setUp(self):
+        import Products.GenericSetup.PluginIndexes
         from Products.PluginIndexes.DateRangeIndex.DateRangeIndex \
                 import DateRangeIndex
 
-        PlacelessSetup.setUp(self)
-        zcml.load_config('meta.zcml', Products.Five)
+        NodeAdapterTestCase.setUp(self)
         zcml.load_config('configure.zcml',
                          Products.GenericSetup.PluginIndexes)
 
@@ -116,7 +112,7 @@ class DateRangeIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         self._XML = _DATERANGE_XML
 
 
-class FieldIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
+class FieldIndexNodeAdapterTests(NodeAdapterTestCase):
 
     def _getTargetClass(self):
         from Products.GenericSetup.PluginIndexes.exportimport \
@@ -128,10 +124,10 @@ class FieldIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         obj.indexed_attrs = ('bar',)
 
     def setUp(self):
+        import Products.GenericSetup.PluginIndexes
         from Products.PluginIndexes.FieldIndex.FieldIndex import FieldIndex
 
-        PlacelessSetup.setUp(self)
-        zcml.load_config('meta.zcml', Products.Five)
+        NodeAdapterTestCase.setUp(self)
         zcml.load_config('configure.zcml',
                          Products.GenericSetup.PluginIndexes)
 
@@ -139,7 +135,7 @@ class FieldIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         self._XML = _FIELD_XML
 
 
-class KeywordIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
+class KeywordIndexNodeAdapterTests(NodeAdapterTestCase):
 
     def _getTargetClass(self):
         from Products.GenericSetup.PluginIndexes.exportimport \
@@ -151,12 +147,11 @@ class KeywordIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         obj.indexed_attrs = ('bar',)
 
     def setUp(self):
+        import Products.GenericSetup.PluginIndexes
         from Products.PluginIndexes.KeywordIndex.KeywordIndex \
                 import KeywordIndex
 
-
-        PlacelessSetup.setUp(self)
-        zcml.load_config('meta.zcml', Products.Five)
+        NodeAdapterTestCase.setUp(self)
         zcml.load_config('configure.zcml',
                          Products.GenericSetup.PluginIndexes)
 
@@ -164,7 +159,7 @@ class KeywordIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         self._XML = _KEYWORD_XML
 
 
-class PathIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
+class PathIndexNodeAdapterTests(NodeAdapterTestCase):
 
     def _getTargetClass(self):
         from Products.GenericSetup.PluginIndexes.exportimport \
@@ -173,11 +168,10 @@ class PathIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         return PathIndexNodeAdapter
 
     def setUp(self):
+        import Products.GenericSetup.PluginIndexes
         from Products.PluginIndexes.PathIndex.PathIndex import PathIndex
 
-
-        PlacelessSetup.setUp(self)
-        zcml.load_config('meta.zcml', Products.Five)
+        NodeAdapterTestCase.setUp(self)
         zcml.load_config('configure.zcml',
                          Products.GenericSetup.PluginIndexes)
 
@@ -185,7 +179,7 @@ class PathIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         self._XML = _PATH_XML
 
 
-class VocabularyNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
+class VocabularyNodeAdapterTests(NodeAdapterTestCase):
 
     def _getTargetClass(self):
         from Products.GenericSetup.PluginIndexes.exportimport \
@@ -194,10 +188,10 @@ class VocabularyNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         return VocabularyNodeAdapter
 
     def setUp(self):
+        import Products.GenericSetup.PluginIndexes
         from Products.PluginIndexes.TextIndex.Vocabulary import Vocabulary
 
-        PlacelessSetup.setUp(self)
-        zcml.load_config('meta.zcml', Products.Five)
+        NodeAdapterTestCase.setUp(self)
         zcml.load_config('configure.zcml',
                          Products.GenericSetup.PluginIndexes)
 
@@ -208,7 +202,7 @@ class VocabularyNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         pass
 
 
-class TextIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
+class TextIndexNodeAdapterTests(NodeAdapterTestCase):
 
     def _getTargetClass(self):
         from Products.GenericSetup.PluginIndexes.exportimport \
@@ -217,10 +211,10 @@ class TextIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         return TextIndexNodeAdapter
 
     def setUp(self):
+        import Products.GenericSetup.PluginIndexes
         from Products.PluginIndexes.TextIndex.TextIndex import TextIndex
 
-        PlacelessSetup.setUp(self)
-        zcml.load_config('meta.zcml', Products.Five)
+        NodeAdapterTestCase.setUp(self)
         zcml.load_config('configure.zcml',
                          Products.GenericSetup.PluginIndexes)
 
@@ -231,7 +225,7 @@ class TextIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         pass
 
 
-class FilteredSetNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
+class FilteredSetNodeAdapterTests(NodeAdapterTestCase):
 
     def _getTargetClass(self):
         from Products.GenericSetup.PluginIndexes.exportimport \
@@ -243,11 +237,11 @@ class FilteredSetNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         obj.setExpression('True')
 
     def setUp(self):
+        import Products.GenericSetup.PluginIndexes
         from Products.PluginIndexes.TopicIndex.FilteredSet \
                 import PythonFilteredSet
 
-        PlacelessSetup.setUp(self)
-        zcml.load_config('meta.zcml', Products.Five)
+        NodeAdapterTestCase.setUp(self)
         zcml.load_config('configure.zcml',
                          Products.GenericSetup.PluginIndexes)
 
@@ -255,7 +249,7 @@ class FilteredSetNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         self._XML = _SET_XML
 
 
-class TopicIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
+class TopicIndexNodeAdapterTests(NodeAdapterTestCase):
 
     def _getTargetClass(self):
         from Products.GenericSetup.PluginIndexes.exportimport \
@@ -268,10 +262,10 @@ class TopicIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         obj.addFilteredSet('baz', 'PythonFilteredSet', 'False')
 
     def setUp(self):
+        import Products.GenericSetup.PluginIndexes
         from Products.PluginIndexes.TopicIndex.TopicIndex import TopicIndex
 
-        PlacelessSetup.setUp(self)
-        zcml.load_config('meta.zcml', Products.Five)
+        NodeAdapterTestCase.setUp(self)
         zcml.load_config('configure.zcml',
                          Products.GenericSetup.PluginIndexes)
 

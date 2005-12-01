@@ -16,6 +16,8 @@ $Id$
 """
 
 import unittest
+import Testing
+
 from xml.dom.minidom import parseString
 
 import Products.Five
@@ -49,6 +51,9 @@ class BodyAdapterTestCase(PlacelessSetup, unittest.TestCase):
         zcml.load_config('meta.zcml', Products.Five)
         zcml.load_config('permissions.zcml', Products.Five)
 
+    def tearDown(self):
+        PlacelessSetup.tearDown(self)
+
     def test_z3interfaces(self):
         verifyClass(IBody, self._getTargetClass())
 
@@ -68,13 +73,21 @@ class BodyAdapterTestCase(PlacelessSetup, unittest.TestCase):
         self.assertEqual(exporter.body, self._BODY)
 
 
-class NodeAdapterTestCase(unittest.TestCase):
+class NodeAdapterTestCase(PlacelessSetup, unittest.TestCase):
 
     def _populate(self, obj):
         pass
 
     def _verifyImport(self, obj):
         pass
+
+    def setUp(self):
+        PlacelessSetup.setUp(self)
+        zcml.load_config('meta.zcml', Products.Five)
+        zcml.load_config('permissions.zcml', Products.Five)
+
+    def tearDown(self):
+        PlacelessSetup.tearDown(self)
 
     def test_z3interfaces(self):
         verifyClass(INodeExporter, self._getTargetClass())

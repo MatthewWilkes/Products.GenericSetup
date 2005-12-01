@@ -20,22 +20,8 @@ import Testing
 
 from Acquisition import Implicit
 
-import Products.Five
-import Products.GenericSetup.ZCTextIndex
 from Products.Five import zcml
 from Products.GenericSetup.testing import NodeAdapterTestCase
-from Products.GenericSetup.testing import PlacelessSetup
-
-
-class _extra:
-
-    pass
-
-
-class DummyCatalog(Implicit):
-
-    pass
-
 
 _PLEXICON_XML = """\
 <object name="foo_plexicon" meta_type="ZCTextIndex Lexicon">
@@ -54,7 +40,17 @@ _ZCTEXT_XML = """\
 """
 
 
-class ZCLexiconNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
+class _extra:
+
+    pass
+
+
+class DummyCatalog(Implicit):
+
+    pass
+
+
+class ZCLexiconNodeAdapterTests(NodeAdapterTestCase):
 
     def _getTargetClass(self):
         from Products.GenericSetup.ZCTextIndex.exportimport \
@@ -69,17 +65,17 @@ class ZCLexiconNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         obj._pipeline = (Splitter(), CaseNormalizer(), StopWordRemover())
 
     def setUp(self):
+        import Products.GenericSetup.ZCTextIndex
         from Products.ZCTextIndex.ZCTextIndex import PLexicon
 
-        PlacelessSetup.setUp(self)
-        zcml.load_config('meta.zcml', Products.Five)
+        NodeAdapterTestCase.setUp(self)
         zcml.load_config('configure.zcml', Products.GenericSetup.ZCTextIndex)
 
         self._obj = PLexicon('foo_plexicon')
         self._XML = _PLEXICON_XML
 
 
-class ZCTextIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
+class ZCTextIndexNodeAdapterTests(NodeAdapterTestCase):
 
     def _getTargetClass(self):
         from Products.GenericSetup.ZCTextIndex.exportimport \
@@ -88,11 +84,11 @@ class ZCTextIndexNodeAdapterTests(PlacelessSetup, NodeAdapterTestCase):
         return ZCTextIndexNodeAdapter
 
     def setUp(self):
+        import Products.GenericSetup.ZCTextIndex
         from Products.ZCTextIndex.ZCTextIndex import PLexicon
         from Products.ZCTextIndex.ZCTextIndex import ZCTextIndex
 
-        PlacelessSetup.setUp(self)
-        zcml.load_config('meta.zcml', Products.Five)
+        NodeAdapterTestCase.setUp(self)
         zcml.load_config('configure.zcml', Products.GenericSetup.ZCTextIndex)
 
         catalog = DummyCatalog()
