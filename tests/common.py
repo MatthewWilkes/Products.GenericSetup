@@ -25,6 +25,7 @@ from zope.interface import implements
 
 from Products.GenericSetup.interfaces import IExportContext
 from Products.GenericSetup.interfaces import IImportContext
+from Products.GenericSetup.testing import DummyLogger
 
 
 class OmnipotentUser(Implicit):
@@ -177,19 +178,6 @@ class TarballTester( DOMComparator ):
         extract = tarfile.extractfile( entry_name )
         found = extract.read()
         self._compareDOM( found, data )
-
-
-class DummyLogger:
-
-    def __init__(self, id, messages):
-        self._id = id
-        self._messages = messages
-
-    def info(self, msg, *args, **kwargs):
-        self._messages.append((20, self._id, msg))
-
-    def warning(self, msg, *args, **kwargs):
-        self._messages.append((30, self._id, msg))
 
 
 class DummyExportContext:

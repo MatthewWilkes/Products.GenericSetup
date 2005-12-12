@@ -104,6 +104,7 @@ class BaseContext( Implicit ):
         self._loggers = {}
         self._messages = []
         self._encoding = encoding
+        self._should_purge = True
 
     security.declareProtected( ManagePortal, 'getSite' )
     def getSite( self ):
@@ -145,6 +146,13 @@ class BaseContext( Implicit ):
         """ See ISetupContext.
         """
         self._messages[:] = []
+
+    security.declareProtected( ManagePortal, 'shouldPurge' )
+    def shouldPurge( self ):
+
+        """ See ISetupContext.
+        """
+        return self._should_purge
 
 
 class DirectoryImportContext( BaseContext ):
@@ -223,13 +231,6 @@ class DirectoryImportContext( BaseContext ):
         names = os.listdir( full_path )
 
         return [ name for name in names if name not in skip ]
-
-    security.declareProtected( ManagePortal, 'shouldPurge' )
-    def shouldPurge( self ):
-
-        """ See IImportContext.
-        """
-        return self._should_purge
 
 InitializeClass( DirectoryImportContext )
 

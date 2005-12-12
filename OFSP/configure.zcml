@@ -6,7 +6,7 @@
       factory=".exportimport.FolderXMLAdapter"
       provides="Products.GenericSetup.interfaces.IBody"
       for="OFS.interfaces.IFolder
-           Products.GenericSetup.interfaces.ISetupContext"
+           Products.GenericSetup.interfaces.ISetupEnviron"
       />
 
 </configure>

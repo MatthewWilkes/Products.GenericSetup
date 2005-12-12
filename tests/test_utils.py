@@ -20,8 +20,8 @@ import Testing
 
 from xml.dom.minidom import parseString
 
-from Products.GenericSetup.interfaces import PURGE, UPDATE
 from Products.GenericSetup.utils import PrettyDocument
+from Products.GenericSetup.testing import DummySetupEnviron
 
 
 _EMPTY_PROPERTY_EXPORT = """\
@@ -210,7 +210,7 @@ class PropertyManagerHelpersTests(unittest.TestCase):
         obj._setProperty('foo_selection', 'foobarbaz', 'selection')
         obj._setProperty('foo_mselection', 'foobarbaz', 'multiple selection')
         obj._setProperty('foo_boolean0', '', 'boolean')
-        self.helpers = self._makeOne(obj)
+        self.helpers = self._makeOne(obj, DummySetupEnviron())
 
     def _populate(self, obj):
         obj._updateProperty('foo_boolean', 'True')
@@ -245,7 +245,7 @@ class PropertyManagerHelpersTests(unittest.TestCase):
 
     def test__initProperties_normal(self):
         node = parseString(_NORMAL_PROPERTY_EXPORT).documentElement
-        self.helpers._initProperties(node, PURGE)
+        self.helpers._initProperties(node)
         self.assertEqual(type(self.helpers.context.foo_int), int)
         self.assertEqual(type(self.helpers.context.foo_string), str)
         self.assertEqual(type(self.helpers.context.foo_tokens), tuple)
@@ -260,7 +260,7 @@ class PropertyManagerHelpersTests(unittest.TestCase):
 
     def test__initProperties_fixed(self):
         node = parseString(_FIXED_PROPERTY_EXPORT).documentElement
-        self.helpers._initProperties(node, PURGE)
+        self.helpers._initProperties(node)
 
         doc = self.helpers._doc = PrettyDocument()
         node = doc.createElement('dummy')
@@ -271,7 +271,7 @@ class PropertyManagerHelpersTests(unittest.TestCase):
 
     def test__initProperties_special(self):
         node = parseString(_SPECIAL_IMPORT).documentElement
-        self.helpers._initProperties(node, UPDATE)
+        self.helpers._initProperties(node)
 
         doc = self.helpers._doc = PrettyDocument()
         node = doc.createElement('dummy')

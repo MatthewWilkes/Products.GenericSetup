@@ -6,7 +6,7 @@
       factory=".exportimport.MailHostXMLAdapter"
       provides="Products.GenericSetup.interfaces.IBody"
       for="Products.MailHost.interfaces.IMailHost
-           Products.GenericSetup.interfaces.ISetupContext"
+           Products.GenericSetup.interfaces.ISetupEnviron"
       />
 
 </configure>

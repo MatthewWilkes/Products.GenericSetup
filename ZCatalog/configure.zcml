@@ -6,7 +6,7 @@
       factory=".exportimport.ZCatalogXMLAdapter"
       provides="Products.GenericSetup.interfaces.IBody"
       for="Products.ZCatalog.interfaces.IZCatalog
-           Products.GenericSetup.interfaces.ISetupContext"
+           Products.GenericSetup.interfaces.ISetupEnviron"
       />
 
 </configure>

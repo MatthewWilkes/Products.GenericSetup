@@ -19,7 +19,6 @@ from BTrees.IOBTree import IOBTree
 from BTrees.Length import Length
 from BTrees.OIBTree import OIBTree
 
-from Products.GenericSetup.interfaces import PURGE
 from Products.GenericSetup.utils import NodeAdapterBase
 
 from Products.ZCTextIndex.interfaces import IZCLexicon
@@ -34,10 +33,9 @@ class ZCLexiconNodeAdapter(NodeAdapterBase):
 
     __used_for__ = IZCLexicon
 
-    def exportNode(self, doc):
+    def _exportNode(self):
         """Export the object as a DOM node.
         """
-        self._doc = doc
         node = self._getObjectNode('object')
         for element in self.context._pipeline:
             group, name = self._getKeys(element)
@@ -47,7 +45,7 @@ class ZCLexiconNodeAdapter(NodeAdapterBase):
             node.appendChild(child)
         return node
 
-    def importNode(self, node, mode=PURGE):
+    def _importNode(self, node):
         """Import the object from the DOM node.
         """
         pipeline = []
@@ -63,6 +61,8 @@ class ZCLexiconNodeAdapter(NodeAdapterBase):
         self.context._words = IOBTree()
         self.context.length = Length()
 
+    node = property(_exportNode, _importNode)
+
     def _getKeys(self, element):
         for group in element_factory.getFactoryGroups():
             for name, factory in element_factory._groups[group].items():
@@ -77,10 +77,9 @@ class ZCTextIndexNodeAdapter(NodeAdapterBase):
 
     __used_for__ = IZCTextIndex
 
-    def exportNode(self, doc):
+    def _exportNode(self):
         """Export the object as a DOM node.
         """
-        self._doc = doc
         node = self._getObjectNode('index')
 
         for value in self.context.getIndexSourceNames():
@@ -100,7 +99,7 @@ class ZCTextIndexNodeAdapter(NodeAdapterBase):
 
         return node
 
-    def importNode(self, node, mode=PURGE):
+    def _importNode(self, node):
         """Import the object from the DOM node.
         """
         indexed_attrs = []
@@ -110,3 +109,5 @@ class ZCTextIndexNodeAdapter(NodeAdapterBase):
                                   child.getAttribute('value').encode('utf-8'))
         self.context.indexed_attrs = indexed_attrs
         self.context.clear()
+
+    node = property(_exportNode, _importNode)

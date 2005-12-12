@@ -41,10 +41,8 @@ from zope.interface import providedBy
 
 from exceptions import BadRequest
 from interfaces import IBody
-from interfaces import INodeExporter
-from interfaces import INodeImporter
+from interfaces import INode
 from interfaces import ISetupContext
-from interfaces import PURGE, UPDATE
 from permissions import ManagePortal
 
 
@@ -403,12 +401,12 @@ class PrettyDocument(Document):
             node.writexml(writer, indent, addindent, newl)
 
 
-class BodyAdapterBase(object):
+class NodeAdapterBase(object):
 
-    """Body im- and exporter base.
+    """Node im- and exporter base.
     """
 
-    implements(IBody)
+    implements(INode)
 
     _LOGGER_ID = ''
 
@@ -416,49 +414,25 @@ class BodyAdapterBase(object):
         self.context = context
         self.environ = environ
         self._logger = environ.getLogger(self._LOGGER_ID)
+        self._doc = PrettyDocument()
 
-    def _exportBody(self):
-        """Export the object as a file body.
-        """
-        return ''
-
-    def _importBody(self, body):
-        """Import the object from the file body.
-        """
-
-    body = property(_exportBody, _importBody)
-
-    mime_type = 'text/plain'
-
-    suffix = ''
-
-
-class NodeAdapterBase(object):
-
-    """Node im- and exporter base.
-    """
-
-    implements(INodeExporter, INodeImporter)
-
-    def __init__(self, context):
-        self.context = context
-
-    def exportNode(self, doc):
+    def _exportNode(self):
         """Export the object as a DOM node.
         """
-        self._doc = doc
-        return self._getObjectNode('object')
+        return self._getObjectNode('object', False)
 
-    def importNode(self, node, mode=PURGE):
+    def _importNode(self, node):
         """Import the object from the DOM node.
         """
 
-    def _getObjectNode(self, name):
+    node = property(_exportNode, _importNode)
+
+    def _getObjectNode(self, name, i18n=True):
         node = self._doc.createElement(name)
         node.setAttribute('name', self.context.getId())
         node.setAttribute('meta_type', self.context.meta_type)
         i18n_domain = getattr(self.context, 'i18n_domain', None)
-        if i18n_domain:
+        if i18n and i18n_domain:
             node.setAttributeNS(I18NURI, 'i18n:domain', i18n_domain)
             self._i18n_props = ('title', 'description')
         return node
@@ -476,23 +450,46 @@ class NodeAdapterBase(object):
         return val.lower() in ('true', 'yes', '1')
 
 
-class XMLAdapterBase(BodyAdapterBase, NodeAdapterBase):
+class BodyAdapterBase(NodeAdapterBase):
 
-    """XML im- and exporter base.
+    """Body im- and exporter base.
     """
+
+    implements(IBody)
 
     def _exportBody(self):
         """Export the object as a file body.
         """
-        doc = PrettyDocument()
-        doc.appendChild(self.exportNode(doc))
-        return doc.toprettyxml(' ')
+        return ''
 
     def _importBody(self, body):
         """Import the object from the file body.
         """
-        mode = self.environ.shouldPurge() and PURGE or UPDATE
-        self.importNode(parseString(body).documentElement, mode=mode)
+
+    body = property(_exportBody, _importBody)
+
+    mime_type = 'text/plain'
+
+    suffix = ''
+
+
+class XMLAdapterBase(NodeAdapterBase):
+
+    """XML im- and exporter base.
+    """
+
+    implements(IBody)
+
+    def _exportBody(self):
+        """Export the object as a file body.
+        """
+        self._doc.appendChild(self._exportNode())
+        return self._doc.toprettyxml(' ')
+
+    def _importBody(self, body):
+        """Import the object from the file body.
+        """
+        self._importNode(parseString(body).documentElement)
 
     body = property(_exportBody, _importBody)
 
@@ -512,24 +509,16 @@ class ObjectManagerHelpers(object):
         if not IOrderedContainer.providedBy(self.context):
             objects.sort(lambda x,y: cmp(x.getId(), y.getId()))
         for obj in objects:
-            exporter = INodeExporter(obj, None)
+            exporter = zapi.queryMultiAdapter((obj, self.environ), INode)
             if exporter:
-                node = exporter.exportNode(self._doc)
-                fragment.appendChild(node)
-            else:
-                adapters = zapi.getService(zapi.servicenames.Adapters)
-                if adapters.lookup((providedBy(obj), ISetupContext), IBody):
-                    node = self._doc.createElement('object')
-                    node.setAttribute('name', obj.getId())
-                    node.setAttribute('meta_type', obj.meta_type)
-                    fragment.appendChild(node)
+                fragment.appendChild(exporter.node)
         return fragment
 
     def _purgeObjects(self):
         for obj_id in self.context.objectIds():
             self.context._delObject(obj_id)
 
-    def _initObjects(self, node, mode):
+    def _initObjects(self, node):
         for child in node.childNodes:
             if child.nodeName != 'object':
                 continue
@@ -569,9 +558,9 @@ class ObjectManagerHelpers(object):
                         pass
 
             obj = getattr(self.context, obj_id)
-            importer = INodeImporter(obj, None)
+            importer = zapi.queryMultiAdapter((obj, self.environ), INode)
             if importer:
-                importer.importNode(child, mode)
+                importer.node = child
 
 
 class PropertyManagerHelpers(object):
@@ -630,7 +619,7 @@ class PropertyManagerHelpers(object):
                     prop_value = ''
                 self.context._updateProperty(prop_id, prop_value)
 
-    def _initProperties(self, node, mode):
+    def _initProperties(self, node):
         self.context.i18n_domain = node.getAttribute('i18n:domain')
         for child in node.childNodes:
             if child.nodeName != 'property':

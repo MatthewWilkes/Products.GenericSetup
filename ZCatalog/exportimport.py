@@ -15,9 +15,9 @@
 $Id$
 """
 
-from Products.GenericSetup.interfaces import INodeExporter
-from Products.GenericSetup.interfaces import INodeImporter
-from Products.GenericSetup.interfaces import PURGE
+from zope.app import zapi
+
+from Products.GenericSetup.interfaces import INode
 from Products.GenericSetup.utils import ObjectManagerHelpers
 from Products.GenericSetup.utils import PropertyManagerHelpers
 from Products.GenericSetup.utils import XMLAdapterBase
@@ -40,10 +40,9 @@ class ZCatalogXMLAdapter(XMLAdapterBase, ObjectManagerHelpers,
 
     _LOGGER_ID = 'catalog'
 
-    def exportNode(self, doc):
+    def _exportNode(self):
         """Export the object as a DOM node.
         """
-        self._doc = doc
         node = self._getObjectNode('object')
         node.appendChild(self._extractProperties())
         node.appendChild(self._extractObjects())
@@ -53,19 +52,19 @@ class ZCatalogXMLAdapter(XMLAdapterBase, ObjectManagerHelpers,
         self._logger.info('Catalog exported.')
         return node
 
-    def importNode(self, node, mode=PURGE):
+    def _importNode(self, node):
         """Import the object from the DOM node.
         """
-        if mode == PURGE:
+        if self.environ.shouldPurge():
             self._purgeProperties()
             self._purgeObjects()
             self._purgeIndexes()
             self._purgeColumns()
 
-        self._initProperties(node, mode)
-        self._initObjects(node, mode)
-        self._initIndexes(node, mode)
-        self._initColumns(node, mode)
+        self._initProperties(node)
+        self._initObjects(node)
+        self._initIndexes(node)
+        self._initColumns(node)
 
         self._logger.info('Catalog imported.')
 
@@ -74,17 +73,16 @@ class ZCatalogXMLAdapter(XMLAdapterBase, ObjectManagerHelpers,
         indexes = self.context.getIndexObjects()[:]
         indexes.sort(lambda x,y: cmp(x.getId(), y.getId()))
         for idx in indexes:
-            exporter = INodeExporter(idx, None)
-            if exporter is None:
-                continue
-            fragment.appendChild(exporter.exportNode(self._doc))
+            exporter = zapi.queryMultiAdapter((idx, self.environ), INode)
+            if exporter:
+                fragment.appendChild(exporter.node)
         return fragment
 
     def _purgeIndexes(self):
         for idx_id in self.context.indexes():
             self.context.delIndex(idx_id)
 
-    def _initIndexes(self, node, mode):
+    def _initIndexes(self, node):
         for child in node.childNodes:
             if child.nodeName != 'index':
                 continue
@@ -106,7 +104,9 @@ class ZCatalogXMLAdapter(XMLAdapterBase, ObjectManagerHelpers,
                 zcatalog.addIndex(idx_id, meta_type, extra)
 
             idx = zcatalog._catalog.getIndex(idx_id)
-            INodeImporter(idx).importNode(child, mode)
+            importer = zapi.queryMultiAdapter((idx, self.environ), INode)
+            if importer:
+                importer.node = child
 
     def _extractColumns(self):
         fragment = self._doc.createDocumentFragment()
@@ -122,7 +122,7 @@ class ZCatalogXMLAdapter(XMLAdapterBase, ObjectManagerHelpers,
         for col in self.context.schema()[:]:
             self.context.delColumn(col)
 
-    def _initColumns(self, node, mode):
+    def _initColumns(self, node):
         for child in node.childNodes:
             if child.nodeName != 'column':
                 continue

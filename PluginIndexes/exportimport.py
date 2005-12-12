@@ -15,9 +15,9 @@
 $Id$
 """
 
-from Products.GenericSetup.interfaces import INodeExporter
-from Products.GenericSetup.interfaces import INodeImporter
-from Products.GenericSetup.interfaces import PURGE
+from zope.app import zapi
+
+from Products.GenericSetup.interfaces import INode
 from Products.GenericSetup.utils import NodeAdapterBase
 from Products.GenericSetup.utils import PropertyManagerHelpers
 
@@ -38,10 +38,9 @@ class PluggableIndexNodeAdapter(NodeAdapterBase):
 
     __used_for__ = IPluggableIndex
 
-    def exportNode(self, doc):
+    def _exportNode(self):
         """Export the object as a DOM node.
         """
-        self._doc = doc
         node = self._getObjectNode('index')
         for value in self.context.getIndexSourceNames():
             child = self._doc.createElement('indexed_attr')
@@ -49,7 +48,7 @@ class PluggableIndexNodeAdapter(NodeAdapterBase):
             node.appendChild(child)
         return node
 
-    def importNode(self, node, mode=PURGE):
+    def _importNode(self, node):
         """Import the object from the DOM node.
         """
         indexed_attrs = []
@@ -60,6 +59,8 @@ class PluggableIndexNodeAdapter(NodeAdapterBase):
         self.context.indexed_attrs = indexed_attrs
         self.context.clear()
 
+    node = property(_exportNode, _importNode)
+
 
 class DateIndexNodeAdapter(NodeAdapterBase, PropertyManagerHelpers):
 
@@ -68,22 +69,23 @@ class DateIndexNodeAdapter(NodeAdapterBase, PropertyManagerHelpers):
 
     __used_for__ = IDateIndex
 
-    def exportNode(self, doc):
+    def _exportNode(self):
         """Export the object as a DOM node.
         """
-        self._doc = doc
         node = self._getObjectNode('index')
         node.appendChild(self._extractProperties())
         return node
 
-    def importNode(self, node, mode=PURGE):
+    def _importNode(self, node):
         """Import the object from the DOM node.
         """
-        if mode == PURGE:
+        if self.environ.shouldPurge():
             self._purgeProperties()
 
-        self._initProperties(node, mode)
+        self._initProperties(node)
         self.context.clear()
+
+    node = property(_exportNode, _importNode)
 
 
 class DateRangeIndexNodeAdapter(NodeAdapterBase):
@@ -93,21 +95,22 @@ class DateRangeIndexNodeAdapter(NodeAdapterBase):
 
     __used_for__ = IDateRangeIndex
 
-    def exportNode(self, doc):
+    def _exportNode(self):
         """Export the object as a DOM node.
         """
-        self._doc = doc
         node = self._getObjectNode('index')
         node.setAttribute('since_field', self.context.getSinceField())
         node.setAttribute('until_field', self.context.getUntilField())
         return node
 
-    def importNode(self, node, mode=PURGE):
+    def _importNode(self, node):
         """Import the object from the DOM node.
         """
         self.context._edit(node.getAttribute('since_field').encode('utf-8'),
                            node.getAttribute('until_field').encode('utf-8'))
         self.context.clear()
+
+    node = property(_exportNode, _importNode)
 
 
 class PathIndexNodeAdapter(NodeAdapterBase):
@@ -117,11 +120,12 @@ class PathIndexNodeAdapter(NodeAdapterBase):
 
     __used_for__ = IPathIndex
 
-    def exportNode(self, doc):
+    def _exportNode(self):
         """Export the object as a DOM node.
         """
-        self._doc = doc
         return self._getObjectNode('index')
+
+    node = property(_exportNode, NodeAdapterBase._importNode)
 
 
 class VocabularyNodeAdapter(NodeAdapterBase):
@@ -131,13 +135,14 @@ class VocabularyNodeAdapter(NodeAdapterBase):
 
     __used_for__ = IVocabulary
 
-    def exportNode(self, doc):
+    def _exportNode(self):
         """Export the object as a DOM node.
         """
-        self._doc = doc
         node = self._getObjectNode('object')
         node.setAttribute('deprecated', 'True')
         return node
+
+    node = property(_exportNode, NodeAdapterBase._importNode)
 
 
 class TextIndexNodeAdapter(NodeAdapterBase):
@@ -147,13 +152,14 @@ class TextIndexNodeAdapter(NodeAdapterBase):
 
     __used_for__ = ITextIndex
 
-    def exportNode(self, doc):
+    def _exportNode(self):
         """Export the object as a DOM node.
         """
-        self._doc = doc
         node = self._getObjectNode('index')
         node.setAttribute('deprecated', 'True')
         return node
+
+    node = property(_exportNode, NodeAdapterBase._importNode)
 
 
 class FilteredSetNodeAdapter(NodeAdapterBase):
@@ -163,20 +169,21 @@ class FilteredSetNodeAdapter(NodeAdapterBase):
 
     __used_for__ = IFilteredSet
 
-    def exportNode(self, doc):
+    def _exportNode(self):
         """Export the object as a DOM node.
         """
-        self._doc = doc
         node = self._getObjectNode('filtered_set')
         node.setAttribute('expression', self.context.getExpression())
         return node
 
-    def importNode(self, node, mode=PURGE):
+    def _importNode(self, node):
         """Import the object from the DOM node.
         """
         self.context.setExpression(
                               node.getAttribute('expression').encode('utf-8'))
         self.context.clear()
+
+    node = property(_exportNode, _importNode)
 
 
 class TopicIndexNodeAdapter(NodeAdapterBase):
@@ -186,16 +193,16 @@ class TopicIndexNodeAdapter(NodeAdapterBase):
 
     __used_for__ = ITopicIndex
 
-    def exportNode(self, doc):
+    def _exportNode(self):
         """Export the object as a DOM node.
         """
-        self._doc = doc
         node = self._getObjectNode('index')
         for set in self.context.filteredSets.values():
-            node.appendChild(INodeExporter(set).exportNode(doc))
+            exporter = zapi.queryMultiAdapter((set, self.environ), INode)
+            node.appendChild(exporter.node)
         return node
 
-    def importNode(self, node, mode=PURGE):
+    def _importNode(self, node):
         """Import the object from the DOM node.
         """
         for child in node.childNodes:
@@ -204,5 +211,8 @@ class TopicIndexNodeAdapter(NodeAdapterBase):
                 set_meta_type = str(child.getAttribute('meta_type'))
                 self.context.addFilteredSet(set_id, set_meta_type, '')
                 set = self.context.filteredSets[set_id]
-                INodeImporter(set).importNode(child)
+                importer = zapi.queryMultiAdapter((set, self.environ), INode)
+                importer.node = child
         self.context.clear()
+
+    node = property(_exportNode, _importNode)

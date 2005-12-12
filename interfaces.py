@@ -20,7 +20,6 @@ from zope.schema import Text
 from zope.schema import TextLine
 
 BASE, EXTENSION = range(1, 3)
-PURGE, UPDATE = range(1, 3)
 
 
 class IPseudoInterface( Interface ):
@@ -28,7 +27,22 @@ class IPseudoInterface( Interface ):
     """ API documentation;  not testable / enforceable.
     """
 
-class ISetupContext( Interface ):
+
+class ISetupEnviron(Interface):
+
+    """Context for im- and export adapters.
+    """
+
+    def getLogger(name):
+        """Get a logger with the specified name, creating it if necessary.
+        """
+
+    def shouldPurge():
+        """When installing, should the existing setup be purged?
+        """
+
+
+class ISetupContext(ISetupEnviron):
 
     """ Context used for export / import plugins.
     """
@@ -47,10 +61,6 @@ class ISetupContext( Interface ):
         """ Get the encoding used for configuration data within the site.
 
         o Return None if the data should not be encoded.
-        """
-
-    def getLogger(name):
-        """ Get a logger with the specified name, creating it if necessary.
         """
 
     def listNotes():
@@ -118,10 +128,6 @@ class IImportContext( ISetupContext ):
         o If 'path' does not point to a directory / folder, return None.
         """
 
-    def shouldPurge():
-
-        """ When installing, should the existing setup be purged?
-        """
 
 class IImportPlugin( IPseudoInterface ):
 
@@ -588,7 +594,15 @@ class IWriteLogger(Interface):
         """
 
 
-class IBody(Interface):
+class INode(Interface):
+
+    """Node im- and exporter.
+    """
+
+    node = Text(description=u'Im- and export the object as a DOM node.')
+
+
+class IBody(INode):
 
     """Body im- and exporter.
     """
@@ -598,26 +612,6 @@ class IBody(Interface):
     mime_type = TextLine(description=u'MIME type of the file body.')
 
     suffix = TextLine(description=u'Suffix for the file.')
-
-
-class INodeExporter(Interface):
-
-    """Node exporter.
-    """
-
-    def exportNode(doc):
-        """Export the object as a DOM node.
-        """
-
-
-class INodeImporter(Interface):
-
-    """Node importer.
-    """
-
-    def importNode(node, mode=PURGE):
-        """Import the object from the DOM node.
-        """
 
 
 class IFilesystemExporter(Interface):

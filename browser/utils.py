@@ -27,10 +27,12 @@ class AddWithPresettingsViewBase:
         if submit_add:
             obj = self.klass('temp')
             if settings_id:
-                profile_id, obj_id = settings_id.split('/')
+                ids = settings_id.split('/')
+                profile_id = ids[0]
+                obj_path = ids[1:]
                 if not add_input_name:
-                    self.request.set('add_input_name', obj_id)
-                self._initSettings(obj, profile_id, obj_id)
+                    self.request.set('add_input_name', obj_path[-1])
+                self._initSettings(obj, profile_id, obj_path)
             self.context.add(obj)
             self.request.response.redirect(self.context.nextURL())
             return ''

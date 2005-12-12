@@ -23,14 +23,12 @@ from xml.dom.minidom import parseString
 import Products.Five
 from Products.Five import zcml
 from zope.app import zapi
+from zope.interface import implements
 from zope.interface.verify import verifyClass
 
 from interfaces import IBody
-from interfaces import INodeExporter
-from interfaces import INodeImporter
-from tests.common import DummyExportContext
-from tests.common import DummyImportContext
-from utils import PrettyDocument
+from interfaces import INode
+from interfaces import ISetupEnviron
 
 try:
     from zope.app.testing.placelesssetup import PlacelessSetup
@@ -38,7 +36,37 @@ except ImportError:  # BBB, Zope3 < 3.1
     from zope.app.tests.placelesssetup import PlacelessSetup
 
 
-class BodyAdapterTestCase(PlacelessSetup, unittest.TestCase):
+class DummyLogger:
+
+    def __init__(self, id, messages):
+        self._id = id
+        self._messages = messages
+
+    def info(self, msg, *args, **kwargs):
+        self._messages.append((20, self._id, msg))
+
+    def warning(self, msg, *args, **kwargs):
+        self._messages.append((30, self._id, msg))
+
+
+class DummySetupEnviron(object):
+
+    """Context for body im- and exporter.
+    """
+
+    implements(ISetupEnviron)
+
+    def __init__(self):
+        self._notes = []
+
+    def getLogger(self, name):
+        return DummyLogger(name, self._notes)
+
+    def shouldPurge(self):
+        return True
+
+
+class _AdapterTestCaseBase(PlacelessSetup, unittest.TestCase):
 
     def _populate(self, obj):
         pass
@@ -51,56 +79,40 @@ class BodyAdapterTestCase(PlacelessSetup, unittest.TestCase):
         zcml.load_config('meta.zcml', Products.Five)
         zcml.load_config('permissions.zcml', Products.Five)
 
-    def tearDown(self):
-        PlacelessSetup.tearDown(self)
+
+class BodyAdapterTestCase(_AdapterTestCaseBase):
 
     def test_z3interfaces(self):
         verifyClass(IBody, self._getTargetClass())
 
     def test_body_get(self):
         self._populate(self._obj)
-        context = DummyExportContext(None)
-        exporter = zapi.getMultiAdapter((self._obj, context), IBody)
-        self.assertEqual(exporter.body, self._BODY)
+        context = DummySetupEnviron()
+        adapted = zapi.getMultiAdapter((self._obj, context), IBody)
+        self.assertEqual(adapted.body, self._BODY)
 
     def test_body_set(self):
-        context = DummyImportContext(None)
-        importer = zapi.getMultiAdapter((self._obj, context), IBody)
-        importer.body = self._BODY
+        context = DummySetupEnviron()
+        adapted = zapi.getMultiAdapter((self._obj, context), IBody)
+        adapted.body = self._BODY
         self._verifyImport(self._obj)
-        context = DummyExportContext(None)
-        exporter = zapi.getMultiAdapter((self._obj, context), IBody)
-        self.assertEqual(exporter.body, self._BODY)
+        self.assertEqual(adapted.body, self._BODY)
 
 
-class NodeAdapterTestCase(PlacelessSetup, unittest.TestCase):
-
-    def _populate(self, obj):
-        pass
-
-    def _verifyImport(self, obj):
-        pass
-
-    def setUp(self):
-        PlacelessSetup.setUp(self)
-        zcml.load_config('meta.zcml', Products.Five)
-        zcml.load_config('permissions.zcml', Products.Five)
-
-    def tearDown(self):
-        PlacelessSetup.tearDown(self)
+class NodeAdapterTestCase(_AdapterTestCaseBase):
 
     def test_z3interfaces(self):
-        verifyClass(INodeExporter, self._getTargetClass())
-        verifyClass(INodeImporter, self._getTargetClass())
+        verifyClass(INode, self._getTargetClass())
 
-    def test_exportNode(self):
+    def test_node_get(self):
         self._populate(self._obj)
-        node = INodeExporter(self._obj).exportNode(PrettyDocument())
-        self.assertEqual(node.toprettyxml(' '), self._XML)
+        context = DummySetupEnviron()
+        adapted = zapi.getMultiAdapter((self._obj, context), INode)
+        self.assertEqual(adapted.node.toprettyxml(' '), self._XML)
 
-    def test_importNode(self):
-        node = parseString(self._XML).documentElement
-        self.assertEqual(INodeImporter(self._obj).importNode(node), None)
+    def test_node_set(self):
+        context = DummySetupEnviron()
+        adapted = zapi.getMultiAdapter((self._obj, context), INode)
+        adapted.node = parseString(self._XML).documentElement
         self._verifyImport(self._obj)
-        node = INodeExporter(self._obj).exportNode(PrettyDocument())
-        self.assertEqual(node.toprettyxml(' '), self._XML)
+        self.assertEqual(adapted.node.toprettyxml(' '), self._XML)

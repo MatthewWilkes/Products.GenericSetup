@@ -15,7 +15,6 @@
 $Id$
 """
 
-from Products.GenericSetup.interfaces import PURGE
 from Products.GenericSetup.utils import XMLAdapterBase
 from Products.GenericSetup.utils import ObjectManagerHelpers
 from Products.GenericSetup.utils import PropertyManagerHelpers
@@ -33,10 +32,9 @@ class FolderXMLAdapter(XMLAdapterBase, ObjectManagerHelpers,
 
     _LOGGER_ID = 'ofs'
 
-    def exportNode(self, doc):
+    def _exportNode(self):
         """Export the object as a DOM node.
         """
-        self._doc = doc
         node = self._getObjectNode('object')
         node.appendChild(self._extractProperties())
         node.appendChild(self._extractObjects())
@@ -44,15 +42,15 @@ class FolderXMLAdapter(XMLAdapterBase, ObjectManagerHelpers,
         self._logger.info('Folder exported.')
         return node
 
-    def importNode(self, node, mode=PURGE):
+    def _importNode(self, node):
         """Import the object from the DOM node.
         """
-        if mode == PURGE:
+        if self.environ.shouldPurge():
             self._purgeProperties()
             self._purgeObjects()
 
-        self._initProperties(node, mode)
-        self._initObjects(node, mode)
+        self._initProperties(node)
+        self._initObjects(node)
 
         self._logger.info('Folder imported.')
 

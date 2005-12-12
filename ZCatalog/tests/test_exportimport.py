@@ -25,7 +25,7 @@ from zope.app import zapi
 
 from Products.GenericSetup.interfaces import IBody
 from Products.GenericSetup.testing import BodyAdapterTestCase
-from Products.GenericSetup.tests.common import DummyExportContext
+from Products.GenericSetup.testing import DummySetupEnviron
 
 
 class _extra:
@@ -132,7 +132,9 @@ class ZCatalogXMLAdapterTests(BodyAdapterTestCase):
         obj.addIndex('foo_text', 'TextIndex')
 
     def setUp(self):
-        import Products.GenericSetup
+        import Products.GenericSetup.PluginIndexes
+        import Products.GenericSetup.ZCatalog
+        import Products.GenericSetup.ZCTextIndex
         from Products.ZCatalog.ZCatalog import ZCatalog
 
         BodyAdapterTestCase.setUp(self)
@@ -146,9 +148,9 @@ class ZCatalogXMLAdapterTests(BodyAdapterTestCase):
 
     def test_body_get_special(self):
         self._populate_special(self._obj)
-        context = DummyExportContext(None)
-        exporter = zapi.getMultiAdapter((self._obj, context), IBody)
-        self.assertEqual(exporter.body,
+        context = DummySetupEnviron()
+        adapted = zapi.getMultiAdapter((self._obj, context), IBody)
+        self.assertEqual(adapted.body,
                          _CATALOG_BODY % (_VOCABULARY_XML, _TEXT_XML))
 
 

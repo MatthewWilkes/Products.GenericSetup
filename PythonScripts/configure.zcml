@@ -7,7 +7,7 @@
       factory=".exportimport.PythonScriptBodyAdapter"
       provides="Products.GenericSetup.interfaces.IBody"
       for=".interfaces.IPythonScript
-           Products.GenericSetup.interfaces.ISetupContext"
+           Products.GenericSetup.interfaces.ISetupEnviron"
       />
 
   <five:implements

@@ -4,26 +4,16 @@
 
   <adapter
       factory=".exportimport.ZCLexiconNodeAdapter"
-      provides="Products.GenericSetup.interfaces.INodeExporter"
-      for="Products.ZCTextIndex.interfaces.IZCLexicon"
-      />
-
-  <adapter
-      factory=".exportimport.ZCLexiconNodeAdapter"
-      provides="Products.GenericSetup.interfaces.INodeImporter"
-      for="Products.ZCTextIndex.interfaces.IZCLexicon"
+      provides="Products.GenericSetup.interfaces.INode"
+      for="Products.ZCTextIndex.interfaces.IZCLexicon
+           Products.GenericSetup.interfaces.ISetupEnviron"
       />
 
   <adapter
       factory=".exportimport.ZCTextIndexNodeAdapter"
-      provides="Products.GenericSetup.interfaces.INodeExporter"
-      for="Products.ZCTextIndex.interfaces.IZCTextIndex"
-      />
-
-  <adapter
-      factory=".exportimport.ZCTextIndexNodeAdapter"
-      provides="Products.GenericSetup.interfaces.INodeImporter"
-      for="Products.ZCTextIndex.interfaces.IZCTextIndex"
+      provides="Products.GenericSetup.interfaces.INode"
+      for="Products.ZCTextIndex.interfaces.IZCTextIndex
+           Products.GenericSetup.interfaces.ISetupEnviron"
       />
 
 </configure>
