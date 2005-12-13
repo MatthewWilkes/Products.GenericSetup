@@ -539,7 +539,7 @@ class ObjectManagerHelpers(object):
                         parent._setObject(obj_id, mt_info['instance'](obj_id))
                         break
                 else:
-                    raise ValueError('unknown meta_type \'%s\'' % meta_type)
+                    raise ValueError("unknown meta_type '%s'" % meta_type)
 
             if child.hasAttribute('insert-before'):
                 insert_before = child.getAttribute('insert-before')
@@ -639,7 +639,7 @@ class PropertyManagerHelpers(object):
                     obj._setProperty(prop_id, val, child.getAttribute('type'))
                     prop_map = obj.propdict().get(prop_id, None)
                 else:
-                    raise ValueError('undefined property \'%s\'' % prop_id)
+                    raise ValueError("undefined property '%s'" % prop_id)
 
             if not 'w' in prop_map.get('mode', 'wd'):
                 raise BadRequest('%s cannot be changed' % prop_id)
