@@ -16,6 +16,7 @@ $Id$
 """
 
 import os
+import sys
 from inspect import getdoc
 from xml.dom.minidom import _nssplit
 from xml.dom.minidom import Document
@@ -81,6 +82,8 @@ def _resolveDottedName( dotted ):
             break
 
         except ImportError:
+            # Reraise if the import error was caused inside the imported file
+            if sys.exc_info()[2].tb_next is not None: raise
 
             del parts_copy[ -1 ]
 
