@@ -66,6 +66,8 @@ def _getDottedName( named ):
 
 def _resolveDottedName( dotted ):
 
+    __traceback_info__ = dotted
+
     parts = dotted.split( '.' )
 
     if not parts:
