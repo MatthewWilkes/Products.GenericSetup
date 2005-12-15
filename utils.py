@@ -300,9 +300,10 @@ InitializeClass(ConfiguratorBase)
 
 class _LineWrapper:
 
-    def __init__(self, writer, indent, newl, max):
+    def __init__(self, writer, indent, addindent, newl, max):
         self._writer = writer
         self._indent = indent
+        self._addindent = addindent
         self._newl = newl
         self._max = max
         self._length = 0
@@ -317,7 +318,8 @@ class _LineWrapper:
         if 0 < self._length > self._max - len(self._queue):
             self._writer.write(self._newl)
             self._length = 0
-            self._queue = '%s  %s' % (self._indent, self._queue)
+            self._queue = '%s%s %s' % (self._indent, self._addindent,
+                                       self._queue)
 
         if self._queue != self._indent:
             self._writer.write(self._queue)
@@ -339,7 +341,7 @@ class _Element(Element):
         # indent = current indentation
         # addindent = indentation to add to higher levels
         # newl = newline string
-        wrapper = _LineWrapper(writer, indent, newl, 78)
+        wrapper = _LineWrapper(writer, indent, addindent, newl, 78)
         wrapper.write('<%s' % self.tagName)
 
         # move 'name', 'meta_type' and 'title' to the top, sort the rest 
@@ -371,7 +373,7 @@ class _Element(Element):
                     if textlines:
                         for textline in textlines:
                             wrapper.write('', True)
-                            wrapper.queue(' %s' % textline)
+                            wrapper.queue('%s%s' % (addindent, textline))
                 else:
                     wrapper.write('', True)
                     node.writexml(writer, indent+addindent, addindent, newl)
