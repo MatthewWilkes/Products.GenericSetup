@@ -29,6 +29,8 @@ class MailHostXMLAdapter(XMLAdapterBase):
 
     _LOGGER_ID = 'mailhost'
 
+    name = 'mailhost'
+
     def _exportNode(self):
         """Export the object as a DOM node.
         """

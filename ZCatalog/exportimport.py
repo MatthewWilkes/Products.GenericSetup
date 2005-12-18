@@ -40,6 +40,8 @@ class ZCatalogXMLAdapter(XMLAdapterBase, ObjectManagerHelpers,
 
     _LOGGER_ID = 'catalog'
 
+    name = 'catalog'
+
     def _exportNode(self):
         """Export the object as a DOM node.
         """

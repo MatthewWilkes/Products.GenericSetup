@@ -611,6 +611,8 @@ class IBody(INode):
 
     mime_type = TextLine(description=u'MIME type of the file body.')
 
+    name = TextLine(description=u'Enforce this name for the file.')
+
     suffix = TextLine(description=u'Suffix for the file.')
 
 

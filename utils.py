@@ -477,6 +477,8 @@ class BodyAdapterBase(NodeAdapterBase):
 
     mime_type = 'text/plain'
 
+    name = ''
+
     suffix = ''
 
 
@@ -501,6 +503,8 @@ class XMLAdapterBase(NodeAdapterBase):
     body = property(_exportBody, _importBody)
 
     mime_type = 'text/xml'
+
+    name = ''
 
     suffix = '.xml'
 
@@ -663,34 +667,39 @@ class PropertyManagerHelpers(object):
             obj._updateProperty(prop_id, prop_value)
 
 
-def exportObjects(parent, parent_path, context):
+def exportObjects(obj, parent_path, context):
     """ Export subobjects recursively.
     """
-    for obj in parent.objectValues():
-        path = '%s/%s' % (parent_path, obj.getId().replace(' ', '_'))
+    exporter = zapi.queryMultiAdapter((obj, context), IBody)
+    path = '%s%s' % (parent_path, obj.getId().replace(' ', '_'))
+    if exporter:
+        if exporter.name:
+            path = '%s%s' % (parent_path, exporter.name)
+        filename = '%s%s' % (path, exporter.suffix)
+        body = exporter.body
+        if body is not None:
+            context.writeDataFile(filename, body, exporter.mime_type)
 
-        exporter = zapi.queryMultiAdapter((obj, context), IBody)
-        if exporter:
-            filename = '%s%s' % (path, exporter.suffix)
-            body = exporter.body
-            if body is not None:
-                context.writeDataFile(filename, body, exporter.mime_type)
+    if getattr(obj, 'objectValues', False):
+        for sub in obj.objectValues():
+            exportObjects(sub, path+'/', context)
 
-        if getattr(obj, 'objectValues', False):
-            exportObjects(obj, path, context)
-
-def importObjects(parent, parent_path, context):
+def importObjects(obj, parent_path, context):
     """ Import subobjects recursively.
     """
-    for obj in parent.objectValues():
-        path = '%s/%s' % (parent_path, obj.getId().replace(' ', '_'))
+    importer = zapi.queryMultiAdapter((obj, context), IBody)
+    path = '%s%s' % (parent_path, obj.getId().replace(' ', '_'))
+    if importer:
+        if importer.name:
+            path = '%s%s' % (parent_path, importer.name)
+        filename = '%s%s' % (path, importer.suffix)
+        body = context.readDataFile(filename)
+        if body is None and filename == 'types.xml':
+            # BBB: for CMF 1.5 profiles
+            body = context.readDataFile('typestool.xml')
+        if body is not None:
+            importer.body = body
 
-        importer = zapi.queryMultiAdapter((obj, context), IBody)
-        if importer:
-            filename = '%s%s' % (path, importer.suffix)
-            body = context.readDataFile(filename)
-            if body is not None:
-                importer.body = body
-
-        if getattr(obj, 'objectValues', False):
-            importObjects(obj, path, context)
+    if getattr(obj, 'objectValues', False):
+        for sub in obj.objectValues():
+            importObjects(sub, path+'/', context)
