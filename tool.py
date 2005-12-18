@@ -404,22 +404,22 @@ class SetupTool(Folder):
                                   ):
         """ Import the steps selected by the user.
         """
+        messages = {}
         if not ids:
-            summary = 'No+steps+selected.'
+            summary = 'No steps selected.'
 
         else:
             steps_run = []
-            messages = {}
             for step_id in ids:
                 result = self.runImportStep(step_id, run_dependencies)
                 steps_run.extend(result['steps'])
                 messages.update(result['messages'])
 
-            summary = 'Steps+run:%s' % '+,'.join(steps_run)
+            summary = 'Steps run: %s' % ', '.join(steps_run)
 
-        if create_report:
-            name = self._mangleTimestampName('import-selected', 'log')
-            self._createReport(name, result['steps'], result['messages'])
+            if create_report:
+                name = self._mangleTimestampName('import-selected', 'log')
+                self._createReport(name, result['steps'], result['messages'])
 
         return self.manage_importSteps(manage_tabs_message=summary,
                                        messages=messages)
@@ -430,7 +430,7 @@ class SetupTool(Folder):
         """ Import all steps.
         """
         result = self.runAllImportSteps()
-        steps_run = 'Steps+run:%s' % '+,'.join(result['steps'])
+        steps_run = 'Steps run: %s' % ', '.join(result['steps'])
 
         if create_report:
             name = self._mangleTimestampName('import-all', 'log')
