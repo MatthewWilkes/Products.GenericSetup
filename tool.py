@@ -220,7 +220,7 @@ class SetupTool(Folder):
 
                 if dependency not in steps:
                     message = self._doRunImportStep(dependency, context)
-                    messages[dependency] = message
+                    messages[dependency] = message or ''
                     steps.append(dependency)
 
         message = self._doRunImportStep(step_id, context)
