@@ -518,6 +518,7 @@ class ObjectManagerHelpers(object):
         fragment = self._doc.createDocumentFragment()
         objects = self.context.objectValues()
         if not IOrderedContainer.providedBy(self.context):
+            objects = list(objects)
             objects.sort(lambda x,y: cmp(x.getId(), y.getId()))
         for obj in objects:
             exporter = zapi.queryMultiAdapter((obj, self.environ), INode)
