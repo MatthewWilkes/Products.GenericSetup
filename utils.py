@@ -24,6 +24,7 @@ from xml.dom.minidom import Element
 from xml.dom.minidom import Node
 from xml.dom.minidom import parseString
 from xml.sax.handler import ContentHandler
+from xml.parsers.expat import ExpatError
 
 import Products
 from AccessControl import ClassSecurityInfo
@@ -512,7 +513,13 @@ class XMLAdapterBase(BodyAdapterBase):
     def _importBody(self, body):
         """Import the object from the file body.
         """
-        self._importNode(parseString(body).documentElement)
+        try:
+            dom = parseString(body)
+        except ExpatError, e:
+            filename = (self.filename or
+                        '/'.join(self.context.getPhysicalPath()))
+            raise ExpatError('%s: %s' % (filename, e))
+        self._importNode(dom.documentElement)
 
     mime_type = 'text/xml'
 
@@ -520,6 +527,7 @@ class XMLAdapterBase(BodyAdapterBase):
 
     suffix = '.xml'
 
+    filename = '' # for error reporting during import
 
 class ObjectManagerHelpers(object):
 
@@ -553,6 +561,7 @@ class ObjectManagerHelpers(object):
             obj_id = str(child.getAttribute('name'))
             if obj_id not in parent.objectIds():
                 meta_type = str(child.getAttribute('meta_type'))
+                __traceback_info__ = obj_id, meta_type
                 for mt_info in Products.meta_types:
                     if mt_info['name'] == meta_type:
                         parent._setObject(obj_id, mt_info['instance'](obj_id))
@@ -709,6 +718,7 @@ def importObjects(obj, parent_path, context):
     """
     importer = zapi.queryMultiAdapter((obj, context), IBody)
     path = '%s%s' % (parent_path, obj.getId().replace(' ', '_'))
+    __traceback_info__ = path
     if importer:
         if importer.name:
             path = '%s%s' % (parent_path, importer.name)
@@ -718,6 +728,7 @@ def importObjects(obj, parent_path, context):
             # BBB: for CMF 1.5 profiles
             body = context.readDataFile('typestool.xml')
         if body is not None:
+            importer.filename = filename # for error reporting
             importer.body = body
 
     if getattr(obj, 'objectValues', False):
