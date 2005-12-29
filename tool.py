@@ -236,6 +236,8 @@ class SetupTool(Folder):
 
         """ See ISetupTool.
         """
+        __traceback_info__ = self._import_context_id
+
         context = self._getImportContext(self._import_context_id, purge_old)
 
         steps = self._import_registry.sortSteps()
@@ -703,6 +705,8 @@ class SetupTool(Folder):
 
         """ Run a single import step, using a pre-built context.
         """
+        __traceback_info__ = step_id
+
         handler = self._import_registry.getStep(step_id)
 
         if handler is None:
