@@ -435,13 +435,7 @@ class NodeAdapterBase(object):
         """Import the object from the DOM node.
         """
 
-    def __exportNode(self):
-        return self._exportNode()
-
-    def __importNode(self, *args):
-        self._importNode(*args)
-
-    node = property(__exportNode, __importNode)
+    node = property(_exportNode, _importNode)
 
     def _getObjectNode(self, name, i18n=True):
         node = self._doc.createElement(name)
@@ -482,13 +476,7 @@ class BodyAdapterBase(NodeAdapterBase):
         """Import the object from the file body.
         """
 
-    def __exportBody(self):
-        return self._exportBody()
-
-    def __importBody(self, *args):
-        self._importBody(*args)
-
-    body = property(__exportBody, __importBody)
+    body = property(_exportBody, _importBody)
 
     mime_type = 'text/plain'
 
@@ -520,6 +508,8 @@ class XMLAdapterBase(BodyAdapterBase):
                         '/'.join(self.context.getPhysicalPath()))
             raise ExpatError('%s: %s' % (filename, e))
         self._importNode(dom.documentElement)
+
+    body = property(_exportBody, _importBody)
 
     mime_type = 'text/xml'
 
