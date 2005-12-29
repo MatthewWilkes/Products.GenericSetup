@@ -512,14 +512,7 @@ class XMLAdapterBase(BodyAdapterBase):
     def _importBody(self, body):
         """Import the object from the file body.
         """
-        from xml.parsers.expat import ExpatError
-        try:
-            node = parseString(body)
-        except ExpatError:
-            print 'error in', body
-            raise
-
-        self._importNode(node.documentElement)
+        self._importNode(parseString(body).documentElement)
 
     mime_type = 'text/xml'
 
