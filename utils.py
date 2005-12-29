@@ -35,6 +35,7 @@ try:
 except:
     #BBB: for Zope 2.8
     from Products.Five.bbb.OFS_interfaces import IOrderedContainer
+from cgi import escape
 from TAL.TALDefs import attrEscape
 from zope.app import zapi
 from zope.interface import implements
@@ -367,7 +368,8 @@ class _Element(Element):
             wrapper.queue('>')
             for node in self.childNodes:
                 if node.nodeType == Node.TEXT_NODE:
-                    textlines = node.data.splitlines()
+                    data = escape(node.data)
+                    textlines = data.splitlines()
                     if textlines:
                         wrapper.queue(textlines.pop(0))
                     if textlines:
@@ -498,7 +500,14 @@ class XMLAdapterBase(NodeAdapterBase):
     def _importBody(self, body):
         """Import the object from the file body.
         """
-        self._importNode(parseString(body).documentElement)
+        from xml.parsers.expat import ExpatError
+        try:
+            node = parseString(body)
+        except ExpatError:
+            print 'error in', body
+            raise
+
+        self._importNode(node.documentElement)
 
     body = property(_exportBody, _importBody)
 

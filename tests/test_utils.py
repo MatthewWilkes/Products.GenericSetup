@@ -281,6 +281,27 @@ class PropertyManagerHelpersTests(unittest.TestCase):
         self.assertEqual(doc.toprettyxml(' '), _EMPTY_PROPERTY_EXPORT)
 
 
+class PrettyDocumentTests(unittest.TestCase):
+
+    def test_attr_quoting(self):
+        doc = PrettyDocument()
+        node = doc.createElement('doc')
+        node.setAttribute('foo', 'baz <bar>&"'+"'")
+        doc.appendChild(node)
+        self.assertEqual(doc.toprettyxml(' '),
+                         '<?xml version="1.0"?>\n'
+                         '<doc foo="baz &lt;bar&gt;&amp;&quot;'+"'"+'"/>\n')
+
+    def test_text_quoting(self):
+        doc = PrettyDocument()
+        node = doc.createElement('doc')
+        child = doc.createTextNode('goo <hmm>&"'+"'")
+        node.appendChild(child)
+        doc.appendChild(node)
+        self.assertEqual(doc.toprettyxml(' '),
+                         '<?xml version="1.0"?>\n'
+                         '<doc>goo &lt;hmm&gt;&amp;"'+"'</doc>\n")
+
 def test_suite():
     # reimport to make sure tests are run from Products
     from Products.GenericSetup.tests.test_utils import UtilsTests
@@ -288,6 +309,7 @@ def test_suite():
     return unittest.TestSuite((
         unittest.makeSuite(UtilsTests),
         unittest.makeSuite(PropertyManagerHelpersTests),
+        unittest.makeSuite(PrettyDocumentTests),
         ))
 
 if __name__ == '__main__':
