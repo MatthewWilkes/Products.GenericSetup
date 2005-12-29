@@ -11,6 +11,10 @@ GenericSetup Product Changelog
     - Forward ported changes from GenericSetup 0.11 and 0.12 (which were
       created in a separate repository).
 
+    - Don't export or purge read-only properties.
+
+    - Correctly quote XML on export.
+
   GenericSetup 1.0 (2005/09/23)
 
     - CVS tag:  GenericSetup-1_0

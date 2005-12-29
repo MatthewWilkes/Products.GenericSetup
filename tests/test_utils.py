@@ -210,6 +210,8 @@ class PropertyManagerHelpersTests(unittest.TestCase):
         obj._setProperty('foo_selection', 'foobarbaz', 'selection')
         obj._setProperty('foo_mselection', 'foobarbaz', 'multiple selection')
         obj._setProperty('foo_boolean0', '', 'boolean')
+        obj._setProperty('foo_ro', '', 'string')
+        obj._properties[-1]['mode'] = '' # Read-only, not exported or purged
         self.helpers = self._makeOne(obj, DummySetupEnviron())
 
     def _populate(self, obj):
@@ -225,6 +227,7 @@ class PropertyManagerHelpersTests(unittest.TestCase):
         obj._updateProperty('foo_selection', 'Foo')
         obj._updateProperty( 'foo_mselection', ('Foo', 'Baz') )
         obj.foo_boolean0 = 0
+        obj._updateProperty('foo_ro', 'RO')
 
     def test__extractProperties_empty(self):
         doc = self.helpers._doc = PrettyDocument()
@@ -242,6 +245,25 @@ class PropertyManagerHelpersTests(unittest.TestCase):
         doc.appendChild(node)
 
         self.assertEqual(doc.toprettyxml(' '), _NORMAL_PROPERTY_EXPORT)
+
+    def test__purgeProperties(self):
+        obj = self.helpers.context
+        self._populate(obj)
+        self.helpers._purgeProperties()
+
+        self.assertEqual(getattr(obj, 'foo_boolean', None), None)
+        self.assertEqual(getattr(obj, 'foo_date', None), None)
+        self.assertEqual(getattr(obj, 'foo_float', None), None)
+        self.assertEqual(getattr(obj, 'foo_int', None), None)
+        self.assertEqual(getattr(obj, 'foo_lines', None), None)
+        self.assertEqual(getattr(obj, 'foo_long', None), None)
+        self.assertEqual(getattr(obj, 'foo_string', None), None)
+        self.assertEqual(getattr(obj, 'foo_text', None), None)
+        self.assertEqual(getattr(obj, 'foo_tokens', None), None)
+        self.assertEqual(getattr(obj, 'foo_selection', None), None)
+        self.assertEqual(getattr(obj, 'foo_mselection', None), None)
+        self.assertEqual(getattr(obj, 'foo_boolean0', None), None)
+        self.assertEqual(getattr(obj, 'foo_ro', None), 'RO')
 
     def test__initProperties_normal(self):
         node = parseString(_NORMAL_PROPERTY_EXPORT).documentElement

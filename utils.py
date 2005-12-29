@@ -593,11 +593,15 @@ class PropertyManagerHelpers(object):
         fragment = self._doc.createDocumentFragment()
 
         for prop_map in self.context._propertyMap():
-            if prop_map['id'] == 'i18n_domain':
-                continue
-            node = self._doc.createElement('property')
-
             prop_id = prop_map['id']
+            if prop_id == 'i18n_domain':
+                continue
+
+            # Don't export read-only nodes
+            if 'w' not in prop_map.get('mode', 'wd'):
+                continue
+
+            node = self._doc.createElement('property')
             node.setAttribute('name', prop_id)
 
             prop = self.context.getProperty(prop_id)
@@ -630,8 +634,11 @@ class PropertyManagerHelpers(object):
 
     def _purgeProperties(self):
         for prop_map in self.context._propertyMap():
+            mode = prop_map.get('mode', 'wd')
+            if 'w' not in mode:
+                continue
             prop_id = prop_map['id']
-            if 'd' in prop_map.get('mode', 'wd') and not prop_id == 'title':
+            if 'd' in mode and not prop_id == 'title':
                 self.context._delProperty(prop_id)
             else:
                 if prop_map.get('type') == 'multiple selection':
