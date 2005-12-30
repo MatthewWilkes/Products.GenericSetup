@@ -125,7 +125,7 @@ class PathIndexNodeAdapter(NodeAdapterBase):
         """
         return self._getObjectNode('index')
 
-    node = property(_exportNode, NodeAdapterBase._importNode)
+    node = property(_exportNode, lambda self, val: None)
 
 
 class VocabularyNodeAdapter(NodeAdapterBase):
@@ -142,7 +142,7 @@ class VocabularyNodeAdapter(NodeAdapterBase):
         node.setAttribute('deprecated', 'True')
         return node
 
-    node = property(_exportNode, NodeAdapterBase._importNode)
+    node = property(_exportNode, lambda self, val: None)
 
 
 class TextIndexNodeAdapter(NodeAdapterBase):
@@ -159,7 +159,7 @@ class TextIndexNodeAdapter(NodeAdapterBase):
         node.setAttribute('deprecated', 'True')
         return node
 
-    node = property(_exportNode, NodeAdapterBase._importNode)
+    node = property(_exportNode, lambda self, val: None)
 
 
 class FilteredSetNodeAdapter(NodeAdapterBase):

@@ -426,17 +426,6 @@ class NodeAdapterBase(object):
         self._logger = environ.getLogger(self._LOGGER_ID)
         self._doc = PrettyDocument()
 
-    def _exportNode(self):
-        """Export the object as a DOM node.
-        """
-        return self._getObjectNode('object', False)
-
-    def _importNode(self, node):
-        """Import the object from the DOM node.
-        """
-
-    node = property(_exportNode, _importNode)
-
     def _getObjectNode(self, name, i18n=True):
         node = self._doc.createElement(name)
         node.setAttribute('name', self.context.getId())
@@ -466,6 +455,17 @@ class BodyAdapterBase(NodeAdapterBase):
     """
 
     implements(IBody)
+
+    def _exportSimpleNode(self):
+        """Export the object as a DOM node.
+        """
+        return self._getObjectNode('object', False)
+
+    def _importSimpleNode(self, node):
+        """Import the object from the DOM node.
+        """
+
+    node = property(_exportSimpleNode, _importSimpleNode)
 
     def _exportBody(self):
         """Export the object as a file body.
