@@ -41,6 +41,9 @@ _EMPTY_PROPERTY_EXPORT = """\
  <property name="foo_mselection" select_variable="foobarbaz"
     type="multiple selection"/>
  <property name="foo_boolean0" type="boolean">False</property>
+ <property name="foo_int_nodel">0</property>
+ <property name="foo_float_nodel">0.0</property>
+ <property name="foo_boolean_nodel">False</property>
 </dummy>
 """
 
@@ -71,6 +74,9 @@ _NORMAL_PROPERTY_EXPORT = """\
   <element value="Baz"/>
  </property>
  <property name="foo_boolean0" type="boolean">False</property>
+ <property name="foo_int_nodel">1789</property>
+ <property name="foo_float_nodel">3.1415</property>
+ <property name="foo_boolean_nodel">True</property>
 </dummy>
 """
 
@@ -99,6 +105,9 @@ _FIXED_PROPERTY_EXPORT = """\
   <element value="Baz"/>
  </property>
  <property name="foo_boolean0">False</property>
+ <property name="foo_int_nodel">1789</property>
+ <property name="foo_float_nodel">3.1415</property>
+ <property name="foo_boolean_nodel">True</property>
 </dummy>
 """
 
@@ -198,6 +207,8 @@ class PropertyManagerHelpersTests(unittest.TestCase):
         obj = PropertyManager('obj')
         obj.foobarbaz = ('Foo', 'Bar', 'Baz')
         obj._properties = ()
+        # XXX Some intializations are dubious, _setProperty doesn't do any
+        # XXX type conversion and will store empty strings as defaults.
         obj._setProperty('foo_boolean', '', 'boolean')
         obj._setProperty('foo_date', '', 'date')
         obj._setProperty('foo_float', '', 'float')
@@ -212,6 +223,12 @@ class PropertyManagerHelpersTests(unittest.TestCase):
         obj._setProperty('foo_boolean0', '', 'boolean')
         obj._setProperty('foo_ro', '', 'string')
         obj._properties[-1]['mode'] = '' # Read-only, not exported or purged
+        obj._setProperty('foo_int_nodel', 0, 'int')
+        obj._properties[-1]['mode'] = 'w' # Not deletable
+        obj._setProperty('foo_float_nodel', 0.0, 'float')
+        obj._properties[-1]['mode'] = 'w' # Not deletable
+        obj._setProperty('foo_boolean_nodel', False, 'boolean')
+        obj._properties[-1]['mode'] = 'w' # Not deletable
         self.helpers = self._makeOne(obj, DummySetupEnviron())
 
     def _populate(self, obj):
@@ -228,6 +245,9 @@ class PropertyManagerHelpersTests(unittest.TestCase):
         obj._updateProperty( 'foo_mselection', ('Foo', 'Baz') )
         obj.foo_boolean0 = 0
         obj._updateProperty('foo_ro', 'RO')
+        obj._updateProperty('foo_int_nodel', '1789')
+        obj._updateProperty('foo_float_nodel', '3.1415')
+        obj._updateProperty('foo_boolean_nodel', 'True')
 
     def test__extractProperties_empty(self):
         doc = self.helpers._doc = PrettyDocument()

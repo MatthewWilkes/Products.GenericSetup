@@ -11,7 +11,8 @@ GenericSetup Product Changelog
     - Forward ported changes from GenericSetup 0.11 and 0.12 (which were
       created in a separate repository).
 
-    - Don't export or purge read-only properties.
+    - Don't export or purge read-only properties. Correctly purge
+      non-deletable int/float properties.
 
     - Correctly quote XML on export.
 

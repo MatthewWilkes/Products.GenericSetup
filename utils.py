@@ -643,8 +643,11 @@ class PropertyManagerHelpers(object):
             if 'd' in mode and not prop_id == 'title':
                 self.context._delProperty(prop_id)
             else:
-                if prop_map.get('type') == 'multiple selection':
+                prop_type = prop_map.get('type')
+                if prop_type == 'multiple selection':
                     prop_value = ()
+                elif prop_type in ('int', 'float'):
+                    prop_value = 0
                 else:
                     prop_value = ''
                 self.context._updateProperty(prop_id, prop_value)
