@@ -28,11 +28,11 @@ _EMPTY_PROPERTY_EXPORT = """\
 <?xml version="1.0"?>
 <dummy>
  <property name="foo_boolean" type="boolean">False</property>
- <property name="foo_date" type="date"></property>
- <property name="foo_float" type="float"></property>
- <property name="foo_int" type="int"></property>
- <property name="foo_lines" type="lines"></property>
- <property name="foo_long" type="long"></property>
+ <property name="foo_date" type="date">1970/01/01</property>
+ <property name="foo_float" type="float">0.0</property>
+ <property name="foo_int" type="int">0</property>
+ <property name="foo_lines" type="lines"/>
+ <property name="foo_long" type="long">0</property>
  <property name="foo_string" type="string"></property>
  <property name="foo_text" type="text"></property>
  <property name="foo_tokens" type="tokens"/>
@@ -207,27 +207,26 @@ class PropertyManagerHelpersTests(unittest.TestCase):
         obj = PropertyManager('obj')
         obj.foobarbaz = ('Foo', 'Bar', 'Baz')
         obj._properties = ()
-        # XXX Some intializations are dubious, _setProperty doesn't do any
-        # XXX type conversion and will store empty strings as defaults.
-        obj._setProperty('foo_boolean', '', 'boolean')
-        obj._setProperty('foo_date', '', 'date')
-        obj._setProperty('foo_float', '', 'float')
-        obj._setProperty('foo_int', '', 'int')
-        obj._setProperty('foo_lines', '', 'lines')
-        obj._setProperty('foo_long', '', 'long')
-        obj._setProperty('foo_string', '', 'string')
-        obj._setProperty('foo_text', '', 'text')
-        obj._setProperty('foo_tokens', (), 'tokens')
-        obj._setProperty('foo_selection', 'foobarbaz', 'selection')
-        obj._setProperty('foo_mselection', 'foobarbaz', 'multiple selection')
-        obj._setProperty('foo_boolean0', '', 'boolean')
-        obj._setProperty('foo_ro', '', 'string')
+        obj.manage_addProperty('foo_boolean', '', 'boolean')
+        obj.manage_addProperty('foo_date', '1970/01/01', 'date')
+        obj.manage_addProperty('foo_float', '0', 'float')
+        obj.manage_addProperty('foo_int', '0', 'int')
+        obj.manage_addProperty('foo_lines', '', 'lines')
+        obj.manage_addProperty('foo_long', '0', 'long')
+        obj.manage_addProperty('foo_string', '', 'string')
+        obj.manage_addProperty('foo_text', '', 'text')
+        obj.manage_addProperty('foo_tokens', '', 'tokens')
+        obj.manage_addProperty('foo_selection', 'foobarbaz', 'selection')
+        obj.manage_addProperty('foo_mselection', 'foobarbaz',
+                               'multiple selection')
+        obj.manage_addProperty('foo_boolean0', '', 'boolean')
+        obj.manage_addProperty('foo_ro', '', 'string')
         obj._properties[-1]['mode'] = '' # Read-only, not exported or purged
-        obj._setProperty('foo_int_nodel', 0, 'int')
+        obj.manage_addProperty('foo_int_nodel', 0, 'int')
         obj._properties[-1]['mode'] = 'w' # Not deletable
-        obj._setProperty('foo_float_nodel', 0.0, 'float')
+        obj.manage_addProperty('foo_float_nodel', 0, 'float')
         obj._properties[-1]['mode'] = 'w' # Not deletable
-        obj._setProperty('foo_boolean_nodel', False, 'boolean')
+        obj.manage_addProperty('foo_boolean_nodel', '', 'boolean')
         obj._properties[-1]['mode'] = 'w' # Not deletable
         self.helpers = self._makeOne(obj, DummySetupEnviron())
 
