@@ -58,12 +58,13 @@ class DummySetupEnviron(object):
 
     def __init__(self):
         self._notes = []
+        self._should_purge = True
 
     def getLogger(self, name):
         return DummyLogger(name, self._notes)
 
     def shouldPurge(self):
-        return True
+        return self._should_purge
 
 
 class _AdapterTestCaseBase(PlacelessSetup, unittest.TestCase):

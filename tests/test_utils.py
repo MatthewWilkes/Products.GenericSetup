@@ -119,6 +119,20 @@ _SPECIAL_IMPORT = """\
 </dummy>
 """
 
+_NOPURGE_IMPORT = """\
+<?xml version="1.0"?>
+<dummy>
+ <property name="lines1">
+  <element value="Foo"/>
+  <element value="Bar"/>
+ </property>
+ <property name="lines2" remove="True">
+  <element value="Foo"/>
+  <element value="Bar"/>
+ </property>
+</dummy>
+"""
+
 
 def _testFunc( *args, **kw ):
 
@@ -320,6 +334,18 @@ class PropertyManagerHelpersTests(unittest.TestCase):
         doc.appendChild(node)
 
         self.assertEqual(doc.toprettyxml(' '), _EMPTY_PROPERTY_EXPORT)
+
+    def test__initProperties_nopurge(self):
+        node = parseString(_NOPURGE_IMPORT).documentElement
+        self.helpers.environ._should_purge = False
+        obj = self.helpers.context
+        obj._properties = ()
+        obj.manage_addProperty('lines1', ('A', 'B'), 'lines')
+        obj.manage_addProperty('lines2', ('A', 'B'), 'lines')
+        self.helpers._initProperties(node)
+
+        self.assertEquals(obj.lines1, ('A', 'B', 'Foo', 'Bar'))
+        self.assertEquals(obj.lines2, ('Foo', 'Bar'))
 
 
 class PrettyDocumentTests(unittest.TestCase):

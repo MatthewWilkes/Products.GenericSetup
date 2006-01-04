@@ -11,6 +11,9 @@ GenericSetup Product Changelog
     - Forward ported changes from GenericSetup 0.11 and 0.12 (which were
       created in a separate repository).
 
+    - In extension profiles, sequence properties are now extended
+      instead of replaced, except if the 'remove' attribute is present.
+
     - Don't export or purge read-only properties. Correctly purge
       non-deletable int/float properties.
 
