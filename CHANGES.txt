@@ -12,7 +12,7 @@ GenericSetup Product Changelog
       created in a separate repository).
 
     - In extension profiles, sequence properties are now extended
-      instead of replaced, except if the 'remove' attribute is present.
+      instead of replaced, except if the 'purge' attribute is true.
 
     - Don't export or purge read-only properties. Correctly purge
       non-deletable int/float properties.
