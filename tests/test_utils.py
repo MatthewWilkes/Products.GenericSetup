@@ -126,7 +126,7 @@ _NOPURGE_IMPORT = """\
   <element value="Foo"/>
   <element value="Bar"/>
  </property>
- <property name="lines2" remove="True">
+ <property name="lines2" purge="True">
   <element value="Foo"/>
   <element value="Bar"/>
  </property>
