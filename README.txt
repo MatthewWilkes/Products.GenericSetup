@@ -2,11 +2,6 @@ GenericSetup Product README
 
   Overview
 
-    This product is a "cut-down" version of the CMFSetup product, shipped
-    with CMF 1.5.x:  it removes all CMF dependencies.  In the ideal world,
-    CMFSetup would depend on this product, and supply the CMF-specific bits
-    (handlers for actions, types, workflows, etc.).
-
     This product provides a mini-framework for expressing the configured
     state of a Zope Site as a set of filesystem artifacts.  These artifacts
     consist of declarative XML files, which spell out the configuration
