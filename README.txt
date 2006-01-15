@@ -40,4 +40,4 @@ GenericSetup Product README
 
     "dotted name" --
       The Pythonic representation of the "path" to a given function /
-      module, e.g. 'Products.CMFSetup.utils.ConfiguratorBase'.
+      module, e.g. 'Products.GenericSetup.tool.exportToolset'.
