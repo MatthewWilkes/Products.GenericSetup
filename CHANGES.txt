@@ -2,6 +2,8 @@ GenericSetup Product Changelog
 
   After GenericSetup 1.0
 
+    - Made GenericSetup a standalone package independent of the CMF
+
     - Added 'for_' argument to profile registry operations.
       A profile may be registered and queried as appropriate to a specific
       site interface;  the default value, 'None', indicates that the profile
