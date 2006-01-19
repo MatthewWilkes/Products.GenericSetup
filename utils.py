@@ -686,11 +686,14 @@ class PropertyManagerHelpers(object):
                 # are converted to the right type
                 prop_value = self._getNodeText(child).encode('utf-8')
 
-            if not self._convertToBoolean(child.getAttribute('purge') or 'True'):
-                # If the purge attribute is false, append to sequence
+            if not self._convertToBoolean(child.getAttribute('purge')
+                                          or 'True'):
+                # If the purge attribute is False, merge sequences
                 prop = obj.getProperty(prop_id)
                 if isinstance(prop, (tuple, list)):
-                    prop_value = tuple(prop) + tuple(prop_value)
+                    prop_value = (tuple([p for p in prop
+                                         if p not in prop_value]) +
+                                  tuple(prop_value))
 
             obj._updateProperty(prop_id, prop_value)
 

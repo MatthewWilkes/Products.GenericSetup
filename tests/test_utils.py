@@ -344,28 +344,28 @@ class PropertyManagerHelpersTests(unittest.TestCase):
         self.helpers.environ._should_purge = True # base profile
         obj = self.helpers.context
         obj._properties = ()
-        obj.manage_addProperty('lines1', ('A', 'B'), 'lines')
-        obj.manage_addProperty('lines2', ('A', 'B'), 'lines')
-        obj.manage_addProperty('lines3', ('A', 'B'), 'lines')
+        obj.manage_addProperty('lines1', ('Foo', 'Gee'), 'lines')
+        obj.manage_addProperty('lines2', ('Foo', 'Gee'), 'lines')
+        obj.manage_addProperty('lines3', ('Foo', 'Gee'), 'lines')
         self.helpers._initProperties(node)
 
         self.assertEquals(obj.lines1, ('Foo', 'Bar'))
         self.assertEquals(obj.lines2, ('Foo', 'Bar'))
-        self.assertEquals(obj.lines3, ('A', 'B', 'Foo', 'Bar'))
+        self.assertEquals(obj.lines3, ('Gee', 'Foo', 'Bar'))
 
     def test__initProperties_nopurge_extension(self):
         node = parseString(_NOPURGE_IMPORT).documentElement
         self.helpers.environ._should_purge = False # extension profile
         obj = self.helpers.context
         obj._properties = ()
-        obj.manage_addProperty('lines1', ('A', 'B'), 'lines')
-        obj.manage_addProperty('lines2', ('A', 'B'), 'lines')
-        obj.manage_addProperty('lines3', ('A', 'B'), 'lines')
+        obj.manage_addProperty('lines1', ('Foo', 'Gee'), 'lines')
+        obj.manage_addProperty('lines2', ('Foo', 'Gee'), 'lines')
+        obj.manage_addProperty('lines3', ('Foo', 'Gee'), 'lines')
         self.helpers._initProperties(node)
 
         self.assertEquals(obj.lines1, ('Foo', 'Bar'))
         self.assertEquals(obj.lines2, ('Foo', 'Bar'))
-        self.assertEquals(obj.lines3, ('A', 'B', 'Foo', 'Bar'))
+        self.assertEquals(obj.lines3, ('Gee', 'Foo', 'Bar'))
 
 
 class PrettyDocumentTests(unittest.TestCase):

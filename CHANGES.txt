@@ -14,7 +14,8 @@ GenericSetup Product Changelog
       created in a separate repository).
 
     - A sequence property with the purge="False" attribute will not be
-      purged. This is useful in extension profiles.
+      purged, but merged (the sequences are treated as sets, which means
+      that duplicates are removed). This is useful in extension profiles.
 
     - Don't export or purge read-only properties. Correctly purge
       non-deletable int/float properties.
