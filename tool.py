@@ -30,6 +30,7 @@ from zope.interface import implementedBy
 
 from interfaces import EXTENSION
 from interfaces import ISetupTool
+from interfaces import SKIPPED_FILES
 from permissions import ManagePortal
 from context import DirectoryImportContext
 from context import SnapshotImportContext
@@ -298,7 +299,7 @@ class SetupTool(Folder):
                               rhs_context,
                               missing_as_empty=False,
                               ignore_blanks=False,
-                              skip=('CVS', '.svn', '_svn'),
+                              skip=SKIPPED_FILES,
                              ):
         """ See ISetupTool.
         """

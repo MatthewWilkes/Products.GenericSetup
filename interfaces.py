@@ -20,6 +20,7 @@ from zope.schema import Text
 from zope.schema import TextLine
 
 BASE, EXTENSION = range(1, 3)
+SKIPPED_FILES = ('CVS', '.svn', '_svn', '_darcs')
 
 
 class IPseudoInterface( Interface ):
@@ -119,7 +120,7 @@ class IImportContext( ISetupContext ):
           bool.
         """
 
-    def listDirectory( path, skip=('CVS', '.svn', '_svn') ):
+    def listDirectory( path, skip=SKIPPED_FILES ):
 
         """ List IDs of the contents of a  directory / folder.
 

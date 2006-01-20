@@ -21,6 +21,8 @@ import re
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
 
+from interfaces import SKIPPED_FILES
+
 BLANKS_REGEX = re.compile( r'^\s*$' )
 
 def unidiff( a
@@ -95,7 +97,7 @@ class ConfigDiff:
                 , rhs
                 , missing_as_empty=False
                 , ignore_blanks=False
-                , skip=('CVS', '.svn', '_svn')
+                , skip=SKIPPED_FILES
                 ):
         self._lhs = lhs
         self._rhs = rhs

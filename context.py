@@ -42,6 +42,7 @@ from zope.interface import implements
 from interfaces import IExportContext
 from interfaces import IImportContext
 from interfaces import IWriteLogger
+from interfaces import SKIPPED_FILES
 from permissions import ManagePortal
 
 
@@ -216,7 +217,7 @@ class DirectoryImportContext( BaseContext ):
         return os.path.isdir( full_path )
 
     security.declareProtected( ManagePortal, 'listDirectory' )
-    def listDirectory( self, path, skip=('CVS', '.svn', '_svn') ):
+    def listDirectory( self, path, skip=SKIPPED_FILES ):
 
         """ See IImportContext.
         """
@@ -315,7 +316,7 @@ class TarballImportContext( BaseContext ):
         if info is not None:
             return info.isdir()
 
-    def listDirectory( self, path, skip=('CVS', '.svn', '_svn') ):
+    def listDirectory( self, path, skip=SKIPPED_FILES ):
 
         """ See IImportContext.
         """
