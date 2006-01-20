@@ -95,7 +95,7 @@ class ConfigDiff:
                 , rhs
                 , missing_as_empty=False
                 , ignore_blanks=False
-                , skip=('CVS','.svn')
+                , skip=('CVS', '.svn', '_svn')
                 ):
         self._lhs = lhs
         self._rhs = rhs

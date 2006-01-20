@@ -216,7 +216,7 @@ class DirectoryImportContext( BaseContext ):
         return os.path.isdir( full_path )
 
     security.declareProtected( ManagePortal, 'listDirectory' )
-    def listDirectory( self, path, skip=('CVS', '.svn') ):
+    def listDirectory( self, path, skip=('CVS', '.svn', '_svn') ):
 
         """ See IImportContext.
         """
@@ -315,7 +315,7 @@ class TarballImportContext( BaseContext ):
         if info is not None:
             return info.isdir()
 
-    def listDirectory( self, path, skip=('CVS', '.svn') ):
+    def listDirectory( self, path, skip=('CVS', '.svn', '_svn') ):
 
         """ See IImportContext.
         """

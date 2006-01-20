@@ -298,7 +298,7 @@ class SetupTool(Folder):
                               rhs_context,
                               missing_as_empty=False,
                               ignore_blanks=False,
-                              skip=('CVS', '.svn'),
+                              skip=('CVS', '.svn', '_svn'),
                              ):
         """ See ISetupTool.
         """

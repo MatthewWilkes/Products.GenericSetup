@@ -119,7 +119,7 @@ class IImportContext( ISetupContext ):
           bool.
         """
 
-    def listDirectory( path, skip=('CVS', '.svn') ):
+    def listDirectory( path, skip=('CVS', '.svn', '_svn') ):
 
         """ List IDs of the contents of a  directory / folder.
 
