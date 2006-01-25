@@ -208,8 +208,9 @@ class TopicIndexNodeAdapter(NodeAdapterBase):
         for child in node.childNodes:
             if child.nodeName == 'filtered_set':
                 set_id = str(child.getAttribute('name'))
-                set_meta_type = str(child.getAttribute('meta_type'))
-                self.context.addFilteredSet(set_id, set_meta_type, '')
+                if set_id not in self.context.filteredSets:
+                    set_meta_type = str(child.getAttribute('meta_type'))
+                    self.context.addFilteredSet(set_id, set_meta_type, '')
                 set = self.context.filteredSets[set_id]
                 importer = zapi.queryMultiAdapter((set, self.environ), INode)
                 importer.node = child

@@ -99,6 +99,18 @@ class BodyAdapterTestCase(_AdapterTestCaseBase):
         self._verifyImport(self._obj)
         self.assertEqual(adapted.body, self._BODY)
 
+        # now in update mode
+        context._should_purge = False
+        adapted = zapi.getMultiAdapter((self._obj, context), IBody)
+        adapted.body = self._BODY
+        self._verifyImport(self._obj)
+        self.assertEqual(adapted.body, self._BODY)
+
+        # and again in update mode
+        adapted = zapi.getMultiAdapter((self._obj, context), IBody)
+        adapted.body = self._BODY
+        self._verifyImport(self._obj)
+        self.assertEqual(adapted.body, self._BODY)
 
 class NodeAdapterTestCase(_AdapterTestCaseBase):
 
@@ -113,6 +125,19 @@ class NodeAdapterTestCase(_AdapterTestCaseBase):
 
     def test_node_set(self):
         context = DummySetupEnviron()
+        adapted = zapi.getMultiAdapter((self._obj, context), INode)
+        adapted.node = parseString(self._XML).documentElement
+        self._verifyImport(self._obj)
+        self.assertEqual(adapted.node.toprettyxml(' '), self._XML)
+
+        # now in update mode
+        context._should_purge = False
+        adapted = zapi.getMultiAdapter((self._obj, context), INode)
+        adapted.node = parseString(self._XML).documentElement
+        self._verifyImport(self._obj)
+        self.assertEqual(adapted.node.toprettyxml(' '), self._XML)
+
+        # and again in update mode
         adapted = zapi.getMultiAdapter((self._obj, context), INode)
         adapted.node = parseString(self._XML).documentElement
         self._verifyImport(self._obj)
