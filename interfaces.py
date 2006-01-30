@@ -21,6 +21,7 @@ from zope.schema import TextLine
 
 BASE, EXTENSION = range(1, 3)
 SKIPPED_FILES = ('CVS', '.svn', '_svn', '_darcs')
+SKIPPED_SUFFIXES = ('~',)
 
 
 class IPseudoInterface( Interface ):

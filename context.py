@@ -43,6 +43,7 @@ from interfaces import IExportContext
 from interfaces import IImportContext
 from interfaces import IWriteLogger
 from interfaces import SKIPPED_FILES
+from interfaces import SKIPPED_SUFFIXES
 from permissions import ManagePortal
 
 
@@ -217,7 +218,8 @@ class DirectoryImportContext( BaseContext ):
         return os.path.isdir( full_path )
 
     security.declareProtected( ManagePortal, 'listDirectory' )
-    def listDirectory( self, path, skip=SKIPPED_FILES ):
+    def listDirectory(self, path, skip=SKIPPED_FILES,
+                      skip_suffixes=SKIPPED_SUFFIXES):
 
         """ See IImportContext.
         """
@@ -229,9 +231,15 @@ class DirectoryImportContext( BaseContext ):
         if not os.path.exists( full_path ) or not os.path.isdir( full_path ):
             return None
 
-        names = os.listdir( full_path )
+        names = []
+        for name in os.listdir(full_path):
+            if name in skip:
+                continue
+            if [s for s in skip_suffixes if name.endswith(s)]:
+                continue
+            names.append(name)
 
-        return [ name for name in names if name not in skip ]
+        return names
 
 InitializeClass( DirectoryImportContext )
 
@@ -316,7 +324,8 @@ class TarballImportContext( BaseContext ):
         if info is not None:
             return info.isdir()
 
-    def listDirectory( self, path, skip=SKIPPED_FILES ):
+    def listDirectory(self, path, skip=SKIPPED_FILES,
+                      skip_suffixes=SKIPPED_SUFFIXES):
 
         """ See IImportContext.
         """
@@ -331,10 +340,18 @@ class TarballImportContext( BaseContext ):
 
         pfx_len = len(path)
 
-        beneath = [x[pfx_len:] for x in self._archive.getnames()
-                                if x.startswith(path) and x != path]
+        names = []
+        for name in self._archive.getnames():
+            if name == path or not name.startswith(path):
+                continue
+            name = name[pfx_len:]
+            if '/' in name or name in skip:
+                continue
+            if [s for s in skip_suffixes if name.endswith(s)]:
+                continue
+            names.append(name)
 
-        return [x for x in beneath if '/' not in x and x not in skip]
+        return names
 
     def shouldPurge( self ):
 
@@ -580,7 +597,7 @@ class SnapshotImportContext( BaseContext ):
             return bool( folderish )
 
     security.declareProtected( ManagePortal, 'listDirectory' )
-    def listDirectory( self, path, skip=() ):
+    def listDirectory(self, path, skip=(), skip_suffixes=()):
 
         """ See IImportContext.
         """
@@ -593,8 +610,15 @@ class SnapshotImportContext( BaseContext ):
             if not getattr( subdir, 'isPrincipiaFolderish', False ):
                 return None
 
-            object_ids = subdir.objectIds()
-            return [ x for x in object_ids if x not in skip ]
+            names = []
+            for name in subdir.objectIds():
+                if name in skip:
+                    continue
+                if [s for s in skip_suffixes if name.endswith(s)]:
+                    continue
+                names.append(name)
+
+            return names
 
     security.declareProtected( ManagePortal, 'shouldPurge' )
     def shouldPurge( self ):

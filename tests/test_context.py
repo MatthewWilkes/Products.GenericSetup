@@ -299,6 +299,7 @@ class DirectoryImportContextTests( FilesystemTestBase
         FILENAME = os.path.join( SUBDIR, 'nested.txt' )
         self._makeFile( FILENAME, printable )
         self._makeFile( os.path.join( SUBDIR, 'another.txt' ), 'ABC' )
+        self._makeFile( os.path.join( SUBDIR, 'another.txt~' ), '123' )
         self._makeFile( os.path.join( SUBDIR, 'CVS/skip.txt' ), 'DEF' )
         self._makeFile( os.path.join( SUBDIR, '.svn/skip.txt' ), 'GHI' )
 
@@ -309,6 +310,7 @@ class DirectoryImportContextTests( FilesystemTestBase
         self.assertEqual( len( names ), 2 )
         self.failUnless( 'nested.txt' in names )
         self.failUnless( 'another.txt' in names )
+        self.failIf( 'another.txt~' in names )
         self.failIf( 'CVS' in names )
         self.failIf( '.svn' in names )
 
@@ -319,15 +321,18 @@ class DirectoryImportContextTests( FilesystemTestBase
         FILENAME = os.path.join( SUBDIR, 'nested.txt' )
         self._makeFile( FILENAME, printable )
         self._makeFile( os.path.join( SUBDIR, 'another.txt' ), 'ABC' )
+        self._makeFile( os.path.join( SUBDIR, 'another.bak' ), '123' )
         self._makeFile( os.path.join( SUBDIR, 'CVS/skip.txt' ), 'DEF' )
         self._makeFile( os.path.join( SUBDIR, '.svn/skip.txt' ), 'GHI' )
 
         site = DummySite( 'site' ).__of__( self.root )
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
-        names = ctx.listDirectory( SUBDIR, ( 'nested.txt', ) )
+        names = ctx.listDirectory(SUBDIR, skip=('nested.txt',),
+                                  skip_suffixes=('.bak',))
         self.assertEqual( len( names ), 3 )
         self.failIf( 'nested.txt' in names )
+        self.failIf( 'nested.bak' in names )
         self.failUnless( 'another.txt' in names )
         self.failUnless( 'CVS' in names )
         self.failUnless( '.svn' in names )
@@ -720,15 +725,20 @@ class TarballImportContextTests( SecurityRequestTest
         PATH1 = '%s/%s' % ( SUBDIR, FILENAME1 )
         FILENAME2 = 'another.txt'
         PATH2 = '%s/%s' % ( SUBDIR, FILENAME2 )
+        FILENAME3 = 'another.bak'
+        PATH3 = '%s/%s' % ( SUBDIR, FILENAME3 )
 
         site, tool, ctx = self._makeOne( { PATH1: printable
                                          , PATH2: uppercase
+                                         , PATH3: 'xyz'
                                          } )
 
-        names = ctx.listDirectory( SUBDIR, skip=( FILENAME1, ) )
+        names = ctx.listDirectory(SUBDIR, skip=(FILENAME1,),
+                                  skip_suffixes=('.bak',))
         self.assertEqual( len( names ), 1 )
         self.failIf( FILENAME1 in names )
         self.failUnless( FILENAME2 in names )
+        self.failIf( FILENAME3 in names )
 
 
 class TarballExportContextTests( FilesystemTestBase
@@ -1402,17 +1412,22 @@ class SnapshotImportContextTests( SecurityRequestTest
         SUBDIR = 'subdir'
         FILENAME1 = 'nested.txt'
         FILENAME2 = 'another.txt'
+        FILENAME3 = 'another.bak'
 
         site, tool, ctx = self._makeOne( SNAPSHOT_ID )
         file1 = self._makeFile( tool, SNAPSHOT_ID, FILENAME1, printable
                               , subdir=SUBDIR )
         file2 = self._makeFile( tool, SNAPSHOT_ID, FILENAME2, uppercase
                               , subdir=SUBDIR )
+        file3 = self._makeFile( tool, SNAPSHOT_ID, FILENAME3, 'abc'
+                              , subdir=SUBDIR )
 
-        names = ctx.listDirectory( SUBDIR, skip=( FILENAME1, ) )
+        names = ctx.listDirectory(SUBDIR, skip=(FILENAME1,),
+                                  skip_suffixes=('.bak',))
         self.assertEqual( len( names ), 1 )
         self.failIf( FILENAME1 in names )
         self.failUnless( FILENAME2 in names )
+        self.failIf( FILENAME3 in names )
 
 
 def test_suite():
