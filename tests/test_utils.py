@@ -371,23 +371,33 @@ class PropertyManagerHelpersTests(unittest.TestCase):
 class PrettyDocumentTests(unittest.TestCase):
 
     def test_attr_quoting(self):
+        original = 'baz &nbsp;<bar>&"\''
+        expected = ('<?xml version="1.0"?>\n'
+                    '<doc foo="baz &amp;nbsp;&lt;bar&gt;&amp;&quot;\'"/>\n')
+
         doc = PrettyDocument()
         node = doc.createElement('doc')
-        node.setAttribute('foo', 'baz <bar>&"'+"'")
+        node.setAttribute('foo', original)
         doc.appendChild(node)
-        self.assertEqual(doc.toprettyxml(' '),
-                         '<?xml version="1.0"?>\n'
-                         '<doc foo="baz &lt;bar&gt;&amp;&quot;'+"'"+'"/>\n')
+        self.assertEqual(doc.toprettyxml(' '), expected)
+        # Reparse
+        e = parseString(expected).documentElement
+        self.assertEqual(e.getAttribute('foo'), original)
 
     def test_text_quoting(self):
+        original = 'goo &nbsp;<hmm>&"\''
+        expected = ('<?xml version="1.0"?>\n'
+                    '<doc>goo &amp;nbsp;&lt;hmm&gt;&amp;"\'</doc>\n')
+
         doc = PrettyDocument()
         node = doc.createElement('doc')
-        child = doc.createTextNode('goo <hmm>&"'+"'")
+        child = doc.createTextNode(original)
         node.appendChild(child)
         doc.appendChild(node)
-        self.assertEqual(doc.toprettyxml(' '),
-                         '<?xml version="1.0"?>\n'
-                         '<doc>goo &lt;hmm&gt;&amp;"'+"'</doc>\n")
+        self.assertEqual(doc.toprettyxml(' '), expected)
+        # Reparse
+        e = parseString(expected).documentElement
+        self.assertEqual(e.childNodes[0].nodeValue, original)
 
 def test_suite():
     # reimport to make sure tests are run from Products

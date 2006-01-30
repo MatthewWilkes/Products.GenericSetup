@@ -37,7 +37,6 @@ except:
     #BBB: for Zope 2.8
     from Products.Five.bbb.OFS_interfaces import IOrderedContainer
 from cgi import escape
-from TAL.TALDefs import attrEscape
 from zope.app import zapi
 from zope.interface import implements
 from zope.interface import providedBy
@@ -362,7 +361,7 @@ class _Element(Element):
 
         for a_name in a_names:
             wrapper.write()
-            a_value = attrEscape(attrs[a_name].value)
+            a_value = escape(attrs[a_name].value, quote=True)
             wrapper.queue(' %s="%s"' % (a_name, a_value))
 
         if self.childNodes:
