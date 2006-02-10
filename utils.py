@@ -565,6 +565,8 @@ class ObjectManagerHelpers(object):
                 else:
                     try:
                         position = parent.getObjectPosition(insert_before)
+                        if parent.getObjectPosition(obj_id) < position:
+                            position -= 1
                         parent.moveObjectToPosition(obj_id, position)
                     except ValueError:
                         pass
@@ -575,6 +577,8 @@ class ObjectManagerHelpers(object):
                 else:
                     try:
                         position = parent.getObjectPosition(insert_after)
+                        if parent.getObjectPosition(obj_id) < position:
+                            position -= 1
                         parent.moveObjectToPosition(obj_id, position+1)
                     except ValueError:
                         pass
@@ -652,11 +656,13 @@ class PropertyManagerHelpers(object):
                 self.context._updateProperty(prop_id, prop_value)
 
     def _initProperties(self, node):
-        self.context.i18n_domain = node.getAttribute('i18n:domain')
+        obj = self.context
+        if node.hasAttribute('i18n:domain'):
+            i18n_domain = str(node.getAttribute('i18n:domain'))
+            obj._updateProperty('i18n_domain', i18n_domain)
         for child in node.childNodes:
             if child.nodeName != 'property':
                 continue
-            obj = self.context
             prop_id = str(child.getAttribute('name'))
             prop_map = obj.propdict().get(prop_id, None)
 

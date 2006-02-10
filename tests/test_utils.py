@@ -119,6 +119,14 @@ _SPECIAL_IMPORT = """\
 </dummy>
 """
 
+_I18N_IMPORT = """\
+<?xml version="1.0"?>
+<dummy xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+   i18n:domain="dummy_domain">
+ <property name="foo_string" i18n:translate="">Foo String</property>
+</dummy>
+"""
+
 _NOPURGE_IMPORT = """\
 <?xml version="1.0"?>
 <dummy>
@@ -338,6 +346,13 @@ class PropertyManagerHelpersTests(unittest.TestCase):
         doc.appendChild(node)
 
         self.assertEqual(doc.toprettyxml(' '), _EMPTY_PROPERTY_EXPORT)
+
+    def test__initProperties_i18n(self):
+        self.helpers.context.manage_addProperty('i18n_domain', '', 'string')
+        node = parseString(_I18N_IMPORT).documentElement
+        self.helpers._initProperties(node)
+
+        self.assertEqual(self.helpers.context.i18n_domain, 'dummy_domain')
 
     def test__initProperties_nopurge_base(self):
         node = parseString(_NOPURGE_IMPORT).documentElement
