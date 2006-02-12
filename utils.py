@@ -548,6 +548,10 @@ class ObjectManagerHelpers(object):
             parent = self.context
 
             obj_id = str(child.getAttribute('name'))
+            if child.hasAttribute('remove'):
+                parent._delObject(obj_id)
+                continue
+
             if obj_id not in parent.objectIds():
                 meta_type = str(child.getAttribute('meta_type'))
                 __traceback_info__ = obj_id, meta_type
