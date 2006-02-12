@@ -81,7 +81,7 @@ def importRolemap( context ):
         rc = RolemapConfigurator( site, encoding )
         rolemap_info = rc.parseXML( text )
 
-        immediate_roles = list( getattr( site, '__ac_roles__', [] ) )[:]
+        immediate_roles = list( getattr(site, '__ac_roles__', []) )
         already = {}
 
         for role in site.valid_roles():
@@ -186,7 +186,7 @@ class RolemapConfigurator(ConfiguratorBase):
             if roles or not acquire:
                 permissions.append( { 'name'    : name
                                     , 'acquire' : acquire
-                                    , 'roles'   : roles
+                                    , 'roles'   : sorted(roles)
                                     } )
 
         return permissions
@@ -199,7 +199,7 @@ class RolemapConfigurator(ConfiguratorBase):
 
         return {
           'rolemap':
-            { 'roles':       {CONVERTER: self._convertToUnique},
+            { 'roles':       {CONVERTER: self._convertToUnique, DEFAULT: ()},
               'permissions': {CONVERTER: self._convertToUnique} },
           'roles':
             { 'role':        {KEY: None} },
