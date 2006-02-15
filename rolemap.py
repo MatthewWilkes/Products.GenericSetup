@@ -182,11 +182,12 @@ class RolemapConfigurator(ConfiguratorBase):
             roles = p.getRoles( default=[] )
             acquire = isinstance( roles, list )  # tuple means don't acquire
             roles = [ r for r in roles if r in valid_roles ]
+            roles.sort()
 
             if roles or not acquire:
                 permissions.append( { 'name'    : name
                                     , 'acquire' : acquire
-                                    , 'roles'   : sorted(roles)
+                                    , 'roles'   : roles
                                     } )
 
         return permissions
