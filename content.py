@@ -376,10 +376,15 @@ class DAVAwareFileAdapter(object):
     def __init__(self, context):
         self.context = context
 
+    def _getFileName(self):
+        """ Return the name under which our file data is stored.
+        """
+        return '%s' % self.context.getId()
+
     def export(self, export_context, subdir, root=False):
         """ See IFilesystemExporter.
         """
-        export_context.writeDataFile('%s' % self.context.getId(),
+        export_context.writeDataFile(self._getFileName(),
                                      self.context.manage_FTPget(),
                                      'text/plain',
                                      subdir,
@@ -394,7 +399,7 @@ class DAVAwareFileAdapter(object):
         """ See IFilesystemImporter.
         """
         cid = self.context.getId()
-        data = import_context.readDataFile('%s' % cid, subdir)
+        data = import_context.readDataFile(self._getFileName(), subdir)
         if data is None:
             logger = import_context.getLogger('SGAIFA')
             logger.info('no .ini file for %s/%s' % (subdir, cid))

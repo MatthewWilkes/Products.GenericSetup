@@ -2,6 +2,9 @@ GenericSetup Product Changelog
 
   After GenericSetup 1.0
 
+    - Allowed subclasses of DAVAwareFileAdapter to override the filename
+      in which the file is stored.
+
     - Added a doc directory including some basic documentation.
 
     - Made GenericSetup a standalone package independent of the CMF
