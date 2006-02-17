@@ -39,6 +39,7 @@ except:
 from cgi import escape
 from zope.app import zapi
 from zope.interface import implements
+from zope.interface import implementsOnly
 from zope.interface import providedBy
 
 from exceptions import BadRequest
@@ -453,7 +454,7 @@ class BodyAdapterBase(NodeAdapterBase):
     """Body im- and exporter base.
     """
 
-    implements(IBody)
+    implementsOnly(IBody)
 
     def _exportSimpleNode(self):
         """Export the object as a DOM node.
@@ -489,7 +490,7 @@ class XMLAdapterBase(BodyAdapterBase):
     """XML im- and exporter base.
     """
 
-    implements(IBody)
+    implementsOnly(IBody)
 
     def _exportBody(self):
         """Export the object as a file body.
