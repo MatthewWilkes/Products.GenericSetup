@@ -96,12 +96,15 @@ def importToolset(context):
         tool_class = _resolveDottedName(info['class'])
 
         existing = getattr(aq_base(site), tool_id, None)
-        new_tool = tool_class()
-
         try:
-            new_tool._setId(tool_id)
-        except: # XXX:  ImmutableId raises result of calling MessageDialog
-            pass
+            new_tool = tool_class()
+        except TypeError:
+            new_tool = tool_class(tool_id)
+        else:
+            try:
+                new_tool._setId(tool_id)
+            except: # XXX:  ImmutableId raises result of calling MessageDialog
+                pass
 
         if existing is None:
             site._setObject(tool_id, new_tool)

@@ -749,6 +749,22 @@ class Test_importToolset( _ToolsetSetup ):
             tool = getattr( site, tool_id )
             self.assertEqual( tool.getId(), tool_id )
 
+    def test_tool_id_required(self):
+        # Tests that tool creation will still work when an id is required
+        # by the tool constructor.
+        from Products.GenericSetup.tool import TOOLSET_XML
+        from Products.GenericSetup.tool import importToolset
+
+        site = self._initSite()
+        context = DummyImportContext( site, tool=site.setup_tool )
+        context._files[ TOOLSET_XML ] = _WITH_ID_TOOLSET_XML
+
+        importToolset( context )
+
+        for tool_id in ( 'mandatory', 'requires_id' ):
+            tool = getattr( site, tool_id )
+            self.assertEqual( tool.getId(), tool_id )
+
     def test_forbidden_tools( self ):
 
         from Products.GenericSetup.tool import TOOLSET_XML
@@ -897,6 +913,13 @@ class AnotherDummyTool( Folder ):
 
     pass
 
+class DummyToolRequiresId( Folder ):
+
+    def __init__(self, id):
+        Folder.__init__(self)
+        self._setId(id)
+
+
 _EMPTY_TOOLSET_XML = """\
 <?xml version="1.0"?>
 <tool-setup>
@@ -933,6 +956,17 @@ _REQUIRED_TOOLSET_XML = """\
 </tool-setup>
 """
 
+_WITH_ID_TOOLSET_XML = """\
+<?xml version="1.0"?>
+<tool-setup>
+  <required
+    tool_id="mandatory"
+    class="Products.GenericSetup.tests.test_tool.DummyTool" />
+  <required
+    tool_id="requires_id"
+    class="Products.GenericSetup.tests.test_tool.DummyToolRequiresId" />
+</tool-setup>
+"""
 
 def test_suite():
     # reimport to make sure tests are run from Products
