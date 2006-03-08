@@ -1,6 +1,6 @@
 GenericSetup Product Changelog
 
-  After GenericSetup 1.0
+  GenericSetup 1.1-beta (2006/03/08)
 
     - Allowed subclasses of DAVAwareFileAdapter to override the filename
       in which the file is stored.
