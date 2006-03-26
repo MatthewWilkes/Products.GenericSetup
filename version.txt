@@ -1,1 +1,1 @@
-GenericSetup-1.1-beta
+GenericSetup-1.1-beta2
