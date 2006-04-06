@@ -15,7 +15,7 @@
 $Id$
 """
 
-from zope.app import zapi
+from zope.component import queryMultiAdapter
 
 from Products.GenericSetup.interfaces import INode
 from Products.GenericSetup.utils import NodeAdapterBase
@@ -198,7 +198,7 @@ class TopicIndexNodeAdapter(NodeAdapterBase):
         """
         node = self._getObjectNode('index')
         for set in self.context.filteredSets.values():
-            exporter = zapi.queryMultiAdapter((set, self.environ), INode)
+            exporter = queryMultiAdapter((set, self.environ), INode)
             node.appendChild(exporter.node)
         return node
 
@@ -212,7 +212,7 @@ class TopicIndexNodeAdapter(NodeAdapterBase):
                     set_meta_type = str(child.getAttribute('meta_type'))
                     self.context.addFilteredSet(set_id, set_meta_type, '')
                 set = self.context.filteredSets[set_id]
-                importer = zapi.queryMultiAdapter((set, self.environ), INode)
+                importer = queryMultiAdapter((set, self.environ), INode)
                 importer.node = child
         self.context.clear()
 

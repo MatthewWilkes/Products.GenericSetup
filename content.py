@@ -22,9 +22,9 @@ from ConfigParser import ConfigParser
 import re
 from StringIO import StringIO
 
+from zope.component import queryAdapter
 from zope.interface import implements
 from zope.interface import directlyProvides
-from zope.app import zapi
 
 from interfaces import IContentFactory
 from interfaces import IContentFactoryName
@@ -207,10 +207,10 @@ class FolderishExporterImporter(object):
                 factory = _factory
 
         else:
-            factory = zapi.queryAdapter(self.context,
-                                        IContentFactory,
-                                        name=type_name,
-                                       )
+            factory = queryAdapter(self.context,
+                                   IContentFactory,
+                                   name=type_name,
+                                   )
         if factory is None:
             return None
 

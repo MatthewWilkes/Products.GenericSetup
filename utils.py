@@ -37,7 +37,7 @@ except:
     #BBB: for Zope 2.8
     from Products.Five.bbb.OFS_interfaces import IOrderedContainer
 from cgi import escape
-from zope.app import zapi
+from zope.component import queryMultiAdapter
 from zope.interface import implements
 from zope.interface import implementsOnly
 from zope.interface import providedBy
@@ -531,7 +531,7 @@ class ObjectManagerHelpers(object):
             objects = list(objects)
             objects.sort(lambda x,y: cmp(x.getId(), y.getId()))
         for obj in objects:
-            exporter = zapi.queryMultiAdapter((obj, self.environ), INode)
+            exporter = queryMultiAdapter((obj, self.environ), INode)
             if exporter:
                 fragment.appendChild(exporter.node)
         return fragment
@@ -589,7 +589,7 @@ class ObjectManagerHelpers(object):
                         pass
 
             obj = getattr(self.context, obj_id)
-            importer = zapi.queryMultiAdapter((obj, self.environ), INode)
+            importer = queryMultiAdapter((obj, self.environ), INode)
             if importer:
                 importer.node = child
 
@@ -711,7 +711,7 @@ class PropertyManagerHelpers(object):
 def exportObjects(obj, parent_path, context):
     """ Export subobjects recursively.
     """
-    exporter = zapi.queryMultiAdapter((obj, context), IBody)
+    exporter = queryMultiAdapter((obj, context), IBody)
     path = '%s%s' % (parent_path, obj.getId().replace(' ', '_'))
     if exporter:
         if exporter.name:
@@ -728,7 +728,7 @@ def exportObjects(obj, parent_path, context):
 def importObjects(obj, parent_path, context):
     """ Import subobjects recursively.
     """
-    importer = zapi.queryMultiAdapter((obj, context), IBody)
+    importer = queryMultiAdapter((obj, context), IBody)
     path = '%s%s' % (parent_path, obj.getId().replace(' ', '_'))
     __traceback_info__ = path
     if importer:

@@ -22,7 +22,7 @@ from xml.dom.minidom import parseString
 
 import Products.Five
 from Products.Five import zcml
-from zope.app import zapi
+from zope.component import getMultiAdapter
 from zope.interface import implements
 from zope.interface.verify import verifyClass
 
@@ -89,25 +89,25 @@ class BodyAdapterTestCase(_AdapterTestCaseBase):
     def test_body_get(self):
         self._populate(self._obj)
         context = DummySetupEnviron()
-        adapted = zapi.getMultiAdapter((self._obj, context), IBody)
+        adapted = getMultiAdapter((self._obj, context), IBody)
         self.assertEqual(adapted.body, self._BODY)
 
     def test_body_set(self):
         context = DummySetupEnviron()
-        adapted = zapi.getMultiAdapter((self._obj, context), IBody)
+        adapted = getMultiAdapter((self._obj, context), IBody)
         adapted.body = self._BODY
         self._verifyImport(self._obj)
         self.assertEqual(adapted.body, self._BODY)
 
         # now in update mode
         context._should_purge = False
-        adapted = zapi.getMultiAdapter((self._obj, context), IBody)
+        adapted = getMultiAdapter((self._obj, context), IBody)
         adapted.body = self._BODY
         self._verifyImport(self._obj)
         self.assertEqual(adapted.body, self._BODY)
 
         # and again in update mode
-        adapted = zapi.getMultiAdapter((self._obj, context), IBody)
+        adapted = getMultiAdapter((self._obj, context), IBody)
         adapted.body = self._BODY
         self._verifyImport(self._obj)
         self.assertEqual(adapted.body, self._BODY)
@@ -120,25 +120,25 @@ class NodeAdapterTestCase(_AdapterTestCaseBase):
     def test_node_get(self):
         self._populate(self._obj)
         context = DummySetupEnviron()
-        adapted = zapi.getMultiAdapter((self._obj, context), INode)
+        adapted = getMultiAdapter((self._obj, context), INode)
         self.assertEqual(adapted.node.toprettyxml(' '), self._XML)
 
     def test_node_set(self):
         context = DummySetupEnviron()
-        adapted = zapi.getMultiAdapter((self._obj, context), INode)
+        adapted = getMultiAdapter((self._obj, context), INode)
         adapted.node = parseString(self._XML).documentElement
         self._verifyImport(self._obj)
         self.assertEqual(adapted.node.toprettyxml(' '), self._XML)
 
         # now in update mode
         context._should_purge = False
-        adapted = zapi.getMultiAdapter((self._obj, context), INode)
+        adapted = getMultiAdapter((self._obj, context), INode)
         adapted.node = parseString(self._XML).documentElement
         self._verifyImport(self._obj)
         self.assertEqual(adapted.node.toprettyxml(' '), self._XML)
 
         # and again in update mode
-        adapted = zapi.getMultiAdapter((self._obj, context), INode)
+        adapted = getMultiAdapter((self._obj, context), INode)
         adapted.node = parseString(self._XML).documentElement
         self._verifyImport(self._obj)
         self.assertEqual(adapted.node.toprettyxml(' '), self._XML)

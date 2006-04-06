@@ -21,7 +21,7 @@ import Zope2
 Zope2.startup()
 
 from Products.Five import zcml
-from zope.app import zapi
+from zope.component import getMultiAdapter
 
 from Products.GenericSetup.interfaces import IBody
 from Products.GenericSetup.testing import BodyAdapterTestCase
@@ -149,7 +149,7 @@ class ZCatalogXMLAdapterTests(BodyAdapterTestCase):
     def test_body_get_special(self):
         self._populate_special(self._obj)
         context = DummySetupEnviron()
-        adapted = zapi.getMultiAdapter((self._obj, context), IBody)
+        adapted = getMultiAdapter((self._obj, context), IBody)
         self.assertEqual(adapted.body,
                          _CATALOG_BODY % (_VOCABULARY_XML, _TEXT_XML))
 

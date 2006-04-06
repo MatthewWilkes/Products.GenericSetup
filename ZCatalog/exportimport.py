@@ -15,7 +15,7 @@
 $Id$
 """
 
-from zope.app import zapi
+from zope.component import queryMultiAdapter
 
 from Products.GenericSetup.interfaces import INode
 from Products.GenericSetup.utils import ObjectManagerHelpers
@@ -75,7 +75,7 @@ class ZCatalogXMLAdapter(XMLAdapterBase, ObjectManagerHelpers,
         indexes = self.context.getIndexObjects()[:]
         indexes.sort(lambda x,y: cmp(x.getId(), y.getId()))
         for idx in indexes:
-            exporter = zapi.queryMultiAdapter((idx, self.environ), INode)
+            exporter = queryMultiAdapter((idx, self.environ), INode)
             if exporter:
                 fragment.appendChild(exporter.node)
         return fragment
@@ -106,7 +106,7 @@ class ZCatalogXMLAdapter(XMLAdapterBase, ObjectManagerHelpers,
                 zcatalog.addIndex(idx_id, meta_type, extra)
 
             idx = zcatalog._catalog.getIndex(idx_id)
-            importer = zapi.queryMultiAdapter((idx, self.environ), INode)
+            importer = queryMultiAdapter((idx, self.environ), INode)
             if importer:
                 importer.node = child
 
