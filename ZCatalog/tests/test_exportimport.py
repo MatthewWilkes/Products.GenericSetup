@@ -68,12 +68,33 @@ _CATALOG_BODY = """\
 </object>
 """
 
+_CATALOG_UPDATE_BODY = """\
+<?xml version="1.0"?>
+<object name="foo_catalog">
+ <object name="foo_vocabulary" remove="True"/>
+ <index name="foo_text" remove="True"/>
+ <index name="foo_text" meta_type="ZCTextIndex">
+  <indexed_attr value="foo_text"/>
+  <extra name="index_type" value="Okapi BM25 Rank"/>
+  <extra name="lexicon_id" value="foo_plexicon"/>
+ </index>
+</object>
+"""
+
 _TEXT_XML = """\
  <index name="foo_text" meta_type="TextIndex" deprecated="True"/>
 """
 
 _VOCABULARY_XML = """\
  <object name="foo_vocabulary" meta_type="Vocabulary" deprecated="True"/>
+"""
+
+_ZCTEXT_XML = """\
+ <index name="foo_text" meta_type="ZCTextIndex">
+  <indexed_attr value="foo_text"/>
+  <extra name="index_type" value="Okapi BM25 Rank"/>
+  <extra name="lexicon_id" value="foo_plexicon"/>
+ </index>
 """
 
 
@@ -152,6 +173,14 @@ class ZCatalogXMLAdapterTests(BodyAdapterTestCase):
         adapted = getMultiAdapter((self._obj, context), IBody)
         self.assertEqual(adapted.body,
                          _CATALOG_BODY % (_VOCABULARY_XML, _TEXT_XML))
+
+    def test_body_set_update(self):
+        self._populate_special(self._obj)
+        context = DummySetupEnviron()
+        context._should_purge = False
+        adapted = getMultiAdapter((self._obj, context), IBody)
+        adapted.body = _CATALOG_UPDATE_BODY
+        self.assertEqual(adapted.body, _CATALOG_BODY % ('', _ZCTEXT_XML))
 
 
 def test_suite():

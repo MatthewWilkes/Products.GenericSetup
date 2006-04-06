@@ -2,7 +2,10 @@ GenericSetup Product Changelog
 
   GenericSetup 1.1 (unreleased)
 
-   - getExportStepRegistry had the wrong security declaration
+    - ZCatalog handler: Implemented the 'remove' directive for indexes.
+      This allows to write extension profiles that remove or replace indexes.
+
+    - getExportStepRegistry had the wrong security declaration
 
   GenericSetup 1.1-beta2 (2006/03/26)
 

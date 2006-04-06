@@ -93,6 +93,10 @@ class ZCatalogXMLAdapter(XMLAdapterBase, ObjectManagerHelpers,
             zcatalog = self.context
 
             idx_id = str(child.getAttribute('name'))
+            if child.hasAttribute('remove'):
+                zcatalog.delIndex(idx_id)
+                continue
+
             if idx_id not in zcatalog.indexes():
                 extra = _extra()
                 for sub in child.childNodes:
