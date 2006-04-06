@@ -1,5 +1,9 @@
 GenericSetup Product Changelog
 
+  GenericSetup 1.1 (unreleased)
+
+   - getExportStepRegistry had the wrong security declaration
+
   GenericSetup 1.1-beta2 (2006/03/26)
 
     No changes - tag created to coincide with CMF 2.0.0-beta2

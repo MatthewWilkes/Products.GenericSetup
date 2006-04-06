@@ -189,7 +189,7 @@ class SetupTool(Folder):
         """
         return self._import_registry
 
-    security.declareProtected(ManagePortal, 'getImportStepRegistry')
+    security.declareProtected(ManagePortal, 'getExportStepRegistry')
     def getExportStepRegistry(self):
 
         """ See ISetupTool.
