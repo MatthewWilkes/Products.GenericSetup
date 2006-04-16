@@ -1,6 +1,6 @@
 GenericSetup Product Changelog
 
-  GenericSetup 1.1 (unreleased)
+  GenericSetup 1.1 (2006/04/16)
 
     - ZCatalog handler: Implemented the 'remove' directive for indexes.
       This allows to write extension profiles that remove or replace indexes.
