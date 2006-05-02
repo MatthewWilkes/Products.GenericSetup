@@ -237,17 +237,37 @@ class ImportStepRegistry( Implicit ):
         graph = [ ( x[ 'id' ], x[ 'dependencies' ] )
                     for x in self._registered.values() ]
 
-        for node, edges in graph:
+        unresolved = []
 
-            after = -1
+        while 1:
+            for node, edges in graph:
+    
+                after = -1
+                resolved = 0
+    
+                for edge in edges:
+    
+                    if edge in result:
+                        resolved += 1
+                        after = max( after, result.index( edge ) )
+                
+                if len(edges) > resolved:
+                    unresolved.append((node, edges))
+                else:
+                    result.insert( after + 1, node )
 
-            for edge in edges:
-
-                if edge in result:
-                    after = max( after, result.index( edge ) )
-
-            result.insert( after + 1, node )
-
+            if not unresolved:
+                break
+            if len(unresolved) == len(graph):
+                # Nothing was resolved in this loop. There must be circular or
+                # missing dependencies. Just add them to the end. We can't
+                # raise an error, because checkComplete relies on this method.
+                for node, edges in unresolved:
+                    result.append(node)
+                break
+            graph = unresolved
+            unresolved = []
+        
         return result
 
     security.declarePrivate( '_exportTemplate' )

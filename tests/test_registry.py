@@ -152,11 +152,6 @@ class ImportStepRegistryTests( BaseRegistryTests
         steps = registry.listSteps()
         self.assertEqual( len( steps ), 1 )
         self.failUnless( 'one' in steps )
-
-        sorted = registry.sortSteps()
-        self.assertEqual( len( sorted ), 1 )
-        self.assertEqual( sorted[ 0 ], 'one' )
-
         self.assertEqual( registry.getStep( 'one' ), ONE_FUNC )
 
         info = registry.getStepMetadata( 'one' )
@@ -274,14 +269,14 @@ class ImportStepRegistryTests( BaseRegistryTests
         registry.registerStep( id='one'
                              , version='1'
                              , handler=ONE_FUNC
-                             , dependencies=( 'two', )
+                             , dependencies=( 'three', )
                              , title='One small step'
                              )
 
         registry.registerStep( id='two'
                              , version='2'
                              , handler=TWO_FUNC
-                             , dependencies=( 'three', )
+                             , dependencies=( 'one', )
                              , title='Texas two step'
                              )
 
@@ -291,14 +286,15 @@ class ImportStepRegistryTests( BaseRegistryTests
                              , dependencies=()
                              , title='Gimme three steps'
                              )
-
+       
         steps = registry.sortSteps()
         self.assertEqual( len( steps ), 3 )
         one = steps.index( 'one' )
         two = steps.index( 'two' )
         three = steps.index( 'three' )
 
-        self.failUnless( 0 <= three < two < one )
+        self.failUnless( 0 <= three < one < two )
+
 
     def test_sortStep_complex( self ):
 

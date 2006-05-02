@@ -1,6 +1,12 @@
 GenericSetup Product Changelog
 
   GenericSetup 1.1 (2006/04/16)
+    - The dependency sorting was highly reliant on steps being added in the
+      right order to work. If import step A depends on import step B which 
+      depends on step C, and step C gets processed early, and they were 
+      processed in the order A, C, B, then the dependency order would be 
+      incorrect. This is now fixed by keeping tack of steps with unresolved
+      dependencies, and trying again after inserting everything else.
 
     - ZCatalog handler: Implemented the 'remove' directive for indexes.
       This allows to write extension profiles that remove or replace indexes.
