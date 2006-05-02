@@ -19,7 +19,9 @@ from zope.interface import Interface
 from zope.schema import Text
 from zope.schema import TextLine
 
-BASE, EXTENSION = range(1, 3)
+# Please note that these values may change. Always import 
+# the values from here instead of using the values directly.
+BASE, EXTENSION = 1, 2
 SKIPPED_FILES = ('CVS', '.svn', '_svn', '_darcs')
 SKIPPED_SUFFIXES = ('~',)
 

@@ -53,7 +53,9 @@ _pkgdir = package_home( globals() )
 _wwwdir = os.path.join( _pkgdir, 'www' )
 _xmldir = os.path.join( _pkgdir, 'xml' )
 
-CONVERTER, DEFAULT, KEY = range(3)
+# Please note that these values may change. Always import 
+# the values from here instead of using the values directly.
+CONVERTER, DEFAULT, KEY = 1, 2, 3
 I18NURI = 'http://xml.zope.org/namespaces/i18n'
 
 
