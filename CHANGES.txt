@@ -1,6 +1,12 @@
 GenericSetup Product Changelog
 
+  GenericSetup 1.2 (unreleased)
+
+    - Added support for PageTemplate import/export, modeled closely after
+      existing PythonScript support
+
   GenericSetup 1.1 (2006/04/16)
+
     - The dependency sorting was highly reliant on steps being added in the
       right order to work. If import step A depends on import step B which 
       depends on step C, and step C gets processed early, and they were 

@@ -10,6 +10,8 @@
 
   <include package=".PythonScripts"/>
 
+  <include package=".PageTemplates"/>
+
   <include package=".ZCatalog"/>
 
   <include package=".ZCTextIndex"/>
