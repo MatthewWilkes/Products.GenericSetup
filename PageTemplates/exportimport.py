@@ -27,10 +27,14 @@ class PageTemplateBodyAdapter(BodyAdapterBase):
 
     __used_for__ = IPageTemplate
 
+    mime_type = 'text/html'
+    suffix = '.pt'
+    supported_meta_type = 'Page Template'
+    
     def _exportBody(self):
         """Export the object as a file body.
         """
-        if self.context.meta_type == 'Page Template':
+        if self.context.meta_type == self.supported_meta_type:
             return self.context.read()
         return None
 
@@ -40,7 +44,3 @@ class PageTemplateBodyAdapter(BodyAdapterBase):
         self.context.write(body)
 
     body = property(_exportBody, _importBody)
-
-    mime_type = 'text/html'
-
-    suffix = '.pt'
