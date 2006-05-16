@@ -10,7 +10,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""PythonScript export / import support.
+"""PageTemplate export / import support.
 
 $Id$
 """
@@ -22,7 +22,7 @@ from interfaces import IPageTemplate
 
 class PageTemplateBodyAdapter(BodyAdapterBase):
 
-    """Body im- and exporter for PythonScript.
+    """Body im- and exporter for PageTemplate.
     """
 
     __used_for__ = IPageTemplate
@@ -30,7 +30,7 @@ class PageTemplateBodyAdapter(BodyAdapterBase):
     mime_type = 'text/html'
     suffix = '.pt'
     supported_meta_type = 'Page Template'
-    
+
     def _exportBody(self):
         """Export the object as a file body.
         """

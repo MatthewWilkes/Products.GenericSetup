@@ -25,9 +25,6 @@ class IPageTemplate(Interface):
 
     def read():
         """Generate a text representation of the Template source.
-
-        Includes specially formatted comment lines for parameters, bindings
-        and the title.
         """
 
     def write(text):

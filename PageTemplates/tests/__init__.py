@@ -10,7 +10,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""PythonScript support tests.
+"""PageTemplate support tests.
 
 $Id$
 """
