@@ -10,6 +10,30 @@ Profiles
     can't export extension profiles. Snapshots and exports always represent
     the merged settings.
 
+  Registering Profiles
+
+    By convention profiles are stored in a 'profiles' directory within a Zope
+    product. They have to be registered explicitly with a registerProfile call
+    in the __init__.py of the product.
+
+    Here is example code for MyProduct that extends BaseProduct::
+
+      from Products.BaseProduct.interfaces import IBaseRoot
+      from Products.GenericSetup import EXTENSION
+      from Products.GenericSetup import profile_registry
+
+      def initialize(context):
+          profile_registry.registerProfile(
+                  name='install',
+                  title='Install MyProduct Extension',
+                  description='Adds local settings necessary for MyProduct.',
+                  path='profiles/install',
+                  product='MyProduct',
+                  profile_type=EXTENSION,
+                  for_=IBaseRoot)
+
+    See IProfileRegistry.registerProfile for further details.
+
   Update Directives
 
     For some XML elements there are additional attributes and values to

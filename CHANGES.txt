@@ -2,10 +2,10 @@ GenericSetup Product Changelog
 
   GenericSetup 1.2 (unreleased)
 
+    - docs: Added 'Registering Profiles' section to profiles.txt.
+
     - Added support for PageTemplate import/export, modeled closely after
       existing PythonScript support
-
-  GenericSetup 1.1 (2006/04/16)
 
     - The dependency sorting was highly reliant on steps being added in the
       right order to work. If import step A depends on import step B which 
@@ -13,6 +13,8 @@ GenericSetup Product Changelog
       processed in the order A, C, B, then the dependency order would be 
       incorrect. This is now fixed by keeping tack of steps with unresolved
       dependencies, and trying again after inserting everything else.
+
+  GenericSetup 1.1 (2006/04/16)
 
     - ZCatalog handler: Implemented the 'remove' directive for indexes.
       This allows to write extension profiles that remove or replace indexes.
@@ -22,7 +24,6 @@ GenericSetup Product Changelog
   GenericSetup 1.1-beta2 (2006/03/26)
 
     No changes - tag created to coincide with CMF 2.0.0-beta2
-
 
   GenericSetup 1.1-beta (2006/03/08)
 

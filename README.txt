@@ -26,6 +26,15 @@ GenericSetup Product README
     Third-party products extend the tool by registering handlers for
     import / export of their unique tools.
 
+    See doc/handlers.txt for a step by step how-to.
+
+  Providing Profiles
+
+    GenericSetup doesn't ship with any profile. They have to be provided by
+    third-party products and depend on the registered handlers.
+
+    See doc/profiles.txt for more details.
+
   Glossary
 
     Site --
