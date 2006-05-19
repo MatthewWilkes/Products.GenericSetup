@@ -107,7 +107,7 @@ class ZCTextIndexNodeAdapter(NodeAdapterBase):
             if child.nodeName == 'indexed_attr':
                 indexed_attrs.append(
                                   child.getAttribute('value').encode('utf-8'))
-        self.context.indexed_attrs = indexed_attrs
+        self.context._indexed_attrs = indexed_attrs
         self.context.clear()
 
     node = property(_exportNode, _importNode)

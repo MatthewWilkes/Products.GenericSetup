@@ -2,6 +2,9 @@ GenericSetup Product Changelog
 
   GenericSetup 1.2 (unreleased)
 
+    - ZCTextIndex handler: Fixed 'indexed_attr' import.
+      (http://www.zope.org/Collectors/CMF/436)
+
     - docs: Added 'Registering Profiles' section to profiles.txt.
 
     - Added support for PageTemplate import/export, modeled closely after

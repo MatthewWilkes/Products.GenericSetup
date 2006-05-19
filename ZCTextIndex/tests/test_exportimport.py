@@ -34,6 +34,7 @@ _PLEXICON_XML = """\
 _ZCTEXT_XML = """\
 <index name="foo_zctext" meta_type="ZCTextIndex">
  <indexed_attr value="foo_zctext"/>
+ <indexed_attr value="baz_zctext"/>
  <extra name="index_type" value="Okapi BM25 Rank"/>
  <extra name="lexicon_id" value="foo_plexicon"/>
 </index>
@@ -82,6 +83,9 @@ class ZCTextIndexNodeAdapterTests(NodeAdapterTestCase):
                 import ZCTextIndexNodeAdapter
 
         return ZCTextIndexNodeAdapter
+
+    def _populate(self, obj):
+        obj._indexed_attrs = ['foo_zctext', 'baz_zctext']
 
     def setUp(self):
         import Products.GenericSetup.ZCTextIndex
