@@ -22,7 +22,9 @@ from tarfile import TarFile
 from Acquisition import Implicit
 from Testing.ZopeTestCase import ZopeTestCase
 from zope.interface import implements
+from zope.testing.cleanup import cleanUp
 
+from Products.Five import zcml
 from Products.GenericSetup.interfaces import IExportContext
 from Products.GenericSetup.interfaces import IImportContext
 from Products.GenericSetup.testing import DummyLogger
@@ -45,10 +47,19 @@ class OmnipotentUser(Implicit):
     def getRolesInContext(self, object):
         return ('Manager',)
 
+
 class SecurityRequestTest(ZopeTestCase):
+
     def setUp(self):
+        import Products
         from AccessControl.SecurityManagement import newSecurityManager
         ZopeTestCase.setUp(self)
+        try:
+            # BBB: for Zope 2.9
+            from Products.Five.traversable import FiveTraversable
+        except ImportError:
+            zcml.load_config('meta.zcml', Products.Five)
+            zcml.load_config('traversing.zcml', Products.Five)
         self.root = self.app
         newSecurityManager(None, OmnipotentUser().__of__(self.app.acl_users))
 
@@ -56,6 +67,8 @@ class SecurityRequestTest(ZopeTestCase):
         from AccessControl.SecurityManagement import noSecurityManager
         noSecurityManager()
         ZopeTestCase.tearDown(self)
+        cleanUp()
+
 
 class DOMComparator:
 
@@ -92,12 +105,14 @@ class DOMComparator:
 
         self.assertEqual( found.toxml(), expected.toxml() )
 
+
 class BaseRegistryTests( SecurityRequestTest, DOMComparator ):
 
     def _makeOne( self, *args, **kw ):
 
         # Derived classes must implement _getTargetClass
         return self._getTargetClass()( *args, **kw )
+
 
 def _clearTestDirectory( root_path ):
 
@@ -119,6 +134,7 @@ def _makeTestFile( filename, root_path, contents ):
     file.write( contents )
     file.close()
     return fqpath
+
 
 class FilesystemTestBase( SecurityRequestTest ):
 
