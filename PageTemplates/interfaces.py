@@ -18,7 +18,7 @@ $Id$
 from zope.interface import Interface
 
 
-class IPageTemplate(Interface):
+class IZopePageTemplate(Interface):
 
     """Page Templates using TAL, TALES, and METAL.
     """

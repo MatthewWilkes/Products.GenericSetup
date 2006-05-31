@@ -30,33 +30,32 @@ _PAGETEMPLATE_BODY = """\
 """
 
 
-class PageTemplateBodyAdapterTests(BodyAdapterTestCase):
+class ZopePageTemplateBodyAdapterTests(BodyAdapterTestCase):
 
     def _getTargetClass(self):
         from Products.GenericSetup.PageTemplates.exportimport \
-                import PageTemplateBodyAdapter
+                import ZopePageTemplateBodyAdapter
 
-        return PageTemplateBodyAdapter
+        return ZopePageTemplateBodyAdapter
 
     def _populate(self, obj):
         obj.write(_PAGETEMPLATE_BODY)
 
     def setUp(self):
         import Products.GenericSetup.PageTemplates
-        from Products.PageTemplates.PageTemplate import PageTemplate
+        from Products.PageTemplates.ZopePageTemplate import ZopePageTemplate
 
         BodyAdapterTestCase.setUp(self)
         zcml.load_config('configure.zcml',
                          Products.GenericSetup.PageTemplates)
 
-        self._obj = PageTemplate('foo_template')
-        self._obj.meta_type = 'Page Template'
+        self._obj = ZopePageTemplate('foo_template')
         self._BODY = _PAGETEMPLATE_BODY
 
 
 def test_suite():
     return unittest.TestSuite((
-        unittest.makeSuite(PageTemplateBodyAdapterTests),
+        unittest.makeSuite(ZopePageTemplateBodyAdapterTests),
         ))
 
 if __name__ == '__main__':

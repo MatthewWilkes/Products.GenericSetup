@@ -4,15 +4,15 @@
     >
 
   <adapter
-      factory=".exportimport.PageTemplateBodyAdapter"
+      factory=".exportimport.ZopePageTemplateBodyAdapter"
       provides="Products.GenericSetup.interfaces.IBody"
-      for=".interfaces.IPageTemplate
+      for=".interfaces.IZopePageTemplate
            Products.GenericSetup.interfaces.ISetupEnviron"
       />
 
   <five:implements
-      class="Products.PageTemplates.PageTemplate.PageTemplate"
-      interface=".interfaces.IPageTemplate"
+      class="Products.PageTemplates.ZopePageTemplate.ZopePageTemplate"
+      interface=".interfaces.IZopePageTemplate"
       />
 
 </configure>

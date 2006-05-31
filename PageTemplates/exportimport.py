@@ -17,26 +17,20 @@ $Id$
 
 from Products.GenericSetup.utils import BodyAdapterBase
 
-from interfaces import IPageTemplate
+from interfaces import IZopePageTemplate
 
 
-class PageTemplateBodyAdapter(BodyAdapterBase):
+class ZopePageTemplateBodyAdapter(BodyAdapterBase):
 
-    """Body im- and exporter for PageTemplate.
+    """Body im- and exporter for ZopePageTemplate.
     """
 
-    __used_for__ = IPageTemplate
-
-    mime_type = 'text/html'
-    suffix = '.pt'
-    supported_meta_type = 'Page Template'
+    __used_for__ = IZopePageTemplate
 
     def _exportBody(self):
         """Export the object as a file body.
         """
-        if self.context.meta_type == self.supported_meta_type:
-            return self.context.read()
-        return None
+        return self.context.read()
 
     def _importBody(self, body):
         """Import the object from the file body.
@@ -44,3 +38,7 @@ class PageTemplateBodyAdapter(BodyAdapterBase):
         self.context.write(body)
 
     body = property(_exportBody, _importBody)
+
+    mime_type = 'text/html'
+
+    suffix = '.pt'
