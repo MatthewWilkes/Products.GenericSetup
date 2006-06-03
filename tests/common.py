@@ -22,7 +22,6 @@ from tarfile import TarFile
 from Acquisition import Implicit
 from Testing.ZopeTestCase import ZopeTestCase
 from zope.interface import implements
-from zope.testing.cleanup import cleanUp
 
 from Products.Five import zcml
 from Products.GenericSetup.interfaces import IExportContext
@@ -67,7 +66,12 @@ class SecurityRequestTest(ZopeTestCase):
         from AccessControl.SecurityManagement import noSecurityManager
         noSecurityManager()
         ZopeTestCase.tearDown(self)
-        cleanUp()
+        try:
+            from zope.testing.cleanup import cleanUp
+            cleanUp()
+        except ImportError:
+            # BBB: for Zope 2.8
+            pass
 
 
 class DOMComparator:
