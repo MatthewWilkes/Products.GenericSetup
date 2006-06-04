@@ -17,8 +17,6 @@ $Id$
 
 import unittest
 import Testing
-import Zope2
-Zope2.startup()
 
 from OFS.Folder import Folder
 from Products.GenericSetup.tests.common import BaseRegistryTests

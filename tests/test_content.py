@@ -17,8 +17,6 @@ $Id$
 
 import unittest
 import Testing
-import Zope2
-Zope2.startup()
 
 from csv import reader
 from ConfigParser import ConfigParser

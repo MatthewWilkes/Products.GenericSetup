@@ -17,8 +17,6 @@ $Id$
 
 import unittest
 import Testing
-import Zope2
-Zope2.startup()
 
 from OFS.Folder import Folder
 from OFS.Image import File
@@ -26,6 +24,7 @@ from OFS.Image import File
 from DateTime.DateTime import DateTime
 
 from common import SecurityRequestTest
+
 
 class DummySite( Folder ):
 
@@ -398,8 +397,8 @@ Index: sub/again.txt
 
 def test_suite():
     return unittest.TestSuite((
-        unittest.makeSuite( Test_unidiff ),
-        unittest.makeSuite( ConfigDiffTests ),
+        unittest.makeSuite(Test_unidiff),
+        unittest.makeSuite(ConfigDiffTests),
         ))
 
 if __name__ == '__main__':

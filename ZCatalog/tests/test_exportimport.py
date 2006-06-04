@@ -16,9 +16,8 @@ $Id$
 """
 
 import unittest
-import Testing
-import Zope2
-Zope2.startup()
+from Testing import ZopeTestCase
+ZopeTestCase.installProduct('ZCTextIndex', 1)
 
 from Products.Five import zcml
 from zope.component import getMultiAdapter

@@ -17,14 +17,13 @@ $Id$
 
 import unittest
 import Testing
-import Zope2
-Zope2.startup()
 
 from OFS.Folder import Folder
 
 from common import BaseRegistryTests
 from common import DummyExportContext
 from common import DummyImportContext
+
 
 class RolemapConfiguratorTests( BaseRegistryTests ):
 
