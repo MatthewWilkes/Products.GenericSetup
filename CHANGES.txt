@@ -2,6 +2,14 @@ GenericSetup Product Changelog
 
   GenericSetup 1.2 (unreleased)
 
+    - ProfileRegistry: Added 'registerProfile' ZCML directive.
+      Using the old registerProfile method in initialize() is now deprecated.
+      See doc/profiles.txt for details.
+
+    - ProfileRegistry: 'product' should now be the module name.
+      For backwards compatibility 'product' is still first looked up in
+      Products before searching the default module search path.
+
     - ZCTextIndex handler: Fixed 'indexed_attr' import.
       (http://www.zope.org/Collectors/CMF/436)
 

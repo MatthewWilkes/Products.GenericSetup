@@ -13,24 +13,36 @@ Profiles
   Registering Profiles
 
     By convention profiles are stored in a 'profiles' directory within a Zope
-    product. They have to be registered explicitly with a registerProfile call
-    in the __init__.py of the product.
+    product. They have to be registered explicitly using registerProfile.
 
-    Here is example code for MyProduct that extends BaseProduct::
+    Here is example ZCML for MyProduct that extends BaseProduct::
+
+      <genericsetup:registerProfile
+          name="install"
+          title="Install MyProduct Extension"
+          description="Adds local settings necessary for MyProduct."
+          provides="Products.GenericSetup.interfaces.EXTENSION"
+          for="Products.BaseProduct.interfaces.IBaseRoot"
+          />
+
+    See zcml.IRegisterProfileDirective for further details.
+
+    Alternatively the registerProfile method can be called. Using this for
+    product initialization is deprecated. Here is the code for the same
+    example::
 
       from Products.BaseProduct.interfaces import IBaseRoot
       from Products.GenericSetup import EXTENSION
       from Products.GenericSetup import profile_registry
 
-      def initialize(context):
-          profile_registry.registerProfile(
-                  name='install',
-                  title='Install MyProduct Extension',
-                  description='Adds local settings necessary for MyProduct.',
-                  path='profiles/install',
-                  product='MyProduct',
-                  profile_type=EXTENSION,
-                  for_=IBaseRoot)
+      profile_registry.registerProfile(
+              name='install',
+              title='Install MyProduct Extension',
+              description='Adds local settings necessary for MyProduct.',
+              path='profiles/install',
+              product='Products.MyProduct',
+              profile_type=EXTENSION,
+              for_=IBaseRoot)
 
     See IProfileRegistry.registerProfile for further details.
 

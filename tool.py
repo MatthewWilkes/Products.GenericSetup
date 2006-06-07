@@ -602,10 +602,16 @@ class SetupTool(Folder):
         """ Return the absolute path of the product's directory.
         """
         try:
+            # BBB: for GenericSetup 1.1 style product names
             product = __import__('Products.%s' % product_name
                                 , globals(), {}, ['initialize'])
         except ImportError:
-            raise ValueError, 'Not a valid product name: %s' % product_name
+            try:
+                product = __import__(product_name
+                                    , globals(), {}, ['initialize'])
+            except ImportError:
+                raise ValueError('Not a valid product name: %s'
+                                 % product_name)
 
         return product.__path__[0]
 
