@@ -46,6 +46,7 @@ from exceptions import BadRequest
 from interfaces import IBody
 from interfaces import INode
 from interfaces import ISetupContext
+from interfaces import ISetupTool
 from permissions import ManagePortal
 
 
@@ -461,6 +462,8 @@ class BodyAdapterBase(NodeAdapterBase):
     def _exportSimpleNode(self):
         """Export the object as a DOM node.
         """
+        if ISetupTool.providedBy(self.context):
+            return None
         return self._getObjectNode('object', False)
 
     def _importSimpleNode(self, node):
@@ -521,6 +524,7 @@ class XMLAdapterBase(BodyAdapterBase):
 
     filename = '' # for error reporting during import
 
+
 class ObjectManagerHelpers(object):
 
     """ObjectManager im- and export helpers.
@@ -535,11 +539,15 @@ class ObjectManagerHelpers(object):
         for obj in objects:
             exporter = queryMultiAdapter((obj, self.environ), INode)
             if exporter:
-                fragment.appendChild(exporter.node)
+                node = exporter.node
+                if node is not None:
+                    fragment.appendChild(exporter.node)
         return fragment
 
     def _purgeObjects(self):
-        for obj_id in self.context.objectIds():
+        for obj_id, obj in self.context.objectItems():
+            if ISetupTool.providedBy(obj):
+                continue
             self.context._delObject(obj_id)
 
     def _initObjects(self, node):
