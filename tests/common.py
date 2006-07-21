@@ -54,11 +54,12 @@ class SecurityRequestTest(ZopeTestCase):
         from AccessControl.SecurityManagement import newSecurityManager
         ZopeTestCase.setUp(self)
         try:
-            # BBB: for Zope 2.9
-            from Products.Five.traversable import FiveTraversable
-        except ImportError:
+            import zope.traversing
             zcml.load_config('meta.zcml', Products.Five)
             zcml.load_config('traversing.zcml', Products.Five)
+        except ImportError:
+            # BBB: for Zope 2.9
+            pass
         self.root = self.app
         newSecurityManager(None, OmnipotentUser().__of__(self.app.acl_users))
 
