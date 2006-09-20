@@ -11,7 +11,7 @@ procedure, in order to pick up changes since the site was created.
 
 <h3>Available Import Steps</h3>
 
-<form action="." method="POST"
+<form action="." method="POST" enctype="multipart/form-data"
       tal:attributes="action context/absolute_url" >
 <input type="hidden" name="ids:default:tokens" value="" />
 
@@ -70,6 +70,12 @@ procedure, in order to pick up changes since the site was created.
     <input class="form-element" type="submit"
            name="manage_importAllSteps:method"
            value=" Import all steps " />
+      
+    <input class="form-element" type="file"
+           name="tarball" />
+    <input class="form-element" type="submit"
+           name="manage_importTarball:method"
+           value=" Import uploaded tarball " />
    </td>
   </tr>
  </tbody>

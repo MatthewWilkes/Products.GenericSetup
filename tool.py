@@ -35,6 +35,7 @@ from permissions import ManagePortal
 from context import DirectoryImportContext
 from context import SnapshotImportContext
 from context import TarballExportContext
+from context import TarballImportContext
 from context import SnapshotExportContext
 from differ import ConfigDiff
 from registry import ImportStepRegistry
@@ -177,10 +178,15 @@ class SetupTool(Folder):
         """ See ISetupTool.
         """
         self._import_context_id = context_id
+        context = self._getImportContext(context_id)
 
-        self._updateImportStepsRegistry(encoding)
-        self._updateExportStepsRegistry(encoding)
-        self._updateToolsetRegistry(encoding)
+        self.applyContext(context, encoding)
+
+    security.declareProtected(ManagePortal, 'applyContext')
+    def applyContext(self, context, encoding=None):
+        self._updateImportStepsRegistry(context, encoding)
+        self._updateExportStepsRegistry(context, encoding)
+        self._updateToolsetRegistry(context, encoding)
 
     security.declareProtected(ManagePortal, 'getImportStepRegistry')
     def getImportStepRegistry(self):
@@ -244,18 +250,7 @@ class SetupTool(Folder):
 
         context = self._getImportContext(self._import_context_id, purge_old)
 
-        steps = self._import_registry.sortSteps()
-        messages = {}
-
-        for step in steps:
-            message = self._doRunImportStep(step, context)
-            message_list = filter(None, [message])
-            message_list.extend( ['%s: %s' % x[1:]
-                                  for x in context.listNotes()] )
-            messages[step] = '\n'.join(message_list)
-            context.clearNotes()
-
-        return { 'steps' : steps, 'messages' : messages }
+        return self._runImportStepsFromContext(context, purge_old=purge_old)
 
     security.declareProtected(ManagePortal, 'runExportStep')
     def runExportStep(self, step_id):
@@ -436,6 +431,29 @@ class SetupTool(Folder):
         """ Import all steps.
         """
         result = self.runAllImportSteps()
+        steps_run = 'Steps run: %s' % ', '.join(result['steps'])
+
+        if create_report:
+            name = self._mangleTimestampName('import-all', 'log')
+            self._createReport(name, result['steps'], result['messages'])
+
+        return self.manage_importSteps(manage_tabs_message=steps_run,
+                                       messages=result['messages'])
+
+    security.declareProtected(ManagePortal, 'manage_importTarball')
+    def manage_importTarball(self, tarball, RESPONSE, create_report=True):
+        """ Import steps from the uploaded tarball.
+        """
+        if getattr(tarball, 'read', None) is not None:
+            tarball = tarball.read()
+
+        context = TarballImportContext(tool=self,
+                                       archive_bits=tarball,
+                                       encoding='UTF8',
+                                       should_purge=True,
+                                      )
+        result = self._runImportStepsFromContext(context,
+                                                 purge_old=True)
         steps_run = 'Steps run: %s' % ', '.join(result['steps'])
 
         if create_report:
@@ -643,11 +661,12 @@ class SetupTool(Folder):
         return SnapshotImportContext(self, context_id, should_purge, encoding)
 
     security.declarePrivate('_updateImportStepsRegistry')
-    def _updateImportStepsRegistry(self, encoding):
+    def _updateImportStepsRegistry(self, context, encoding):
 
         """ Update our import steps registry from our profile.
         """
-        context = self._getImportContext(self._import_context_id)
+        if context is None:
+            context = self._getImportContext(self._import_context_id)
         xml = context.readDataFile(IMPORT_STEPS_XML)
         if xml is None:
             return
@@ -673,11 +692,12 @@ class SetupTool(Folder):
                                               )
 
     security.declarePrivate('_updateExportStepsRegistry')
-    def _updateExportStepsRegistry(self, encoding):
+    def _updateExportStepsRegistry(self, context, encoding):
 
         """ Update our export steps registry from our profile.
         """
-        context = self._getImportContext(self._import_context_id)
+        if context is None:
+            context = self._getImportContext(self._import_context_id)
         xml = context.readDataFile(EXPORT_STEPS_XML)
         if xml is None:
             return
@@ -699,11 +719,12 @@ class SetupTool(Folder):
                                               )
 
     security.declarePrivate('_updateToolsetRegistry')
-    def _updateToolsetRegistry(self, encoding):
+    def _updateToolsetRegistry(self, context, encoding):
 
         """ Update our toolset registry from our profile.
         """
-        context = self._getImportContext(self._import_context_id)
+        if context is None:
+            context = self._getImportContext(self._import_context_id)
         xml = context.readDataFile(TOOLSET_XML)
         if xml is None:
             return
@@ -741,12 +762,29 @@ class SetupTool(Folder):
 
             messages[step_id] = handler(context)
 
-
         return { 'steps' : steps
                , 'messages' : messages
                , 'tarball' : context.getArchive()
                , 'filename' : context.getArchiveFilename()
                }
+
+    security.declarePrivate('_runImportStepsFromContext')
+    def _runImportStepsFromContext(self, context, steps=None, purge_old=None):
+        self.applyContext(context)
+
+        if steps is None:
+            steps = self._import_registry.sortSteps()
+        messages = {}
+
+        for step in steps:
+            message = self._doRunImportStep(step, context)
+            message_list = filter(None, [message])
+            message_list.extend( ['%s: %s' % x[1:]
+                                  for x in context.listNotes()] )
+            messages[step] = '\n'.join(message_list)
+            context.clearNotes()
+
+        return { 'steps' : steps, 'messages' : messages }
 
     security.declarePrivate('_mangleTimestampName')
     def _mangleTimestampName(self, prefix, ext=None):

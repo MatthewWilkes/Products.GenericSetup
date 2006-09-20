@@ -2,6 +2,9 @@ GenericSetup Product Changelog
 
   GenericSetup 1.2 (unreleased)
 
+    - tool:  Added support for uploading a tarball on the "Import" tab
+      (i.e., one produced on the export tab).
+
     - docs: Added SampleSite demo product.
 
     - ProfileRegistry: Added 'registerProfile' ZCML directive.

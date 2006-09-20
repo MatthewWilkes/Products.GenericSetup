@@ -453,6 +453,12 @@ class ISetupTool( Interface ):
         """ Get the ID of the active import context.
         """
 
+    def applyContext( context, encoding=None ):
+
+        """ Update the tool from the supplied context, without modifying its
+            "permanent" ID.
+        """
+
     def setImportContext( context_id ):
 
         """ Set the ID of the active import context and update the registries.

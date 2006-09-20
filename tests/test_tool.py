@@ -585,6 +585,64 @@ class SetupToolTests( FilesystemTestBase
         self.assertEqual( info[ 'id' ], 'default' )
         self.assertEqual( info[ 'title' ], 'default' )
 
+    def test_applyContext(self):
+        from Products.GenericSetup.tool import IMPORT_STEPS_XML
+        from Products.GenericSetup.tool import EXPORT_STEPS_XML
+        from Products.GenericSetup.tool import TOOLSET_XML
+        from test_registry import _SINGLE_IMPORT_XML
+        from test_registry import _SINGLE_EXPORT_XML
+        from test_registry import _NORMAL_TOOLSET_XML
+        from test_registry import ONE_FUNC
+
+        site = self._makeSite()
+        tool = self._makeOne('setup_tool').__of__(site)
+        tool.getImportStepRegistry().clear()
+        tool.getExportStepRegistry().clear()
+        tool.getToolsetRegistry().clear()
+
+        context = DummyImportContext( site, tool=tool )
+        context._files[ IMPORT_STEPS_XML ] = _SINGLE_IMPORT_XML
+        context._files[ EXPORT_STEPS_XML ] = _SINGLE_EXPORT_XML
+        context._files[ TOOLSET_XML ] = _NORMAL_TOOLSET_XML
+
+        tool.applyContext(context)
+
+        import_registry = tool.getImportStepRegistry()
+        self.assertEqual( len( import_registry.listSteps() ), 1 )
+        self.failUnless( 'one' in import_registry.listSteps() )
+        info = import_registry.getStepMetadata( 'one' )
+        self.assertEqual( info[ 'id' ], 'one' )
+        self.assertEqual( info[ 'title' ], 'One Step' )
+        self.assertEqual( info[ 'version' ], '1' )
+        self.failUnless( 'One small step' in info[ 'description' ] )
+        self.assertEqual( info[ 'handler' ]
+                        , 'Products.GenericSetup.tests.test_registry.ONE_FUNC' )
+
+        self.assertEqual( import_registry.getStep( 'one' ), ONE_FUNC )
+
+        export_registry = tool.getExportStepRegistry()
+        self.assertEqual( len( export_registry.listSteps() ), 1 )
+        self.failUnless( 'one' in import_registry.listSteps() )
+        info = export_registry.getStepMetadata( 'one' )
+        self.assertEqual( info[ 'id' ], 'one' )
+        self.assertEqual( info[ 'title' ], 'One Step' )
+        self.failUnless( 'One small step' in info[ 'description' ] )
+        self.assertEqual( info[ 'handler' ]
+                        , 'Products.GenericSetup.tests.test_registry.ONE_FUNC' )
+
+        self.assertEqual( export_registry.getStep( 'one' ), ONE_FUNC )
+
+        toolset = tool.getToolsetRegistry()
+        self.assertEqual( len( toolset.listForbiddenTools() ), 1 )
+        self.failUnless( 'doomed' in toolset.listForbiddenTools() )
+        self.assertEqual( len( toolset.listRequiredTools() ), 2 )
+        self.failUnless( 'mandatory' in toolset.listRequiredTools() )
+        info = toolset.getRequiredToolInfo( 'mandatory' )
+        self.assertEqual( info[ 'class' ], 'path.to.one' )
+        self.failUnless( 'obligatory' in toolset.listRequiredTools() )
+        info = toolset.getRequiredToolInfo( 'obligatory' )
+        self.assertEqual( info[ 'class' ], 'path.to.another' )
+
 
 _DEFAULT_STEP_REGISTRIES_EXPORT_XML = """\
 <?xml version="1.0"?>
