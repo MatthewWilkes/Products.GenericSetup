@@ -285,8 +285,8 @@ class TarballImportContext( BaseContext ):
 
     security = ClassSecurityInfo()
 
-    def __init__( self, tool, archive_bits, encoding=None, should_purge=False ):
-
+    def __init__( self, tool, archive_bits, encoding=None,
+                  should_purge=False ):
         BaseContext.__init__( self, tool, encoding )
         timestamp = time.gmtime()
         self._archive_stream = StringIO(archive_bits)

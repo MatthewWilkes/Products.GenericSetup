@@ -104,10 +104,10 @@ class FolderishExporterImporter(object):
             csv_writer.writerow((object_id, factory_name))
 
         export_context.writeDataFile('.objects',
-                                     text=stream.getvalue(),
-                                     content_type='text/comma-separated-values',
-                                     subdir=subdir,
-                                    )
+                                    text=stream.getvalue(),
+                                    content_type='text/comma-separated-values',
+                                    subdir=subdir,
+                                   )
 
         prop_adapter = IINIAware(context, None)
 

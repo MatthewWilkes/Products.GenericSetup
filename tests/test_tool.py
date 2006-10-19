@@ -175,7 +175,7 @@ class SetupToolTests( FilesystemTestBase
         self.assertEqual( info[ 'version' ], '1' )
         self.failUnless( 'One small step' in info[ 'description' ] )
         self.assertEqual( info[ 'handler' ]
-                        , 'Products.GenericSetup.tests.test_registry.ONE_FUNC' )
+                        , 'Products.GenericSetup.tests.test_registry.ONE_FUNC')
 
         self.assertEqual( import_registry.getStep( 'one' ), ONE_FUNC )
 
@@ -187,7 +187,7 @@ class SetupToolTests( FilesystemTestBase
         self.assertEqual( info[ 'title' ], 'One Step' )
         self.failUnless( 'One small step' in info[ 'description' ] )
         self.assertEqual( info[ 'handler' ]
-                        , 'Products.GenericSetup.tests.test_registry.ONE_FUNC' )
+                        , 'Products.GenericSetup.tests.test_registry.ONE_FUNC')
 
         self.assertEqual( export_registry.getStep( 'one' ), ONE_FUNC )
 
