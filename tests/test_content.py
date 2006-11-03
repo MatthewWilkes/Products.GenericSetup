@@ -152,7 +152,10 @@ class FolderishExporterImporterTests(PlacelessSetup,
 
     def _setUpAdapters(self):
         from OFS.Folder import Folder
-        from zope.app.tests import ztapi
+        try:
+            from zope.app.testing import ztapi
+        except ImportError:  # BBB, Zope3 < 3.1
+            from zope.app.tests import ztapi
         #from OFS.Image import File
 
         from Products.GenericSetup.interfaces import IFilesystemExporter
