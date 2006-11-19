@@ -52,4 +52,8 @@
       for="Products.GenericSetup.interfaces.IDAVAware"
       />
 
+  <adapter
+      factory=".components.ComponentRegistryXMLAdapter"
+      />
+
 </configure>

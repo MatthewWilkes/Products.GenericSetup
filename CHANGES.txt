@@ -1,5 +1,11 @@
 GenericSetup Product Changelog
 
+  GenericSetup 1.2 (unreleased)
+
+    - Added support for importing/exporting Zope 3 component registries
+      by folding in Hanno Schlichting's GSLocalAddons product.
+
+
   GenericSetup 1.2-beta (2006/09/20)
 
     - tool:  Added support for uploading a tarball on the "Import" tab
