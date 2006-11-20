@@ -15,6 +15,9 @@
 $Id$
 """
 
+from zope.component import adapts
+
+from Products.GenericSetup.interfaces import ISetupEnviron
 from Products.GenericSetup.utils import XMLAdapterBase
 
 from Products.MailHost.interfaces import IMailHost
@@ -25,7 +28,7 @@ class MailHostXMLAdapter(XMLAdapterBase):
     """XML im- and exporter for MailHost.
     """
 
-    __used_for__ = IMailHost
+    adapts(IMailHost, ISetupEnviron)
 
     _LOGGER_ID = 'mailhost'
 

@@ -21,8 +21,6 @@ from zope.component import getSiteManager
 from zope.component.interfaces import IComponentRegistry
 from zope.interface import implements
 
-from Acquisition import aq_base
-
 from interfaces import IBody
 from interfaces import ISetupEnviron
 from utils import XMLAdapterBase
@@ -31,11 +29,16 @@ from utils import importObjects
 from utils import _getDottedName
 from utils import _resolveDottedName
 
+
 class ComponentRegistryXMLAdapter(XMLAdapterBase):
-    """In- and exporter for a local component registry.
+
+    """XML im- and exporter for a local component registry.
     """
+
     adapts(IComponentRegistry, ISetupEnviron)
-    implements(IBody)
+
+    _LOGGER_ID = 'componentregistry'
+
     name = 'componentregistry'
 
     def _exportNode(self):
@@ -235,6 +238,7 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
         del namespace
         return name
 
+
 def dummyGetId():
     return ''
 
@@ -258,7 +262,7 @@ def exportComponentRegistry(context):
     """
     sm = getSiteManager(context.getSite())
     if sm is None or not IComponentRegistry.providedBy(sm):
-        logger = context.getLogger('sitemanager')
+        logger = context.getLogger('componentregistry')
         logger.info("Nothing to export.")
         return
     # XXX GenericSetup.utils.exportObjects expects the object to have a getId

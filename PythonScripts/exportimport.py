@@ -15,6 +15,9 @@
 $Id$
 """
 
+from zope.component import adapts
+
+from Products.GenericSetup.interfaces import ISetupEnviron
 from Products.GenericSetup.utils import BodyAdapterBase
 
 from interfaces import IPythonScript
@@ -25,7 +28,7 @@ class PythonScriptBodyAdapter(BodyAdapterBase):
     """Body im- and exporter for PythonScript.
     """
 
-    __used_for__ = IPythonScript
+    adapts(IPythonScript, ISetupEnviron)
 
     def _exportBody(self):
         """Export the object as a file body.

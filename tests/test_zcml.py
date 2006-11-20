@@ -65,9 +65,8 @@ def test_registerProfile():
 
     Clean up and make sure the cleanup works::
 
-      >>> # BBB: in Zope 2.8 we can't import cleanUp
-      ... from zope.testing.cleanup import CleanUp
-      >>> CleanUp().cleanUp()
+      >>> from zope.testing.cleanup import cleanUp
+      >>> cleanUp()
       >>> profile_id in _profile_registry._profile_ids
       False
       >>> profile_id in _profile_registry._profile_info

@@ -22,7 +22,8 @@ from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 
 from permissions import ManagePortal
 from utils import _xmldir
-from utils import ConfiguratorBase
+from utils import ExportConfiguratorBase
+from utils import ImportConfiguratorBase
 from utils import CONVERTER, DEFAULT, KEY
 
 
@@ -78,7 +79,7 @@ def importRolemap( context ):
 
     if text is not None:
 
-        rc = RolemapConfigurator( site, encoding )
+        rc = RolemapImportConfigurator(site, encoding)
         rolemap_info = rc.parseXML( text )
 
         immediate_roles = list( getattr(site, '__ac_roles__', []) )
@@ -134,7 +135,7 @@ def exportRolemap( context ):
     site = context.getSite()
     logger = context.getLogger('rolemap')
 
-    rc = RolemapConfigurator( site ).__of__( site )
+    rc = RolemapExportConfigurator(site).__of__(site)
     text = rc.generateXML()
 
     context.writeDataFile( _FILENAME, text, 'text/xml' )
@@ -142,7 +143,8 @@ def exportRolemap( context ):
     logger.info('Role / permission map exported.')
 
 
-class RolemapConfigurator(ConfiguratorBase):
+class RolemapExportConfigurator(ExportConfiguratorBase):
+
     """ Synthesize XML description of sitewide role-permission settings.
     """
     security = ClassSecurityInfo()
@@ -196,6 +198,15 @@ class RolemapConfigurator(ConfiguratorBase):
 
         return PageTemplateFile('rmeExport.xml', _xmldir)
 
+InitializeClass(RolemapExportConfigurator)
+
+
+class RolemapImportConfigurator(ImportConfiguratorBase):
+
+    """ Synthesize XML description of sitewide role-permission settings.
+    """
+    security = ClassSecurityInfo()
+
     def _getImportMapping(self):
 
         return {
@@ -213,4 +224,4 @@ class RolemapConfigurator(ConfiguratorBase):
               'role':        {KEY: 'roles'},
               'acquire':     {CONVERTER: self._convertToBoolean} } }
 
-InitializeClass(RolemapConfigurator)
+InitializeClass(RolemapImportConfigurator)

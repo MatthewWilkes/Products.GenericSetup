@@ -22,22 +22,17 @@ from csv import reader
 from ConfigParser import ConfigParser
 from StringIO import StringIO
 
-try:
-    from OFS.interfaces import IObjectManager
-    from OFS.interfaces import ISimpleItem
-    from OFS.interfaces import IPropertyManager
-except ImportError: # BBB
-    from Products.Five.interfaces import IObjectManager
-    from Products.Five.interfaces import ISimpleItem
-    from Products.Five.interfaces import IPropertyManager
-
-from Products.GenericSetup.testing import PlacelessSetup
+from OFS.interfaces import IObjectManager
+from OFS.interfaces import ISimpleItem
+from OFS.interfaces import IPropertyManager
 from Products.GenericSetup.tests.common import DummyExportContext
 from Products.GenericSetup.tests.common import DummyImportContext
+from zope.testing.cleanup import cleanUp
 
 from conformance import ConformsToIINIAware
 from conformance import ConformsToIFilesystemExporter
 from conformance import ConformsToIFilesystemImporter
+
 
 class SimpleINIAwareTests(unittest.TestCase, ConformsToIINIAware):
 
@@ -134,9 +129,11 @@ int_prop = 13
         self.assertEqual(context.float_prop, 2.818)
         self.assertEqual(context.date_prop, DateTime(DATESTR2))
 
-class FolderishExporterImporterTests(PlacelessSetup,
-                                     unittest.TestCase,
-                                    ):
+
+class FolderishExporterImporterTests(unittest.TestCase):
+
+    def tearDown(self):
+        cleanUp()
 
     def _getExporter(self):
         from Products.GenericSetup.content import exportSiteStructure
@@ -152,10 +149,7 @@ class FolderishExporterImporterTests(PlacelessSetup,
 
     def _setUpAdapters(self):
         from OFS.Folder import Folder
-        try:
-            from zope.app.testing import ztapi
-        except ImportError:  # BBB, Zope3 < 3.1
-            from zope.app.tests import ztapi
+        from zope.app.testing import ztapi
         #from OFS.Image import File
 
         from Products.GenericSetup.interfaces import IFilesystemExporter
@@ -287,7 +281,7 @@ class FolderishExporterImporterTests(PlacelessSetup,
 
         site = _makeFolder('site')
         site.title = 'AAA'
-        site._setProperty('description', 'BBB')
+        site._setProperty('description', 'CCC')
         item = _makeItem('aside')
         dotted = _getDottedName(item.__class__)
         for id in ITEM_IDS:
@@ -317,7 +311,7 @@ class FolderishExporterImporterTests(PlacelessSetup,
         defaults = parser.defaults()
         self.assertEqual(len(defaults), 2)
         self.assertEqual(defaults['title'], 'AAA')
-        self.assertEqual(defaults['description'], 'BBB')
+        self.assertEqual(defaults['description'], 'CCC')
 
     def test_export_site_with_exportable_simple_items(self):
         from Products.GenericSetup.utils import _getDottedName
@@ -326,7 +320,7 @@ class FolderishExporterImporterTests(PlacelessSetup,
 
         site = _makeFolder('site')
         site.title = 'AAA'
-        site._setProperty('description', 'BBB')
+        site._setProperty('description', 'CCC')
         aware = _makeINIAware('aside')
         dotted = _getDottedName(aware.__class__)
         for id in ITEM_IDS:
@@ -363,7 +357,7 @@ class FolderishExporterImporterTests(PlacelessSetup,
         defaults = parser.defaults()
         self.assertEqual(len(defaults), 2)
         self.assertEqual(defaults['title'], 'AAA')
-        self.assertEqual(defaults['description'], 'BBB')
+        self.assertEqual(defaults['description'], 'CCC')
 
     def test_export_site_with_subfolders(self):
         from Products.GenericSetup.utils import _getDottedName
@@ -372,7 +366,7 @@ class FolderishExporterImporterTests(PlacelessSetup,
 
         site = _makeFolder('site')
         site.title = 'AAA'
-        site._setProperty('description', 'BBB')
+        site._setProperty('description', 'CCC')
         aside = _makeFolder('aside')
         dotted = _getDottedName(aside.__class__)
         for id in FOLDER_IDS:
@@ -424,7 +418,7 @@ class FolderishExporterImporterTests(PlacelessSetup,
         defaults = parser.defaults()
         self.assertEqual(len(defaults), 2)
         self.assertEqual(defaults['title'], 'AAA')
-        self.assertEqual(defaults['description'], 'BBB')
+        self.assertEqual(defaults['description'], 'CCC')
 
     def test_export_site_with_csvaware(self):
         from Products.GenericSetup.utils import _getDottedName

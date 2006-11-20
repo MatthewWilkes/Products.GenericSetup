@@ -25,15 +25,11 @@ from Products.Five import zcml
 from zope.component import getMultiAdapter
 from zope.interface import implements
 from zope.interface.verify import verifyClass
+from zope.testing.cleanup import cleanUp
 
 from interfaces import IBody
 from interfaces import INode
 from interfaces import ISetupEnviron
-
-try:
-    from zope.app.testing.placelesssetup import PlacelessSetup
-except ImportError:  # BBB, Zope3 < 3.1
-    from zope.app.tests.placelesssetup import PlacelessSetup
 
 
 class DummyLogger:
@@ -67,7 +63,7 @@ class DummySetupEnviron(object):
         return self._should_purge
 
 
-class _AdapterTestCaseBase(PlacelessSetup, unittest.TestCase):
+class _AdapterTestCaseBase(unittest.TestCase):
 
     def _populate(self, obj):
         pass
@@ -76,9 +72,11 @@ class _AdapterTestCaseBase(PlacelessSetup, unittest.TestCase):
         pass
 
     def setUp(self):
-        PlacelessSetup.setUp(self)
         zcml.load_config('meta.zcml', Products.Five)
         zcml.load_config('permissions.zcml', Products.Five)
+
+    def tearDown(self):
+        cleanUp()
 
 
 class BodyAdapterTestCase(_AdapterTestCaseBase):
@@ -111,6 +109,7 @@ class BodyAdapterTestCase(_AdapterTestCaseBase):
         adapted.body = self._BODY
         self._verifyImport(self._obj)
         self.assertEqual(adapted.body, self._BODY)
+
 
 class NodeAdapterTestCase(_AdapterTestCaseBase):
 

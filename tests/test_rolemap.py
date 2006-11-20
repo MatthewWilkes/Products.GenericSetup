@@ -25,12 +25,12 @@ from common import DummyExportContext
 from common import DummyImportContext
 
 
-class RolemapConfiguratorTests( BaseRegistryTests ):
+class RolemapExportConfiguratorTests(BaseRegistryTests):
 
     def _getTargetClass( self ):
 
-        from Products.GenericSetup.rolemap import RolemapConfigurator
-        return RolemapConfigurator
+        from Products.GenericSetup.rolemap import RolemapExportConfigurator
+        return RolemapExportConfigurator
 
     def test_listRoles_normal( self ):
 
@@ -165,6 +165,14 @@ class RolemapConfiguratorTests( BaseRegistryTests ):
         configurator = self._makeOne( site ).__of__( site )
 
         self._compareDOM( configurator.generateXML(), _UNACQUIRED_EXPORT )
+
+
+class RolemapImportConfiguratorTests(BaseRegistryTests):
+
+    def _getTargetClass( self ):
+
+        from Products.GenericSetup.rolemap import RolemapImportConfigurator
+        return RolemapImportConfigurator
 
     def test_parseXML_empty( self ):
 
@@ -774,9 +782,10 @@ class Test_importRolemap( BaseRegistryTests ):
 
 def test_suite():
     return unittest.TestSuite((
-        unittest.makeSuite( RolemapConfiguratorTests ),
-        unittest.makeSuite( Test_exportRolemap ),
-        unittest.makeSuite( Test_importRolemap ),
+        unittest.makeSuite(RolemapExportConfiguratorTests),
+        unittest.makeSuite(RolemapImportConfiguratorTests),
+        unittest.makeSuite(Test_exportRolemap),
+        unittest.makeSuite(Test_importRolemap),
         ))
 
 if __name__ == '__main__':

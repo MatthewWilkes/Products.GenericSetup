@@ -15,9 +15,11 @@
 $Id$
 """
 
+from zope.component import adapts
 from zope.component import queryMultiAdapter
 
 from Products.GenericSetup.interfaces import INode
+from Products.GenericSetup.interfaces import ISetupEnviron
 from Products.GenericSetup.utils import ObjectManagerHelpers
 from Products.GenericSetup.utils import PropertyManagerHelpers
 from Products.GenericSetup.utils import XMLAdapterBase
@@ -36,7 +38,7 @@ class ZCatalogXMLAdapter(XMLAdapterBase, ObjectManagerHelpers,
     """XML im- and exporter for ZCatalog.
     """
 
-    __used_for__ = IZCatalog
+    adapts(IZCatalog, ISetupEnviron)
 
     _LOGGER_ID = 'catalog'
 

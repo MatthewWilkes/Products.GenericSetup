@@ -15,9 +15,11 @@
 $Id$
 """
 
+from zope.component import adapts
 from zope.component import queryMultiAdapter
 
 from Products.GenericSetup.interfaces import INode
+from Products.GenericSetup.interfaces import ISetupEnviron
 from Products.GenericSetup.utils import NodeAdapterBase
 from Products.GenericSetup.utils import PropertyManagerHelpers
 
@@ -36,7 +38,7 @@ class PluggableIndexNodeAdapter(NodeAdapterBase):
     """Node im- and exporter for FieldIndex, KeywordIndex.
     """
 
-    __used_for__ = IPluggableIndex
+    adapts(IPluggableIndex, ISetupEnviron)
 
     def _exportNode(self):
         """Export the object as a DOM node.
@@ -67,7 +69,7 @@ class DateIndexNodeAdapter(NodeAdapterBase, PropertyManagerHelpers):
     """Node im- and exporter for DateIndex.
     """
 
-    __used_for__ = IDateIndex
+    adapts(IDateIndex, ISetupEnviron)
 
     def _exportNode(self):
         """Export the object as a DOM node.
@@ -93,7 +95,7 @@ class DateRangeIndexNodeAdapter(NodeAdapterBase):
     """Node im- and exporter for DateRangeIndex.
     """
 
-    __used_for__ = IDateRangeIndex
+    adapts(IDateRangeIndex, ISetupEnviron)
 
     def _exportNode(self):
         """Export the object as a DOM node.
@@ -118,7 +120,7 @@ class PathIndexNodeAdapter(NodeAdapterBase):
     """Node im- and exporter for PathIndex.
     """
 
-    __used_for__ = IPathIndex
+    adapts(IPathIndex, ISetupEnviron)
 
     def _exportNode(self):
         """Export the object as a DOM node.
@@ -133,7 +135,7 @@ class VocabularyNodeAdapter(NodeAdapterBase):
     """Node im- and exporter for Vocabulary.
     """
 
-    __used_for__ = IVocabulary
+    adapts(IVocabulary, ISetupEnviron)
 
     def _exportNode(self):
         """Export the object as a DOM node.
@@ -150,7 +152,7 @@ class TextIndexNodeAdapter(NodeAdapterBase):
     """Node im- and exporter for TextIndex.
     """
 
-    __used_for__ = ITextIndex
+    adapts(ITextIndex, ISetupEnviron)
 
     def _exportNode(self):
         """Export the object as a DOM node.
@@ -167,7 +169,7 @@ class FilteredSetNodeAdapter(NodeAdapterBase):
     """Node im- and exporter for FilteredSet.
     """
 
-    __used_for__ = IFilteredSet
+    adapts(IFilteredSet, ISetupEnviron)
 
     def _exportNode(self):
         """Export the object as a DOM node.
@@ -191,7 +193,7 @@ class TopicIndexNodeAdapter(NodeAdapterBase):
     """Node im- and exporter for TopicIndex.
     """
 
-    __used_for__ = ITopicIndex
+    adapts(ITopicIndex, ISetupEnviron)
 
     def _exportNode(self):
         """Export the object as a DOM node.

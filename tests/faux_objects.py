@@ -2,25 +2,17 @@
 
 $Id$
 """
-from OFS.Folder import Folder
+
 from OFS.PropertyManager import PropertyManager
 from OFS.SimpleItem import SimpleItem
 from zope.interface import implements
 
-try:
-    from OFS.interfaces import IObjectManager
-    from OFS.interfaces import ISimpleItem
-    from OFS.interfaces import IPropertyManager
-except ImportError: # BBB
-    from Products.Five.interfaces import IObjectManager
-    from Products.Five.interfaces import ISimpleItem
-    from Products.Five.interfaces import IPropertyManager
 
 class TestSimpleItem(SimpleItem):
-    implements(ISimpleItem)
+    pass
 
 class TestSimpleItemWithProperties(SimpleItem, PropertyManager):
-    implements(ISimpleItem, IPropertyManager)
+    pass
 
 KNOWN_CSV = """\
 one,two,three

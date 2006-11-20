@@ -15,6 +15,9 @@
 $Id$
 """
 
+from zope.component import adapts
+
+from Products.GenericSetup.interfaces import ISetupEnviron
 from Products.GenericSetup.utils import BodyAdapterBase
 
 from interfaces import IZopePageTemplate
@@ -25,7 +28,7 @@ class ZopePageTemplateBodyAdapter(BodyAdapterBase):
     """Body im- and exporter for ZopePageTemplate.
     """
 
-    __used_for__ = IZopePageTemplate
+    adapts(IZopePageTemplate, ISetupEnviron)
 
     def _exportBody(self):
         """Export the object as a file body.

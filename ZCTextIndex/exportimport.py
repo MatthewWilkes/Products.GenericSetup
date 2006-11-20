@@ -18,7 +18,9 @@ $Id$
 from BTrees.IOBTree import IOBTree
 from BTrees.Length import Length
 from BTrees.OIBTree import OIBTree
+from zope.component import adapts
 
+from Products.GenericSetup.interfaces import ISetupEnviron
 from Products.GenericSetup.utils import NodeAdapterBase
 
 from Products.ZCTextIndex.interfaces import IZCLexicon
@@ -31,7 +33,7 @@ class ZCLexiconNodeAdapter(NodeAdapterBase):
     """Node im- and exporter for ZCTextIndex Lexicon.
     """
 
-    __used_for__ = IZCLexicon
+    adapts(IZCLexicon, ISetupEnviron)
 
     def _exportNode(self):
         """Export the object as a DOM node.
@@ -75,7 +77,7 @@ class ZCTextIndexNodeAdapter(NodeAdapterBase):
     """Node im- and exporter for ZCTextIndex.
     """
 
-    __used_for__ = IZCTextIndex
+    adapts(IZCTextIndex, ISetupEnviron)
 
     def _exportNode(self):
         """Export the object as a DOM node.

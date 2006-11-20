@@ -19,10 +19,7 @@ import unittest
 from Testing.ZopeTestCase import ZopeTestCase
 
 from AccessControl import ClassSecurityInfo
-from Acquisition import aq_base
-from Acquisition import aq_get
 from Globals import InitializeClass
-from OFS.Folder import Folder
 from OFS.SimpleItem import SimpleItem
 
 from Products.Five import zcml
@@ -113,6 +110,7 @@ _COMPONENTS_BODY = """\
 </componentregistry>
 """
 
+
 class ComponentRegistryXMLAdapterTests(ZopeTestCase, BodyAdapterTestCase):
 
     def _getTargetClass(self):
@@ -186,7 +184,12 @@ class ComponentRegistryXMLAdapterTests(ZopeTestCase, BodyAdapterTestCase):
     def beforeTearDown(self):
         clearSite()
 
+
 def test_suite():
+    # reimport to make sure tests are run from Products
+    from Products.GenericSetup.tests.test_components \
+            import ComponentRegistryXMLAdapterTests
+
     return unittest.TestSuite((
         unittest.makeSuite(ComponentRegistryXMLAdapterTests),
         ))

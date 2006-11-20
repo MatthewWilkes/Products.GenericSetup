@@ -17,6 +17,7 @@ $Id$
 
 import os
 import sys
+from cgi import escape
 from inspect import getdoc
 from xml.dom.minidom import _nssplit
 from xml.dom.minidom import Document
@@ -31,12 +32,7 @@ from AccessControl import ClassSecurityInfo
 from Acquisition import Implicit
 from Globals import InitializeClass
 from Globals import package_home
-try:
-    from OFS.interfaces import IOrderedContainer
-except:
-    #BBB: for Zope 2.8
-    from Products.Five.bbb.OFS_interfaces import IOrderedContainer
-from cgi import escape
+from OFS.interfaces import IOrderedContainer
 from zope.component import queryMultiAdapter
 from zope.interface import implements
 from zope.interface import implementsOnly
@@ -287,20 +283,6 @@ class ExportConfiguratorBase(Implicit):
         return self._template(**kw)
 
 InitializeClass(ExportConfiguratorBase)
-
-
-# BBB: old class mixing the two, will be removed in CMF 2.1
-class ConfiguratorBase(ImportConfiguratorBase, ExportConfiguratorBase):
-    """ Synthesize XML description.
-    """
-    security = ClassSecurityInfo()
-    security.setDefaultAccess('allow')
-
-    def __init__(self, site, encoding=None):
-        ImportConfiguratorBase.__init__(self, site, encoding)
-        ExportConfiguratorBase.__init__(self, site, encoding)
-
-InitializeClass(ConfiguratorBase)
 
 
 class _LineWrapper:
@@ -746,9 +728,6 @@ def importObjects(obj, parent_path, context):
             path = '%s%s' % (parent_path, importer.name)
         filename = '%s%s' % (path, importer.suffix)
         body = context.readDataFile(filename)
-        if body is None and filename == 'types.xml':
-            # BBB: for CMF 1.5 profiles
-            body = context.readDataFile('typestool.xml')
         if body is not None:
             importer.filename = filename # for error reporting
             importer.body = body

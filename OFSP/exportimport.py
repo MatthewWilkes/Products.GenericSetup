@@ -15,6 +15,9 @@
 $Id$
 """
 
+from zope.component import adapts
+
+from Products.GenericSetup.interfaces import ISetupEnviron
 from Products.GenericSetup.utils import XMLAdapterBase
 from Products.GenericSetup.utils import ObjectManagerHelpers
 from Products.GenericSetup.utils import PropertyManagerHelpers
@@ -28,7 +31,7 @@ class FolderXMLAdapter(XMLAdapterBase, ObjectManagerHelpers,
     """XML im- and exporter for Folder.
     """
 
-    __used_for__ = IFolder
+    adapts(IFolder, ISetupEnviron)
 
     _LOGGER_ID = 'ofs'
 

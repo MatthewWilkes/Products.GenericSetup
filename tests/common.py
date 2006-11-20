@@ -51,28 +51,22 @@ class SecurityRequestTest(ZopeTestCase):
 
     def setUp(self):
         import Products
+        import zope.traversing
         from AccessControl.SecurityManagement import newSecurityManager
+
         ZopeTestCase.setUp(self)
-        try:
-            import zope.traversing
-            zcml.load_config('meta.zcml', Products.Five)
-            zcml.load_config('traversing.zcml', Products.Five)
-        except ImportError:
-            # BBB: for Zope 2.9
-            pass
+        zcml.load_config('meta.zcml', Products.Five)
+        zcml.load_config('traversing.zcml', Products.Five)
         self.root = self.app
         newSecurityManager(None, OmnipotentUser().__of__(self.app.acl_users))
 
     def tearDown(self):
         from AccessControl.SecurityManagement import noSecurityManager
+        from zope.testing.cleanup import cleanUp
+
         noSecurityManager()
         ZopeTestCase.tearDown(self)
-        try:
-            from zope.testing.cleanup import cleanUp
-            cleanUp()
-        except ImportError:
-            # BBB: for Zope 2.8
-            pass
+        cleanUp()
 
 
 class DOMComparator:

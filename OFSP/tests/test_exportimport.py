@@ -49,12 +49,6 @@ class FolderXMLAdapterTests(BodyAdapterTestCase):
         from OFS.Folder import Folder
 
         BodyAdapterTestCase.setUp(self)
-        try:
-            #BBB: for Zope 2.8
-            import Products.Five
-            zcml.load_config('interfaces.zcml', Products.Five)
-        except IOError:
-            pass
         zcml.load_config('configure.zcml', Products.GenericSetup.OFSP)
 
         self._obj = Folder('foo_folder')
