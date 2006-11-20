@@ -20,12 +20,15 @@ import Testing
 
 from OFS.Folder import Folder
 
+from Products.GenericSetup.testing import ExportImportZCMLLayer
 from common import BaseRegistryTests
 from common import DummyExportContext
 from common import DummyImportContext
 
 
 class RolemapExportConfiguratorTests(BaseRegistryTests):
+
+    layer = ExportImportZCMLLayer
 
     def _getTargetClass( self ):
 
@@ -168,6 +171,8 @@ class RolemapExportConfiguratorTests(BaseRegistryTests):
 
 
 class RolemapImportConfiguratorTests(BaseRegistryTests):
+
+    layer = ExportImportZCMLLayer
 
     def _getTargetClass( self ):
 
@@ -366,6 +371,8 @@ _COMBINED_EXPORT = """\
 
 class Test_exportRolemap( BaseRegistryTests ):
 
+    layer = ExportImportZCMLLayer
+
     def test_unchanged( self ):
 
         self.root.site = Folder( 'site' )
@@ -465,7 +472,10 @@ class Test_exportRolemap( BaseRegistryTests ):
         self._compareDOM( text, _UNACQUIRED_EXPORT )
         self.assertEqual( content_type, 'text/xml' )
 
+
 class Test_importRolemap( BaseRegistryTests ):
+
+    layer = ExportImportZCMLLayer
 
     def test_empty_default_purge( self ):
 
@@ -789,4 +799,5 @@ def test_suite():
         ))
 
 if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')
+    from Products.GenericSetup.testing import run
+    run(test_suite())

@@ -20,8 +20,8 @@ import Testing
 
 from Acquisition import Implicit
 
-from Products.Five import zcml
 from Products.GenericSetup.testing import NodeAdapterTestCase
+from Products.GenericSetup.testing import ExportImportZCMLLayer
 
 _PLEXICON_XML = """\
 <object name="foo_plexicon" meta_type="ZCTextIndex Lexicon">
@@ -53,6 +53,8 @@ class DummyCatalog(Implicit):
 
 class ZCLexiconNodeAdapterTests(NodeAdapterTestCase):
 
+    layer = ExportImportZCMLLayer
+
     def _getTargetClass(self):
         from Products.GenericSetup.ZCTextIndex.exportimport \
                 import ZCLexiconNodeAdapter
@@ -66,17 +68,16 @@ class ZCLexiconNodeAdapterTests(NodeAdapterTestCase):
         obj._pipeline = (Splitter(), CaseNormalizer(), StopWordRemover())
 
     def setUp(self):
-        import Products.GenericSetup.ZCTextIndex
         from Products.ZCTextIndex.ZCTextIndex import PLexicon
 
         NodeAdapterTestCase.setUp(self)
-        zcml.load_config('configure.zcml', Products.GenericSetup.ZCTextIndex)
-
         self._obj = PLexicon('foo_plexicon')
         self._XML = _PLEXICON_XML
 
 
 class ZCTextIndexNodeAdapterTests(NodeAdapterTestCase):
+
+    layer = ExportImportZCMLLayer
 
     def _getTargetClass(self):
         from Products.GenericSetup.ZCTextIndex.exportimport \
@@ -88,13 +89,10 @@ class ZCTextIndexNodeAdapterTests(NodeAdapterTestCase):
         obj._indexed_attrs = ['foo_zctext', 'baz_zctext']
 
     def setUp(self):
-        import Products.GenericSetup.ZCTextIndex
         from Products.ZCTextIndex.ZCTextIndex import PLexicon
         from Products.ZCTextIndex.ZCTextIndex import ZCTextIndex
 
         NodeAdapterTestCase.setUp(self)
-        zcml.load_config('configure.zcml', Products.GenericSetup.ZCTextIndex)
-
         catalog = DummyCatalog()
         catalog.foo_plexicon = PLexicon('foo_plexicon')
         extra = _extra()
@@ -112,4 +110,5 @@ def test_suite():
         ))
 
 if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')
+    from Products.GenericSetup.testing import run
+    run(test_suite())

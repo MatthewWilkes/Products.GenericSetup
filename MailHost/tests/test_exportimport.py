@@ -18,9 +18,8 @@ $Id$
 import unittest
 import Testing
 
-from Products.Five import zcml
-
 from Products.GenericSetup.testing import BodyAdapterTestCase
+from Products.GenericSetup.testing import ExportImportZCMLLayer
 
 _MAILHOST_BODY = """\
 <?xml version="1.0"?>
@@ -30,6 +29,8 @@ _MAILHOST_BODY = """\
 
 
 class MailHostXMLAdapterTests(BodyAdapterTestCase):
+
+    layer = ExportImportZCMLLayer
 
     def _getTargetClass(self):
         from Products.GenericSetup.MailHost.exportimport \
@@ -48,12 +49,9 @@ class MailHostXMLAdapterTests(BodyAdapterTestCase):
         self.assertEqual(obj.smtp_uid, '')
 
     def setUp(self):
-        import Products.GenericSetup.MailHost
         from Products.MailHost.MailHost import MailHost
 
         BodyAdapterTestCase.setUp(self)
-        zcml.load_config('configure.zcml', Products.GenericSetup.MailHost)
-
         self._obj = MailHost('foo_mailhost')
         self._BODY = _MAILHOST_BODY
 
@@ -64,4 +62,5 @@ def test_suite():
         ))
 
 if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')
+    from Products.GenericSetup.testing import run
+    run(test_suite())

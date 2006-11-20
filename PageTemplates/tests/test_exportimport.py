@@ -18,10 +18,8 @@ $Id$
 import unittest
 import Testing
 
-from Products.Five import zcml
-
 from Products.GenericSetup.testing import BodyAdapterTestCase
-
+from Products.GenericSetup.testing import ExportImportZCMLLayer
 
 _PAGETEMPLATE_BODY = """\
 <html>
@@ -31,6 +29,8 @@ _PAGETEMPLATE_BODY = """\
 
 
 class ZopePageTemplateBodyAdapterTests(BodyAdapterTestCase):
+
+    layer = ExportImportZCMLLayer
 
     def _getTargetClass(self):
         from Products.GenericSetup.PageTemplates.exportimport \
@@ -42,13 +42,9 @@ class ZopePageTemplateBodyAdapterTests(BodyAdapterTestCase):
         obj.write(_PAGETEMPLATE_BODY)
 
     def setUp(self):
-        import Products.GenericSetup.PageTemplates
         from Products.PageTemplates.ZopePageTemplate import ZopePageTemplate
 
         BodyAdapterTestCase.setUp(self)
-        zcml.load_config('configure.zcml',
-                         Products.GenericSetup.PageTemplates)
-
         self._obj = ZopePageTemplate('foo_template')
         self._BODY = _PAGETEMPLATE_BODY
 
@@ -59,4 +55,5 @@ def test_suite():
         ))
 
 if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')
+    from Products.GenericSetup.testing import run
+    run(test_suite())

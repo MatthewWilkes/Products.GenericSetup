@@ -24,6 +24,7 @@ from Acquisition import aq_base
 from OFS.Folder import Folder
 
 from Products.GenericSetup import profile_registry
+from Products.GenericSetup.testing import ExportImportZCMLLayer
 
 from common import DOMComparator
 from common import DummyExportContext
@@ -39,6 +40,8 @@ class SetupToolTests( FilesystemTestBase
                     , TarballTester
                     , ConformsToISetupTool
                     ):
+
+    layer = ExportImportZCMLLayer
 
     _PROFILE_PATH = '/tmp/STT_test'
 
@@ -734,6 +737,7 @@ def _exportPropertiesINI( context ):
 
     return 'Exported properties'
 
+
 class _ToolsetSetup( SecurityRequestTest ):
 
     def _initSite( self ):
@@ -746,9 +750,12 @@ class _ToolsetSetup( SecurityRequestTest ):
         site._setObject('setup_tool', SetupTool('setup_tool'))
         return site
 
+
 class Test_exportToolset( _ToolsetSetup
                         , DOMComparator
                         ):
+
+    layer = ExportImportZCMLLayer
 
     def test_empty( self ):
 
@@ -787,7 +794,10 @@ class Test_exportToolset( _ToolsetSetup
         self._compareDOM( text, _NORMAL_TOOLSET_XML )
         self.assertEqual( content_type, 'text/xml' )
 
+
 class Test_importToolset( _ToolsetSetup ):
+
+    layer = ExportImportZCMLLayer
 
     def test_tool_ids( self ):
         # The tool import mechanism used to rely on the fact that all tools
@@ -1039,4 +1049,5 @@ def test_suite():
         ))
 
 if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')
+    from Products.GenericSetup.testing import run
+    run(test_suite())

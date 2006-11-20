@@ -19,6 +19,7 @@ import unittest
 import Testing
 
 from OFS.Folder import Folder
+from Products.GenericSetup.testing import ExportImportZCMLLayer
 from Products.GenericSetup.tests.common import BaseRegistryTests
 from Products.GenericSetup import EXTENSION
 from zope.interface import Interface
@@ -51,6 +52,8 @@ class ImportStepRegistryTests( BaseRegistryTests
                              , ConformsToIStepRegistry
                              , ConformsToIImportStepRegistry
                              ):
+
+    layer = ExportImportZCMLLayer
 
     def _getTargetClass( self ):
 
@@ -588,6 +591,8 @@ class ExportStepRegistryTests( BaseRegistryTests
                              , ConformsToIExportStepRegistry
                              ):
 
+    layer = ExportImportZCMLLayer
+
     def _getTargetClass( self ):
 
         from Products.GenericSetup.registry import ExportStepRegistry
@@ -826,6 +831,8 @@ _ORDERED_EXPORT_XML = """\
 class ToolsetRegistryTests( BaseRegistryTests
                           , ConformsToIToolsetRegistry
                           ):
+
+    layer = ExportImportZCMLLayer
 
     def _getTargetClass( self ):
 
@@ -1165,4 +1172,5 @@ def test_suite():
         ))
 
 if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')
+    from Products.GenericSetup.testing import run
+    run(test_suite())

@@ -25,6 +25,7 @@ from Products.Five import zcml
 from zope.component import getMultiAdapter
 from zope.interface import implements
 from zope.interface.verify import verifyClass
+from zope.testing import testrunner
 from zope.testing.cleanup import cleanUp
 
 from interfaces import IBody
@@ -70,13 +71,6 @@ class _AdapterTestCaseBase(unittest.TestCase):
 
     def _verifyImport(self, obj):
         pass
-
-    def setUp(self):
-        zcml.load_config('meta.zcml', Products.Five)
-        zcml.load_config('permissions.zcml', Products.Five)
-
-    def tearDown(self):
-        cleanUp()
 
 
 class BodyAdapterTestCase(_AdapterTestCaseBase):
@@ -141,3 +135,27 @@ class NodeAdapterTestCase(_AdapterTestCaseBase):
         adapted.node = parseString(self._XML).documentElement
         self._verifyImport(self._obj)
         self.assertEqual(adapted.node.toprettyxml(' '), self._XML)
+
+
+class ExportImportZCMLLayer:
+
+    @classmethod
+    def setUp(cls):
+        import Products.Five
+        import Products.GenericSetup
+
+        zcml.load_config('meta.zcml', Products.Five)
+        zcml.load_config('permissions.zcml', Products.Five)
+        zcml.load_config('traversing.zcml', Products.Five)
+        zcml.load_config('configure.zcml', Products.GenericSetup)
+
+    @classmethod
+    def tearDown(cls):
+        cleanUp()
+
+
+def run(test_suite):
+    options = testrunner.get_options()
+    options.resume_layer = None
+    options.resume_number = 0
+    testrunner.run_with_options(options, test_suite)

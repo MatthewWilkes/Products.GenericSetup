@@ -18,8 +18,8 @@ $Id$
 import unittest
 import Testing
 
-from Products.Five import zcml
 from Products.GenericSetup.testing import NodeAdapterTestCase
+from Products.GenericSetup.testing import ExportImportZCMLLayer
 
 _DATE_XML = """\
 <index name="foo_date" meta_type="DateIndex">
@@ -70,6 +70,8 @@ _TOPIC_XML = """\
 
 class DateIndexNodeAdapterTests(NodeAdapterTestCase):
 
+    layer = ExportImportZCMLLayer
+
     def _getTargetClass(self):
         from Products.GenericSetup.PluginIndexes.exportimport \
                 import DateIndexNodeAdapter
@@ -77,18 +79,16 @@ class DateIndexNodeAdapterTests(NodeAdapterTestCase):
         return DateIndexNodeAdapter
 
     def setUp(self):
-        import Products.GenericSetup.PluginIndexes
         from Products.PluginIndexes.DateIndex.DateIndex import DateIndex
 
         NodeAdapterTestCase.setUp(self)
-        zcml.load_config('configure.zcml',
-                         Products.GenericSetup.PluginIndexes)
-
         self._obj = DateIndex('foo_date')
         self._XML = _DATE_XML
 
 
 class DateRangeIndexNodeAdapterTests(NodeAdapterTestCase):
+
+    layer = ExportImportZCMLLayer
 
     def _getTargetClass(self):
         from Products.GenericSetup.PluginIndexes.exportimport \
@@ -100,20 +100,18 @@ class DateRangeIndexNodeAdapterTests(NodeAdapterTestCase):
         obj._edit('bar', 'baz')
 
     def setUp(self):
-        import Products.GenericSetup.PluginIndexes
         from Products.PluginIndexes.DateRangeIndex.DateRangeIndex \
                 import DateRangeIndex
 
         NodeAdapterTestCase.setUp(self)
-        zcml.load_config('configure.zcml',
-                         Products.GenericSetup.PluginIndexes)
-
         self._obj = DateRangeIndex('foo_daterange')
         self._XML = _DATERANGE_XML
 
 
 class FieldIndexNodeAdapterTests(NodeAdapterTestCase):
 
+    layer = ExportImportZCMLLayer
+
     def _getTargetClass(self):
         from Products.GenericSetup.PluginIndexes.exportimport \
                 import PluggableIndexNodeAdapter
@@ -124,19 +122,17 @@ class FieldIndexNodeAdapterTests(NodeAdapterTestCase):
         obj.indexed_attrs = ('bar',)
 
     def setUp(self):
-        import Products.GenericSetup.PluginIndexes
         from Products.PluginIndexes.FieldIndex.FieldIndex import FieldIndex
 
         NodeAdapterTestCase.setUp(self)
-        zcml.load_config('configure.zcml',
-                         Products.GenericSetup.PluginIndexes)
-
         self._obj = FieldIndex('foo_field')
         self._XML = _FIELD_XML
 
 
 class KeywordIndexNodeAdapterTests(NodeAdapterTestCase):
 
+    layer = ExportImportZCMLLayer
+
     def _getTargetClass(self):
         from Products.GenericSetup.PluginIndexes.exportimport \
                 import PluggableIndexNodeAdapter
@@ -147,19 +143,17 @@ class KeywordIndexNodeAdapterTests(NodeAdapterTestCase):
         obj.indexed_attrs = ('bar',)
 
     def setUp(self):
-        import Products.GenericSetup.PluginIndexes
         from Products.PluginIndexes.KeywordIndex.KeywordIndex \
                 import KeywordIndex
 
         NodeAdapterTestCase.setUp(self)
-        zcml.load_config('configure.zcml',
-                         Products.GenericSetup.PluginIndexes)
-
         self._obj = KeywordIndex('foo_keyword')
         self._XML = _KEYWORD_XML
 
 
 class PathIndexNodeAdapterTests(NodeAdapterTestCase):
+
+    layer = ExportImportZCMLLayer
 
     def _getTargetClass(self):
         from Products.GenericSetup.PluginIndexes.exportimport \
@@ -168,18 +162,16 @@ class PathIndexNodeAdapterTests(NodeAdapterTestCase):
         return PathIndexNodeAdapter
 
     def setUp(self):
-        import Products.GenericSetup.PluginIndexes
         from Products.PluginIndexes.PathIndex.PathIndex import PathIndex
 
         NodeAdapterTestCase.setUp(self)
-        zcml.load_config('configure.zcml',
-                         Products.GenericSetup.PluginIndexes)
-
         self._obj = PathIndex('foo_path')
         self._XML = _PATH_XML
 
 
 class VocabularyNodeAdapterTests(NodeAdapterTestCase):
+
+    layer = ExportImportZCMLLayer
 
     def _getTargetClass(self):
         from Products.GenericSetup.PluginIndexes.exportimport \
@@ -188,13 +180,9 @@ class VocabularyNodeAdapterTests(NodeAdapterTestCase):
         return VocabularyNodeAdapter
 
     def setUp(self):
-        import Products.GenericSetup.PluginIndexes
         from Products.PluginIndexes.TextIndex.Vocabulary import Vocabulary
 
         NodeAdapterTestCase.setUp(self)
-        zcml.load_config('configure.zcml',
-                         Products.GenericSetup.PluginIndexes)
-
         self._obj = Vocabulary('foo_vocabulary')
         self._XML = _VOCABULARY_XML
 
@@ -204,6 +192,8 @@ class VocabularyNodeAdapterTests(NodeAdapterTestCase):
 
 class TextIndexNodeAdapterTests(NodeAdapterTestCase):
 
+    layer = ExportImportZCMLLayer
+
     def _getTargetClass(self):
         from Products.GenericSetup.PluginIndexes.exportimport \
                 import TextIndexNodeAdapter
@@ -211,13 +201,9 @@ class TextIndexNodeAdapterTests(NodeAdapterTestCase):
         return TextIndexNodeAdapter
 
     def setUp(self):
-        import Products.GenericSetup.PluginIndexes
         from Products.PluginIndexes.TextIndex.TextIndex import TextIndex
 
         NodeAdapterTestCase.setUp(self)
-        zcml.load_config('configure.zcml',
-                         Products.GenericSetup.PluginIndexes)
-
         self._obj = TextIndex('foo_text')
         self._XML = _TEXT_XML
 
@@ -226,6 +212,8 @@ class TextIndexNodeAdapterTests(NodeAdapterTestCase):
 
 
 class FilteredSetNodeAdapterTests(NodeAdapterTestCase):
+
+    layer = ExportImportZCMLLayer
 
     def _getTargetClass(self):
         from Products.GenericSetup.PluginIndexes.exportimport \
@@ -237,19 +225,17 @@ class FilteredSetNodeAdapterTests(NodeAdapterTestCase):
         obj.setExpression('True')
 
     def setUp(self):
-        import Products.GenericSetup.PluginIndexes
         from Products.PluginIndexes.TopicIndex.FilteredSet \
                 import PythonFilteredSet
 
         NodeAdapterTestCase.setUp(self)
-        zcml.load_config('configure.zcml',
-                         Products.GenericSetup.PluginIndexes)
-
         self._obj = PythonFilteredSet('bar', '')
         self._XML = _SET_XML
 
 
 class TopicIndexNodeAdapterTests(NodeAdapterTestCase):
+
+    layer = ExportImportZCMLLayer
 
     def _getTargetClass(self):
         from Products.GenericSetup.PluginIndexes.exportimport \
@@ -262,13 +248,9 @@ class TopicIndexNodeAdapterTests(NodeAdapterTestCase):
         obj.addFilteredSet('baz', 'PythonFilteredSet', 'False')
 
     def setUp(self):
-        import Products.GenericSetup.PluginIndexes
         from Products.PluginIndexes.TopicIndex.TopicIndex import TopicIndex
 
         NodeAdapterTestCase.setUp(self)
-        zcml.load_config('configure.zcml',
-                         Products.GenericSetup.PluginIndexes)
-
         self._obj = TopicIndex('foo_topic')
         self._XML = _TOPIC_XML
 
@@ -287,4 +269,5 @@ def test_suite():
         ))
 
 if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')
+    from Products.GenericSetup.testing import run
+    run(test_suite())

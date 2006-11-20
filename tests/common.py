@@ -23,7 +23,6 @@ from Acquisition import Implicit
 from Testing.ZopeTestCase import ZopeTestCase
 from zope.interface import implements
 
-from Products.Five import zcml
 from Products.GenericSetup.interfaces import IExportContext
 from Products.GenericSetup.interfaces import IImportContext
 from Products.GenericSetup.testing import DummyLogger
@@ -50,23 +49,17 @@ class OmnipotentUser(Implicit):
 class SecurityRequestTest(ZopeTestCase):
 
     def setUp(self):
-        import Products
-        import zope.traversing
         from AccessControl.SecurityManagement import newSecurityManager
 
         ZopeTestCase.setUp(self)
-        zcml.load_config('meta.zcml', Products.Five)
-        zcml.load_config('traversing.zcml', Products.Five)
         self.root = self.app
         newSecurityManager(None, OmnipotentUser().__of__(self.app.acl_users))
 
     def tearDown(self):
         from AccessControl.SecurityManagement import noSecurityManager
-        from zope.testing.cleanup import cleanUp
 
         noSecurityManager()
         ZopeTestCase.tearDown(self)
-        cleanUp()
 
 
 class DOMComparator:

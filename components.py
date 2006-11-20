@@ -19,9 +19,7 @@ from zope.app.component.hooks import getSite
 from zope.component import adapts
 from zope.component import getSiteManager
 from zope.component.interfaces import IComponentRegistry
-from zope.interface import implements
 
-from interfaces import IBody
 from interfaces import ISetupEnviron
 from utils import XMLAdapterBase
 from utils import exportObjects

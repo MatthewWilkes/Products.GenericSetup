@@ -22,10 +22,10 @@ from AccessControl import ClassSecurityInfo
 from Globals import InitializeClass
 from OFS.SimpleItem import SimpleItem
 
-from Products.Five import zcml
 from Products.Five.component import enableSite
 from Products.Five.component.interfaces import IObjectManagerSite
 from Products.GenericSetup.testing import BodyAdapterTestCase
+from Products.GenericSetup.testing import ExportImportZCMLLayer
 
 from zope.app.component.hooks import setSite, clearSite, setHooks
 from zope.component import getSiteManager
@@ -113,6 +113,8 @@ _COMPONENTS_BODY = """\
 
 class ComponentRegistryXMLAdapterTests(ZopeTestCase, BodyAdapterTestCase):
 
+    layer = ExportImportZCMLLayer
+
     def _getTargetClass(self):
         from Products.GenericSetup.components import \
             ComponentRegistryXMLAdapter
@@ -152,10 +154,7 @@ class ComponentRegistryXMLAdapterTests(ZopeTestCase, BodyAdapterTestCase):
         self.assertEquals(repr(util), repr(tool))
 
     def afterSetUp(self):
-        import Products.GenericSetup
-        
         BodyAdapterTestCase.setUp(self)
-        zcml.load_config('configure.zcml', Products.GenericSetup)
 
         # Create and enable a local component registry
         createComponentRegistry(self.app)
@@ -195,4 +194,5 @@ def test_suite():
         ))
 
 if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')
+    from Products.GenericSetup.testing import run
+    run(test_suite())

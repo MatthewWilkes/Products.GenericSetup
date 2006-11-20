@@ -2,6 +2,11 @@ GenericSetup Product Changelog
 
   GenericSetup 1.3-beta (unreleased)
 
+    - testing: The test base classes no longer set up any ZCML.
+      This change is not backwards compatible. If you are using these base
+      classes for testing custom handlers, you have to add the necessary ZCML
+      setup and tear down. Using test layers is recommended.
+
     - Added support for importing/exporting Zope 3 component registries
       by folding in Hanno Schlichting's GSLocalAddons product.
 

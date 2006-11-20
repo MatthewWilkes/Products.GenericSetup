@@ -19,12 +19,12 @@ import unittest
 from Testing import ZopeTestCase
 ZopeTestCase.installProduct('ZCTextIndex', 1)
 
-from Products.Five import zcml
 from zope.component import getMultiAdapter
 
 from Products.GenericSetup.interfaces import IBody
 from Products.GenericSetup.testing import BodyAdapterTestCase
 from Products.GenericSetup.testing import DummySetupEnviron
+from Products.GenericSetup.testing import ExportImportZCMLLayer
 
 
 class _extra:
@@ -99,6 +99,8 @@ _ZCTEXT_XML = """\
 
 class ZCatalogXMLAdapterTests(BodyAdapterTestCase):
 
+    layer = ExportImportZCMLLayer
+
     def _getTargetClass(self):
         from Products.GenericSetup.ZCatalog.exportimport \
                 import ZCatalogXMLAdapter
@@ -152,17 +154,9 @@ class ZCatalogXMLAdapterTests(BodyAdapterTestCase):
         obj.addIndex('foo_text', 'TextIndex')
 
     def setUp(self):
-        import Products.GenericSetup.PluginIndexes
-        import Products.GenericSetup.ZCatalog
-        import Products.GenericSetup.ZCTextIndex
         from Products.ZCatalog.ZCatalog import ZCatalog
 
         BodyAdapterTestCase.setUp(self)
-        zcml.load_config('configure.zcml',
-                         Products.GenericSetup.PluginIndexes)
-        zcml.load_config('configure.zcml', Products.GenericSetup.ZCatalog)
-        zcml.load_config('configure.zcml', Products.GenericSetup.ZCTextIndex)
-
         self._obj = ZCatalog('foo_catalog')
         self._BODY = _CATALOG_BODY % ('', '')
 
@@ -188,4 +182,5 @@ def test_suite():
         ))
 
 if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')
+    from Products.GenericSetup.testing import run
+    run(test_suite())
