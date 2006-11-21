@@ -19,47 +19,14 @@ import os
 import shutil
 from tarfile import TarFile
 
-from Acquisition import Implicit
+from AccessControl.SecurityManagement import newSecurityManager
+from AccessControl.User import UnrestrictedUser
 from Testing.ZopeTestCase import ZopeTestCase
 from zope.interface import implements
 
 from Products.GenericSetup.interfaces import IExportContext
 from Products.GenericSetup.interfaces import IImportContext
 from Products.GenericSetup.testing import DummyLogger
-
-
-class OmnipotentUser(Implicit):
-    """ Omnipotent User for unit testing purposes.
-    """
-    def getId(self):
-        return 'all_powerful_Oz'
-
-    getUserName = getId
-
-    def getRoles(self):
-        return ('Manager',)
-
-    def allowed(self, object, object_roles=None):
-        return 1
-
-    def getRolesInContext(self, object):
-        return ('Manager',)
-
-
-class SecurityRequestTest(ZopeTestCase):
-
-    def setUp(self):
-        from AccessControl.SecurityManagement import newSecurityManager
-
-        ZopeTestCase.setUp(self)
-        self.root = self.app
-        newSecurityManager(None, OmnipotentUser().__of__(self.app.acl_users))
-
-    def tearDown(self):
-        from AccessControl.SecurityManagement import noSecurityManager
-
-        noSecurityManager()
-        ZopeTestCase.tearDown(self)
 
 
 class DOMComparator:
@@ -98,10 +65,13 @@ class DOMComparator:
         self.assertEqual( found.toxml(), expected.toxml() )
 
 
-class BaseRegistryTests( SecurityRequestTest, DOMComparator ):
+class BaseRegistryTests(ZopeTestCase, DOMComparator):
+
+    def afterSetUp(self):
+        self.root = self.app
+        newSecurityManager(None, UnrestrictedUser('god', '', ['Manager'], ''))
 
     def _makeOne( self, *args, **kw ):
-
         # Derived classes must implement _getTargetClass
         return self._getTargetClass()( *args, **kw )
 
@@ -128,29 +98,16 @@ def _makeTestFile( filename, root_path, contents ):
     return fqpath
 
 
-class FilesystemTestBase( SecurityRequestTest ):
+class FilesystemTestBase(ZopeTestCase):
 
-    def _makeOne( self, *args, **kw ):
+    def _makeOne(self, *args, **kw):
+        return self._getTargetClass()(*args, **kw)
 
-        return self._getTargetClass()( *args, **kw )
+    def beforeTearDown(self):
+        _clearTestDirectory(self._PROFILE_PATH)
 
-    def setUp( self ):
-
-        SecurityRequestTest.setUp( self )
-        self._clearTempDir()
-
-    def tearDown( self ):
-
-        self._clearTempDir()
-        SecurityRequestTest.tearDown( self )
-
-    def _clearTempDir( self ):
-
-        _clearTestDirectory( self._PROFILE_PATH )
-
-    def _makeFile( self, filename, contents ):
-
-        return _makeTestFile( filename, self._PROFILE_PATH, contents )
+    def _makeFile(self, filename, contents):
+        return _makeTestFile(filename, self._PROFILE_PATH, contents)
 
 
 class TarballTester( DOMComparator ):

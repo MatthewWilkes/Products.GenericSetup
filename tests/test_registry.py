@@ -448,7 +448,7 @@ class ImportStepRegistryTests( BaseRegistryTests
 
     def test_generateXML_empty( self ):
 
-        registry = self._makeOne().__of__( self.root )
+        registry = self._makeOne().__of__(self.app)
 
         xml = registry.generateXML()
 
@@ -456,7 +456,7 @@ class ImportStepRegistryTests( BaseRegistryTests
 
     def test_generateXML_single( self ):
 
-        registry = self._makeOne().__of__( self.root )
+        registry = self._makeOne().__of__(self.app)
 
         registry.registerStep( id='one'
                              , version='1'
@@ -470,7 +470,7 @@ class ImportStepRegistryTests( BaseRegistryTests
 
     def test_generateXML_ordered( self ):
 
-        registry = self._makeOne().__of__( self.root )
+        registry = self._makeOne().__of__(self.app)
 
         registry.registerStep( id='one'
                              , version='1'
@@ -500,7 +500,7 @@ class ImportStepRegistryTests( BaseRegistryTests
 
     def test_parseXML_empty( self ):
 
-        registry = self._makeOne().__of__( self.root )
+        registry = self._makeOne().__of__(self.app)
 
         registry.registerStep( id='one'
                              , version='1'
@@ -515,7 +515,7 @@ class ImportStepRegistryTests( BaseRegistryTests
 
     def test_parseXML_single( self ):
 
-        registry = self._makeOne().__of__( self.root )
+        registry = self._makeOne().__of__(self.app)
 
         registry.registerStep( id='two'
                              , version='2'
@@ -691,7 +691,7 @@ class ExportStepRegistryTests( BaseRegistryTests
 
     def test_generateXML_empty( self ):
 
-        registry = self._makeOne().__of__( self.root )
+        registry = self._makeOne().__of__(self.app)
 
         xml = registry.generateXML()
 
@@ -699,7 +699,7 @@ class ExportStepRegistryTests( BaseRegistryTests
 
     def test_generateXML_single( self ):
 
-        registry = self._makeOne().__of__( self.root )
+        registry = self._makeOne().__of__(self.app)
 
         registry.registerStep( id='one'
                              , handler=ONE_FUNC
@@ -711,7 +711,7 @@ class ExportStepRegistryTests( BaseRegistryTests
 
     def test_generateXML_ordered( self ):
 
-        registry = self._makeOne().__of__( self.root )
+        registry = self._makeOne().__of__(self.app)
 
         registry.registerStep( id='one'
                              , handler=ONE_FUNC
@@ -735,7 +735,7 @@ class ExportStepRegistryTests( BaseRegistryTests
 
     def test_parseXML_empty( self ):
 
-        registry = self._makeOne().__of__( self.root )
+        registry = self._makeOne().__of__(self.app)
 
         registry.registerStep( id='one'
                              , handler=ONE_FUNC
@@ -748,7 +748,7 @@ class ExportStepRegistryTests( BaseRegistryTests
 
     def test_parseXML_single( self ):
 
-        registry = self._makeOne().__of__( self.root )
+        registry = self._makeOne().__of__(self.app)
 
         registry.registerStep( id='two'
                              , handler=TWO_FUNC
@@ -768,7 +768,7 @@ class ExportStepRegistryTests( BaseRegistryTests
 
     def test_parseXML_single_as_ascii( self ):
 
-        registry = self._makeOne().__of__( self.root )
+        registry = self._makeOne().__of__(self.app)
 
         registry.registerStep( id='two'
                              , handler=TWO_FUNC
@@ -841,8 +841,8 @@ class ToolsetRegistryTests( BaseRegistryTests
 
     def _initSite( self ):
 
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
 
         return site
 

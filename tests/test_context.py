@@ -16,7 +16,7 @@ $Id$
 """
 
 import unittest
-import Testing
+from Testing.ZopeTestCase import ZopeTestCase
 
 import logging
 import os
@@ -30,9 +30,7 @@ from OFS.Folder import Folder
 from OFS.Image import File
 
 from common import FilesystemTestBase
-from common import SecurityRequestTest
 from common import TarballTester
-from common import _makeTestFile
 from conformance import ConformsToISetupContext
 from conformance import ConformsToIImportContext
 from conformance import ConformsToIExportContext
@@ -61,7 +59,7 @@ class DirectoryImportContextTests( FilesystemTestBase
 
     def test_getLogger( self ):
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
         self.assertEqual( len( ctx.listNotes() ), 0 )
 
@@ -81,7 +79,7 @@ class DirectoryImportContextTests( FilesystemTestBase
 
         FILENAME = 'nonesuch.txt'
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         self.assertEqual( ctx.readDataFile( FILENAME ), None )
@@ -93,7 +91,7 @@ class DirectoryImportContextTests( FilesystemTestBase
         FILENAME = 'simple.txt'
         self._makeFile( FILENAME, printable )
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         self.assertEqual( ctx.readDataFile( FILENAME ), printable )
@@ -105,7 +103,7 @@ class DirectoryImportContextTests( FilesystemTestBase
         FILENAME = 'subdir/nested.txt'
         self._makeFile( FILENAME, printable )
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         self.assertEqual( ctx.readDataFile( FILENAME ), printable )
@@ -114,7 +112,7 @@ class DirectoryImportContextTests( FilesystemTestBase
 
         FILENAME = 'nonesuch.txt'
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         self.assertEqual( ctx.getLastModified( FILENAME ), None )
@@ -127,7 +125,7 @@ class DirectoryImportContextTests( FilesystemTestBase
         fqpath = self._makeFile( FILENAME, printable )
         timestamp = os.path.getmtime( fqpath )
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         lm = ctx.getLastModified( FILENAME )
@@ -143,7 +141,7 @@ class DirectoryImportContextTests( FilesystemTestBase
         fqpath = self._makeFile( FILENAME, printable )
         timestamp = os.path.getmtime( fqpath )
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         lm = ctx.getLastModified( FILENAME )
@@ -160,7 +158,7 @@ class DirectoryImportContextTests( FilesystemTestBase
         path, file = os.path.split( fqpath )
         timestamp = os.path.getmtime( path )
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         lm = ctx.getLastModified( SUBDIR )
@@ -171,7 +169,7 @@ class DirectoryImportContextTests( FilesystemTestBase
 
         FILENAME = 'nonesuch.txt'
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         self.assertEqual( ctx.isDirectory( FILENAME ), None )
@@ -183,7 +181,7 @@ class DirectoryImportContextTests( FilesystemTestBase
         FILENAME = 'simple.txt'
         fqpath = self._makeFile( FILENAME, printable )
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         self.assertEqual( ctx.isDirectory( FILENAME ), False )
@@ -196,7 +194,7 @@ class DirectoryImportContextTests( FilesystemTestBase
         FILENAME = os.path.join( SUBDIR, 'nested.txt' )
         fqpath = self._makeFile( FILENAME, printable )
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         self.assertEqual( ctx.isDirectory( FILENAME ), False )
@@ -209,7 +207,7 @@ class DirectoryImportContextTests( FilesystemTestBase
         FILENAME = os.path.join( SUBDIR, 'nested.txt' )
         fqpath = self._makeFile( FILENAME, printable )
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         self.assertEqual( ctx.isDirectory( SUBDIR ), True )
@@ -218,7 +216,7 @@ class DirectoryImportContextTests( FilesystemTestBase
 
         FILENAME = 'nonesuch.txt'
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         self.assertEqual( ctx.listDirectory( FILENAME ), None )
@@ -227,7 +225,7 @@ class DirectoryImportContextTests( FilesystemTestBase
 
         from string import printable
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         FILENAME = 'simple.txt'
@@ -243,7 +241,7 @@ class DirectoryImportContextTests( FilesystemTestBase
         FILENAME = 'simple.txt'
         self._makeFile( FILENAME, printable )
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         self.assertEqual( ctx.listDirectory( FILENAME ), None )
@@ -256,7 +254,7 @@ class DirectoryImportContextTests( FilesystemTestBase
         FILENAME = os.path.join( SUBDIR, 'nested.txt' )
         self._makeFile( FILENAME, printable )
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         self.assertEqual( ctx.listDirectory( FILENAME ), None )
@@ -269,7 +267,7 @@ class DirectoryImportContextTests( FilesystemTestBase
         FILENAME = os.path.join( SUBDIR, 'nested.txt' )
         self._makeFile( FILENAME, printable )
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         names = ctx.listDirectory( SUBDIR )
@@ -284,7 +282,7 @@ class DirectoryImportContextTests( FilesystemTestBase
         self._makeFile( FILENAME, printable )
         self._makeFile( os.path.join( SUBDIR, 'another.txt' ), 'ABC' )
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         names = ctx.listDirectory( SUBDIR )
@@ -303,7 +301,7 @@ class DirectoryImportContextTests( FilesystemTestBase
         self._makeFile( os.path.join( SUBDIR, 'CVS/skip.txt' ), 'DEF' )
         self._makeFile( os.path.join( SUBDIR, '.svn/skip.txt' ), 'GHI' )
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         names = ctx.listDirectory( SUBDIR )
@@ -325,7 +323,7 @@ class DirectoryImportContextTests( FilesystemTestBase
         self._makeFile( os.path.join( SUBDIR, 'CVS/skip.txt' ), 'DEF' )
         self._makeFile( os.path.join( SUBDIR, '.svn/skip.txt' ), 'GHI' )
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         names = ctx.listDirectory(SUBDIR, skip=('nested.txt',),
@@ -352,7 +350,7 @@ class DirectoryExportContextTests( FilesystemTestBase
 
     def test_getLogger( self ):
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
         self.assertEqual( len( ctx.listNotes() ), 0 )
 
@@ -374,7 +372,7 @@ class DirectoryExportContextTests( FilesystemTestBase
         FILENAME = 'simple.txt'
         fqname = self._makeFile( FILENAME, printable )
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         ctx.writeDataFile( FILENAME, digits, 'text/plain' )
@@ -388,7 +386,7 @@ class DirectoryExportContextTests( FilesystemTestBase
         FILENAME = 'nested.txt'
         fqname = os.path.join( self._PROFILE_PATH, SUBDIR, FILENAME )
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         ctx.writeDataFile( FILENAME, digits, 'text/plain', SUBDIR )
@@ -403,7 +401,7 @@ class DirectoryExportContextTests( FilesystemTestBase
         fqname = self._makeFile( os.path.join( SUBDIR, FILENAME )
                                , printable )
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         ctx.writeDataFile( FILENAME, digits, 'text/plain', SUBDIR )
@@ -418,7 +416,7 @@ class DirectoryExportContextTests( FilesystemTestBase
         self._makeFile( os.path.join( SUBDIR, 'another.txt' ), printable )
         fqname = os.path.join( self._PROFILE_PATH, SUBDIR, FILENAME )
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._makeOne( site, self._PROFILE_PATH )
 
         ctx.writeDataFile( FILENAME, digits, 'text/plain', SUBDIR )
@@ -426,10 +424,8 @@ class DirectoryExportContextTests( FilesystemTestBase
         self.assertEqual( open( fqname, 'rb' ).read(), digits )
 
 
-class TarballImportContextTests( SecurityRequestTest
-                               , ConformsToISetupContext
-                               , ConformsToIImportContext
-                               ):
+class TarballImportContextTests(ZopeTestCase, ConformsToISetupContext,
+                                ConformsToIImportContext):
 
     def _getTargetClass( self ):
 
@@ -472,7 +468,7 @@ class TarballImportContextTests( SecurityRequestTest
         archive.close()
         bits = archive_stream.getvalue()
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         site._setObject( 'setup_tool', Folder( 'setup_tool' ) )
         tool = site._getOb( 'setup_tool' )
 
@@ -741,13 +737,8 @@ class TarballImportContextTests( SecurityRequestTest
         self.failIf( FILENAME3 in names )
 
 
-class TarballExportContextTests( FilesystemTestBase
-                               , TarballTester
-                               , ConformsToISetupContext
-                               , ConformsToIExportContext
-                               ):
-
-    _PROFILE_PATH = '/tmp/TECT_tests'
+class TarballExportContextTests(ZopeTestCase, ConformsToISetupContext,
+                                ConformsToIExportContext, TarballTester):
 
     def _getTargetClass( self ):
 
@@ -756,7 +747,7 @@ class TarballExportContextTests( FilesystemTestBase
 
     def test_getLogger( self ):
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._getTargetClass()( site )
 
         self.assertEqual( len( ctx.listNotes() ), 0 )
@@ -778,7 +769,7 @@ class TarballExportContextTests( FilesystemTestBase
         from string import printable
         now = long( time.time() )
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._getTargetClass()( site )
 
         ctx.writeDataFile( 'foo.txt', printable, 'text/plain' )
@@ -793,7 +784,7 @@ class TarballExportContextTests( FilesystemTestBase
         from string import printable
         from string import digits
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._getTargetClass()( site )
 
         ctx.writeDataFile( 'foo.txt', printable, 'text/plain' )
@@ -810,7 +801,7 @@ class TarballExportContextTests( FilesystemTestBase
         from string import printable
         from string import digits
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         ctx = self._getTargetClass()( site )
 
         ctx.writeDataFile( 'foo.txt', printable, 'text/plain' )
@@ -823,10 +814,8 @@ class TarballExportContextTests( FilesystemTestBase
         self._verifyTarballEntry( fileish, 'bar/baz.txt', digits )
 
 
-class SnapshotExportContextTests( SecurityRequestTest
-                                , ConformsToISetupContext
-                                , ConformsToIExportContext
-                                ):
+class SnapshotExportContextTests(ZopeTestCase, ConformsToISetupContext,
+                                 ConformsToIExportContext):
 
     def _getTargetClass( self ):
 
@@ -839,7 +828,7 @@ class SnapshotExportContextTests( SecurityRequestTest
 
     def test_getLogger( self ):
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         site.setup_tool = DummyTool( 'setup_tool' )
         tool = site.setup_tool
         ctx = self._makeOne( tool, 'simple' )
@@ -869,7 +858,7 @@ class SnapshotExportContextTests( SecurityRequestTest
         png_data = png_file.read()
         png_file.close()
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         site.setup_tool = DummyTool( 'setup_tool' )
         tool = site.setup_tool
         ctx = self._makeOne( tool, 'simple' )
@@ -895,7 +884,7 @@ class SnapshotExportContextTests( SecurityRequestTest
         FILENAME = 'simple.txt'
         CONTENT_TYPE = 'text/plain'
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         site.setup_tool = DummyTool( 'setup_tool' )
         tool = site.setup_tool
         ctx = self._makeOne( tool, 'simple' )
@@ -922,7 +911,7 @@ class SnapshotExportContextTests( SecurityRequestTest
         CONTENT_TYPE = 'text/plain'
         CONTENT = u'Unicode, with non-ASCII: %s.' % unichr(150)
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         site.setup_tool = DummyTool( 'setup_tool' )
         tool = site.setup_tool
         ctx = self._makeOne( tool, 'simple', 'latin_1' )
@@ -949,7 +938,7 @@ class SnapshotExportContextTests( SecurityRequestTest
         CONTENT_TYPE = 'text/xml'
         _XML = """<?xml version="1.0"?><simple />"""
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         site.setup_tool = DummyTool( 'setup_tool' )
         tool = site.setup_tool
         ctx = self._makeOne( tool, 'simple' )
@@ -975,7 +964,7 @@ class SnapshotExportContextTests( SecurityRequestTest
         CONTENT_TYPE = 'text/xml'
         _XML = u"""<?xml version="1.0"?><simple />"""
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         site.setup_tool = DummyTool( 'setup_tool' )
         tool = site.setup_tool
         ctx = self._makeOne( tool, 'simple' )
@@ -1001,7 +990,7 @@ class SnapshotExportContextTests( SecurityRequestTest
         CONTENT_TYPE = 'text/html'
         _HTML = """<html><body><h1>HTML</h1></body></html>"""
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         site.setup_tool = DummyTool( 'setup_tool' )
         tool = site.setup_tool
         ctx = self._makeOne( tool, 'simple' )
@@ -1030,7 +1019,7 @@ class SnapshotExportContextTests( SecurityRequestTest
         CONTENT_TYPE = 'text/html'
         _HTML = """<html><body><h1>HTML</h1></body></html>"""
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         site.setup_tool = DummyTool( 'setup_tool' )
         tool = site.setup_tool
         ctx = self._makeOne( tool, 'simple' )
@@ -1056,7 +1045,7 @@ class SnapshotExportContextTests( SecurityRequestTest
         from string import printable
         from string import digits
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         site.setup_tool = DummyTool( 'setup_tool' )
         tool = site.setup_tool
         ctx = self._makeOne( tool, 'multiple' )
@@ -1072,10 +1061,8 @@ class SnapshotExportContextTests( SecurityRequestTest
             self.failUnless( id in snapshot.objectIds() )
 
 
-class SnapshotImportContextTests( SecurityRequestTest
-                                , ConformsToISetupContext
-                                , ConformsToIImportContext
-                                ):
+class SnapshotImportContextTests(ZopeTestCase, ConformsToISetupContext,
+                                 ConformsToIImportContext):
 
     def _getTargetClass( self ):
 
@@ -1084,7 +1071,7 @@ class SnapshotImportContextTests( SecurityRequestTest
 
     def _makeOne( self, context_id, *args, **kw ):
 
-        site = DummySite( 'site' ).__of__( self.root )
+        site = DummySite('site').__of__(self.app)
         site._setObject( 'setup_tool', Folder( 'setup_tool' ) )
         tool = site._getOb( 'setup_tool' )
 

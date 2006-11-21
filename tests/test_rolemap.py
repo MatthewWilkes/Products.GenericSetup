@@ -38,8 +38,8 @@ class RolemapExportConfiguratorTests(BaseRegistryTests):
     def test_listRoles_normal( self ):
 
         EXPECTED = [ 'Anonymous', 'Authenticated', 'Manager', 'Owner' ]
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         configurator = self._makeOne( site )
 
         roles = list( configurator.listRoles() )
@@ -53,8 +53,8 @@ class RolemapExportConfiguratorTests(BaseRegistryTests):
     def test_listRoles_added( self ):
 
         EXPECTED = [ 'Anonymous', 'Authenticated', 'Manager', 'Owner', 'ZZZ' ]
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         existing_roles = list( getattr( site, '__ac_roles__', [] ) )[:]
         existing_roles.append( 'ZZZ' )
         site.__ac_roles__ = existing_roles
@@ -71,15 +71,15 @@ class RolemapExportConfiguratorTests(BaseRegistryTests):
 
     def test_listPermissions_nooverrides( self ):
 
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         configurator = self._makeOne( site )
 
         self.assertEqual( len( configurator.listPermissions() ), 0 )
 
     def test_listPermissions_nooverrides( self ):
 
-        site = Folder( id='site' ).__of__( self.root )
+        site = Folder(id='site').__of__(self.app)
         configurator = self._makeOne( site )
 
         self.assertEqual( len( configurator.listPermissions() ), 0 )
@@ -89,7 +89,7 @@ class RolemapExportConfiguratorTests(BaseRegistryTests):
         ACI = 'Access contents information'
         ROLES = [ 'Manager', 'Owner' ]
 
-        site = Folder( id='site' ).__of__( self.root )
+        site = Folder(id='site').__of__(self.app)
         site.manage_permission( ACI, ROLES, acquire=1 )
         configurator = self._makeOne( site )
 
@@ -104,7 +104,7 @@ class RolemapExportConfiguratorTests(BaseRegistryTests):
         ACI = 'Access contents information'
         ROLES = [ 'Manager', 'Owner' ]
 
-        site = Folder( id='site' ).__of__( self.root )
+        site = Folder(id='site').__of__(self.app)
         site.manage_permission( ACI, ROLES )
         configurator = self._makeOne( site )
 
@@ -116,16 +116,16 @@ class RolemapExportConfiguratorTests(BaseRegistryTests):
 
     def test_generateXML_empty( self ):
 
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         configurator = self._makeOne( site ).__of__( site )
 
         self._compareDOM( configurator.generateXML(), _EMPTY_EXPORT )
 
     def test_generateXML_added_role( self ):
 
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         existing_roles = list( getattr( site, '__ac_roles__', [] ) )[:]
         existing_roles.append( 'ZZZ' )
         site.__ac_roles__ = existing_roles
@@ -138,7 +138,7 @@ class RolemapExportConfiguratorTests(BaseRegistryTests):
         ACI = 'Access contents information'
         ROLES = [ 'Manager', 'Owner' ]
 
-        site = Folder( id='site' ).__of__( self.root )
+        site = Folder(id='site').__of__(self.app)
         site.manage_permission( ACI, ROLES, acquire=1 )
         configurator = self._makeOne( site ).__of__( site )
 
@@ -149,7 +149,7 @@ class RolemapExportConfiguratorTests(BaseRegistryTests):
         ACI = 'Access contents information'
         ROLES = [ 'Manager', 'Owner', 'ZZZ' ]
 
-        site = Folder( id='site' ).__of__( self.root )
+        site = Folder(id='site').__of__(self.app)
         existing_roles = list( getattr( site, '__ac_roles__', [] ) )[:]
         existing_roles.append( 'ZZZ' )
         site.__ac_roles__ = existing_roles
@@ -163,7 +163,7 @@ class RolemapExportConfiguratorTests(BaseRegistryTests):
         ACI = 'Access contents information'
         ROLES = [ 'Manager', 'Owner' ]
 
-        site = Folder( id='site' ).__of__( self.root )
+        site = Folder(id='site').__of__(self.app)
         site.manage_permission( ACI, ROLES )
         configurator = self._makeOne( site ).__of__( site )
 
@@ -181,8 +181,8 @@ class RolemapImportConfiguratorTests(BaseRegistryTests):
 
     def test_parseXML_empty( self ):
 
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         existing_roles = list( getattr( site, '__ac_roles__', [] ) )[:]
         configurator = self._makeOne( site )
 
@@ -193,8 +193,8 @@ class RolemapImportConfiguratorTests(BaseRegistryTests):
 
     def test_parseXML_added_role( self ):
 
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         configurator = self._makeOne( site )
 
         rolemap_info = configurator.parseXML( _ADDED_ROLE_EXPORT )
@@ -211,8 +211,8 @@ class RolemapImportConfiguratorTests(BaseRegistryTests):
 
         ACI = 'Access contents information'
 
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         configurator = self._makeOne( site )
 
         rolemap_info = configurator.parseXML( _ACQUIRED_EXPORT )
@@ -232,8 +232,8 @@ class RolemapImportConfiguratorTests(BaseRegistryTests):
 
         ACI = 'Access contents information'
 
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         configurator = self._makeOne( site )
 
         rolemap_info = configurator.parseXML( _UNACQUIRED_EXPORT )
@@ -253,8 +253,8 @@ class RolemapImportConfiguratorTests(BaseRegistryTests):
 
         ACI = 'Access contents information'
 
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         configurator = self._makeOne( site )
 
         rolemap_info = configurator.parseXML( _COMBINED_EXPORT )
@@ -375,8 +375,8 @@ class Test_exportRolemap( BaseRegistryTests ):
 
     def test_unchanged( self ):
 
-        self.root.site = Folder( 'site' )
-        site = self.root.site
+        self.app.site = Folder('site')
+        site = self.app.site
 
         context = DummyExportContext( site )
 
@@ -391,8 +391,8 @@ class Test_exportRolemap( BaseRegistryTests ):
 
     def test_added_role( self ):
 
-        self.root.site = Folder( 'site' )
-        site = self.root.site
+        self.app.site = Folder('site')
+        site = self.app.site
         existing_roles = list( getattr( site, '__ac_roles__', [] ) )[:]
         existing_roles.append( 'ZZZ' )
         site.__ac_roles__ = existing_roles
@@ -414,8 +414,8 @@ class Test_exportRolemap( BaseRegistryTests ):
         ACI = 'Access contents information'
         ROLES = [ 'Manager', 'Owner' ]
 
-        self.root.site = Folder( 'site' )
-        site = self.root.site
+        self.app.site = Folder('site')
+        site = self.app.site
         site.manage_permission( ACI, ROLES, acquire=1 )
 
         context = DummyExportContext( site )
@@ -434,8 +434,8 @@ class Test_exportRolemap( BaseRegistryTests ):
         ACI = 'Access contents information'
         ROLES = [ 'Manager', 'Owner', 'ZZZ' ]
 
-        self.root.site = Folder( 'site' )
-        site = self.root.site
+        self.app.site = Folder('site')
+        site = self.app.site
         existing_roles = list( getattr( site, '__ac_roles__', [] ) )[:]
         existing_roles.append( 'ZZZ' )
         site.__ac_roles__ = existing_roles
@@ -457,8 +457,8 @@ class Test_exportRolemap( BaseRegistryTests ):
         ACI = 'Access contents information'
         ROLES = [ 'Manager', 'Owner' ]
 
-        self.root.site = Folder( 'site' )
-        site = self.root.site
+        self.app.site = Folder('site')
+        site = self.app.site
         site.manage_permission( ACI, ROLES )
 
         context = DummyExportContext( site )
@@ -479,8 +479,8 @@ class Test_importRolemap( BaseRegistryTests ):
 
     def test_empty_default_purge( self ):
 
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         original_roles = list( getattr( site, '__ac_roles__', [] ) )[:]
         modified_roles = original_roles[:]
         modified_roles.append( 'ZZZ' )
@@ -501,8 +501,8 @@ class Test_importRolemap( BaseRegistryTests ):
 
     def test_empty_explicit_purge( self ):
 
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         original_roles = list( getattr( site, '__ac_roles__', [] ) )[:]
         modified_roles = original_roles[:]
         modified_roles.append( 'ZZZ' )
@@ -523,8 +523,8 @@ class Test_importRolemap( BaseRegistryTests ):
 
     def test_empty_skip_purge( self ):
 
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         original_roles = list( getattr( site, '__ac_roles__', [] ) )[:]
         modified_roles = original_roles[:]
         modified_roles.append( 'ZZZ' )
@@ -548,8 +548,8 @@ class Test_importRolemap( BaseRegistryTests ):
         ACI = 'Access contents information'
         VIEW = 'View'
 
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         site.manage_permission( ACI, () )
         site.manage_permission( VIEW, () )
 
@@ -583,8 +583,8 @@ class Test_importRolemap( BaseRegistryTests ):
         ACI = 'Access contents information'
         VIEW = 'View'
 
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         site.manage_permission( ACI, () )
         site.manage_permission( VIEW, () )
 
@@ -617,8 +617,8 @@ class Test_importRolemap( BaseRegistryTests ):
         ACI = 'Access contents information'
         VIEW = 'View'
 
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         site.manage_permission( VIEW, () )
 
         existing_allowed = [ x[ 'name' ]
@@ -650,8 +650,8 @@ class Test_importRolemap( BaseRegistryTests ):
         ACI = 'Access contents information'
         VIEW = 'View'
 
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         site.manage_permission( VIEW, () )
 
         existing_allowed = [ x[ 'name' ]
@@ -683,8 +683,8 @@ class Test_importRolemap( BaseRegistryTests ):
         ACI = 'Access contents information'
         VIEW = 'View'
 
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         site.manage_permission( VIEW, () )
 
         existing_allowed = [ x[ 'name' ]
@@ -720,8 +720,8 @@ class Test_importRolemap( BaseRegistryTests ):
         ACI = 'Access contents information'
         VIEW = 'View'
 
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         site.manage_permission( VIEW, () )
 
         existing_allowed = [ x[ 'name' ]
@@ -757,8 +757,8 @@ class Test_importRolemap( BaseRegistryTests ):
         ACI = 'Access contents information'
         VIEW = 'View'
 
-        self.root.site = Folder( id='site' )
-        site = self.root.site
+        self.app.site = Folder(id='site')
+        site = self.app.site
         site.manage_permission( VIEW, () )
 
         existing_allowed = [ x[ 'name' ]

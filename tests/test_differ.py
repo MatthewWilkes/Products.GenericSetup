@@ -16,14 +16,11 @@ $Id$
 """
 
 import unittest
-import Testing
-
-from OFS.Folder import Folder
-from OFS.Image import File
+from Testing.ZopeTestCase import ZopeTestCase
 
 from DateTime.DateTime import DateTime
-
-from common import SecurityRequestTest
+from OFS.Folder import Folder
+from OFS.Image import File
 
 
 class DummySite( Folder ):
@@ -96,7 +93,7 @@ DIFF_TEXT = """\
  four\
 """
 
-class ConfigDiffTests( SecurityRequestTest ):
+class ConfigDiffTests(ZopeTestCase):
 
     site = None
     tool = None
@@ -115,7 +112,7 @@ class ConfigDiffTests( SecurityRequestTest ):
         if self.site is not None:
             return
 
-        site = self.site = DummySite( 'site' ).__of__( self.root )
+        site = self.site = DummySite('site').__of__(self.app)
         site._setObject( 'setup_tool', Folder( 'setup_tool' ) )
         self.tool = tool = site._getOb( 'setup_tool' )
 

@@ -26,46 +26,34 @@ from OFS.Folder import Folder
 from Products.GenericSetup import profile_registry
 from Products.GenericSetup.testing import ExportImportZCMLLayer
 
-from common import DOMComparator
+from common import BaseRegistryTests
 from common import DummyExportContext
 from common import DummyImportContext
 from common import FilesystemTestBase
-
-from common import SecurityRequestTest
 from common import TarballTester
 from conformance import ConformsToISetupTool
 
 
-class SetupToolTests( FilesystemTestBase
-                    , TarballTester
-                    , ConformsToISetupTool
-                    ):
+class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
 
     layer = ExportImportZCMLLayer
 
     _PROFILE_PATH = '/tmp/STT_test'
 
-    def setUp( self ):
-
-        FilesystemTestBase.setUp( self )
+    def afterSetUp(self):
         self._profile_registry_info = profile_registry._profile_info
         self._profile_registry_ids = profile_registry._profile_ids
         profile_registry.clear()
 
-    def tearDown( self ):
-
+    def beforeTearDown(self):
         profile_registry._profile_info = self._profile_registry_info
         profile_registry._profile_ids = self._profile_registry_ids
-        FilesystemTestBase.tearDown( self )
+        FilesystemTestBase.beforeTearDown(self)
 
-    def _getTargetClass( self ):
-
+    def _getTargetClass(self):
         from Products.GenericSetup.tool import SetupTool
+
         return SetupTool
-
-    def _makeOne( self, *args, **kw ):
-
-        return self._getTargetClass()( *args, **kw )
 
     def _makeSite( self, title="Don't care" ):
 
@@ -73,8 +61,8 @@ class SetupToolTests( FilesystemTestBase
         site._setId( 'site' )
         site.title = title
 
-        self.root._setObject( 'site', site )
-        return self.root._getOb( 'site' )
+        self.app._setObject( 'site', site )
+        return self.app._getOb( 'site' )
 
     def test_empty( self ):
 
@@ -102,24 +90,12 @@ class SetupToolTests( FilesystemTestBase
         from test_registry import _EMPTY_IMPORT_XML
         from test_registry import _EMPTY_EXPORT_XML
         from test_registry import _EMPTY_TOOLSET_XML
-        from common import _makeTestFile
 
         tool = self._makeOne('setup_tool')
 
-        _makeTestFile( IMPORT_STEPS_XML
-                     , self._PROFILE_PATH
-                     , _EMPTY_IMPORT_XML
-                     )
-
-        _makeTestFile( EXPORT_STEPS_XML
-                     , self._PROFILE_PATH
-                     , _EMPTY_EXPORT_XML
-                     )
-
-        _makeTestFile( TOOLSET_XML
-                     , self._PROFILE_PATH
-                     , _EMPTY_TOOLSET_XML
-                     )
+        self._makeFile(IMPORT_STEPS_XML, _EMPTY_IMPORT_XML)
+        self._makeFile(EXPORT_STEPS_XML, _EMPTY_EXPORT_XML)
+        self._makeFile(TOOLSET_XML, _EMPTY_TOOLSET_XML)
 
         profile_registry.registerProfile('foo', 'Foo', '', self._PROFILE_PATH)
         tool.setImportContext('profile-other:foo')
@@ -144,25 +120,13 @@ class SetupToolTests( FilesystemTestBase
         from test_registry import _SINGLE_EXPORT_XML
         from test_registry import _NORMAL_TOOLSET_XML
         from test_registry import ONE_FUNC
-        from common import _makeTestFile
 
         tool = self._makeOne('setup_tool')
         tool.getExportStepRegistry().clear()
 
-        _makeTestFile( IMPORT_STEPS_XML
-                     , self._PROFILE_PATH
-                     , _SINGLE_IMPORT_XML
-                     )
-
-        _makeTestFile( EXPORT_STEPS_XML
-                     , self._PROFILE_PATH
-                     , _SINGLE_EXPORT_XML
-                     )
-
-        _makeTestFile( TOOLSET_XML
-                     , self._PROFILE_PATH
-                     , _NORMAL_TOOLSET_XML
-                     )
+        self._makeFile(IMPORT_STEPS_XML, _SINGLE_IMPORT_XML)
+        self._makeFile(EXPORT_STEPS_XML, _SINGLE_EXPORT_XML)
+        self._makeFile(TOOLSET_XML, _NORMAL_TOOLSET_XML)
 
         profile_registry.registerProfile('foo', 'Foo', '', self._PROFILE_PATH)
         tool.setImportContext('profile-other:foo')
@@ -738,22 +702,20 @@ def _exportPropertiesINI( context ):
     return 'Exported properties'
 
 
-class _ToolsetSetup( SecurityRequestTest ):
+class _ToolsetSetup(BaseRegistryTests):
 
     def _initSite( self ):
 
         from Products.GenericSetup.tool import SetupTool
         site = Folder()
         site._setId( 'site' )
-        self.root._setObject( 'site', site )
-        site = self.root._getOb( 'site' )
+        self.app._setObject( 'site', site )
+        site = self.app._getOb( 'site' )
         site._setObject('setup_tool', SetupTool('setup_tool'))
         return site
 
 
-class Test_exportToolset( _ToolsetSetup
-                        , DOMComparator
-                        ):
+class Test_exportToolset(_ToolsetSetup):
 
     layer = ExportImportZCMLLayer
 
@@ -795,7 +757,7 @@ class Test_exportToolset( _ToolsetSetup
         self.assertEqual( content_type, 'text/xml' )
 
 
-class Test_importToolset( _ToolsetSetup ):
+class Test_importToolset(_ToolsetSetup):
 
     layer = ExportImportZCMLLayer
 
