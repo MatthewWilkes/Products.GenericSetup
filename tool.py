@@ -186,7 +186,6 @@ class SetupTool(Folder):
     def applyContext(self, context, encoding=None):
         self._updateImportStepsRegistry(context, encoding)
         self._updateExportStepsRegistry(context, encoding)
-        self._updateToolsetRegistry(context, encoding)
 
     security.declareProtected(ManagePortal, 'getImportStepRegistry')
     def getImportStepRegistry(self):
@@ -717,19 +716,6 @@ class SetupTool(Folder):
                                                title=title,
                                                description=description,
                                               )
-
-    security.declarePrivate('_updateToolsetRegistry')
-    def _updateToolsetRegistry(self, context, encoding):
-
-        """ Update our toolset registry from our profile.
-        """
-        if context is None:
-            context = self._getImportContext(self._import_context_id)
-        xml = context.readDataFile(TOOLSET_XML)
-        if xml is None:
-            return
-
-        self._toolset_registry.parseXML(xml, encoding)
 
     security.declarePrivate('_doRunImportStep')
     def _doRunImportStep(self, step_id, context):

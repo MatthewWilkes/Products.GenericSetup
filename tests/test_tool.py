@@ -158,17 +158,6 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
 
         self.assertEqual( export_registry.getStep( 'one' ), ONE_FUNC )
 
-        toolset = tool.getToolsetRegistry()
-        self.assertEqual( len( toolset.listForbiddenTools() ), 1 )
-        self.failUnless( 'doomed' in toolset.listForbiddenTools() )
-        self.assertEqual( len( toolset.listRequiredTools() ), 2 )
-        self.failUnless( 'mandatory' in toolset.listRequiredTools() )
-        info = toolset.getRequiredToolInfo( 'mandatory' )
-        self.assertEqual( info[ 'class' ], 'path.to.one' )
-        self.failUnless( 'obligatory' in toolset.listRequiredTools() )
-        info = toolset.getRequiredToolInfo( 'obligatory' )
-        self.assertEqual( info[ 'class' ], 'path.to.another' )
-
     def test_runImportStep_nonesuch( self ):
 
         site = self._makeSite()
@@ -578,6 +567,7 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
         self.assertEqual( len( import_registry.listSteps() ), 1 )
         self.failUnless( 'one' in import_registry.listSteps() )
         info = import_registry.getStepMetadata( 'one' )
+
         self.assertEqual( info[ 'id' ], 'one' )
         self.assertEqual( info[ 'title' ], 'One Step' )
         self.assertEqual( info[ 'version' ], '1' )
@@ -598,17 +588,6 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
                         , 'Products.GenericSetup.tests.test_registry.ONE_FUNC' )
 
         self.assertEqual( export_registry.getStep( 'one' ), ONE_FUNC )
-
-        toolset = tool.getToolsetRegistry()
-        self.assertEqual( len( toolset.listForbiddenTools() ), 1 )
-        self.failUnless( 'doomed' in toolset.listForbiddenTools() )
-        self.assertEqual( len( toolset.listRequiredTools() ), 2 )
-        self.failUnless( 'mandatory' in toolset.listRequiredTools() )
-        info = toolset.getRequiredToolInfo( 'mandatory' )
-        self.assertEqual( info[ 'class' ], 'path.to.one' )
-        self.failUnless( 'obligatory' in toolset.listRequiredTools() )
-        info = toolset.getRequiredToolInfo( 'obligatory' )
-        self.assertEqual( info[ 'class' ], 'path.to.another' )
 
 
 _DEFAULT_STEP_REGISTRIES_EXPORT_XML = """\
@@ -760,6 +739,40 @@ class Test_exportToolset(_ToolsetSetup):
 class Test_importToolset(_ToolsetSetup):
 
     layer = ExportImportZCMLLayer
+
+    def test_import_updates_registry(self):
+        from Products.GenericSetup.tool import TOOLSET_XML
+        from Products.GenericSetup.tool import importToolset
+        from test_registry import _NORMAL_TOOLSET_XML
+
+        site = self._initSite()
+        context = DummyImportContext( site, tool=site.setup_tool )
+
+        # Import forbidden
+        context._files[ TOOLSET_XML ] = _FORBIDDEN_TOOLSET_XML
+        importToolset( context )
+
+        tool = context.getSetupTool()
+        toolset = tool.getToolsetRegistry()
+
+        self.assertEqual( len( toolset.listForbiddenTools() ), 3 )
+        self.failUnless( 'doomed' in toolset.listForbiddenTools() )
+        self.failUnless( 'damned' in toolset.listForbiddenTools() )
+        self.failUnless( 'blasted' in toolset.listForbiddenTools() )
+
+        # Import required
+        context._files[ TOOLSET_XML ] = _REQUIRED_TOOLSET_XML
+        importToolset( context )
+
+        self.assertEqual( len( toolset.listRequiredTools() ), 2 )
+        self.failUnless( 'mandatory' in toolset.listRequiredTools() )
+        info = toolset.getRequiredToolInfo( 'mandatory' )
+        self.assertEqual( info[ 'class' ],
+                          'Products.GenericSetup.tests.test_tool.DummyTool' )
+        self.failUnless( 'obligatory' in toolset.listRequiredTools() )
+        info = toolset.getRequiredToolInfo( 'obligatory' )
+        self.assertEqual( info[ 'class' ],
+                          'Products.GenericSetup.tests.test_tool.DummyTool' )
 
     def test_tool_ids( self ):
         # The tool import mechanism used to rely on the fact that all tools
