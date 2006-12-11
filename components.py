@@ -15,7 +15,6 @@
 $Id$
 """
 
-from zope.app.component.hooks import getSite
 from zope.component import adapts
 from zope.component import getSiteManager
 from zope.component.interfaces import IComponentRegistry
@@ -71,7 +70,7 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
                 self._logger.info('Utilities registered.')
 
     def _purgeAdapters(self):
-        registrations = self.context.registeredAdapters()
+        registrations = tuple(self.context.registeredAdapters())
         
         for registration in registrations:
             factory = registration.factory
@@ -85,7 +84,7 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
                                            name=name)
 
     def _purgeUtilities(self):
-        registrations = self.context.registeredAdapters()
+        registrations = tuple(self.context.registeredUtilities())
         
         for registration in registrations:
             provided = registration.provided
@@ -128,22 +127,20 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
 
             obj_path = child.getAttribute('object')
             if obj_path:
-                site = getSite()
+                site = self.environ.getSite()
                 # we support registering aq_wrapped objects only for now
                 if hasattr(site, 'aq_base'):
                     # filter out empty path segments
                     path = [f for f in obj_path.split('/') if f]
-                    # XXX add support for nested folder
-                    if len(path) > 1:
-                        return
-                    obj = getattr(site, path[0], None)
+                    # support for nested folder
+                    obj = self._recurseFolder(site, path)
                     if obj is not None:
                         self.context.registerUtility(obj, provided, name)
                 else:
                     # Log an error, not aq_wrapped
                     self._logger.warning("The object %s was not acquisition "
                                          "wrapped. Registering these is not "
-                                         "supported right now." % obj)
+                                         "supported right now." % obj_path)
             elif component:
                 self.context.registerUtility(component, provided, name)
             else:
@@ -156,9 +153,9 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
         # which is needed for the tests we convert to a sorted list
         registrations = [reg for reg in self.context.registeredAdapters()]
         registrations.sort()
-        
+
         for registration in registrations:
-            child=self._doc.createElement('adapter')
+            child = self._doc.createElement('adapter')
 
             factory = _getDottedName(registration.factory)
             provided = _getDottedName(registration.provided)
@@ -187,7 +184,7 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
         registrations.sort()
 
         for registration in registrations:
-            child=self._doc.createElement('utility')
+            child = self._doc.createElement('utility')
 
             provided = _getDottedName(registration.provided)
             child.setAttribute('interface', provided)
@@ -198,43 +195,32 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
 
             comp = registration.component
             # check if the component is acquisition wrapped. If it is export
-            # an object reference instead of a component / factory reference
+            # an object reference instead of a factory reference
             if hasattr(comp, 'aq_base'):
                 # if the site is acquistion wrapped as well, get the relative
                 # path to the site
                 path = '/'.join(comp.getPhysicalPath())
-                site = getSite()
+                site = self.environ.getSite()
                 if hasattr(site, 'aq_base'):
                     site_path = '/'.join(site.getPhysicalPath())
                     rel_path = path[len(site_path):]
                 child.setAttribute('object', rel_path)
             else:
                 factory = _getDottedName(type(comp))
-                reference = self.resolveName(comp)
-                if reference:
-                    module = _getDottedName(comp.__module__)
-                    component = "%s.%s" % (module, reference)
-                    child.setAttribute('component', component)
-                else:
-                    child.setAttribute('factory', factory)
+                child.setAttribute('factory', factory)
 
             fragment.appendChild(child)
 
         return fragment
 
-    def resolveName(self, component):
-        # extremly ugly hack to get to the reference name, this only
-        # works if the utility reference is defined in the namespace of the
-        # same module as the class itself
-        module = _resolveDottedName(component.__module__)
-        namespace = module.__dict__
-        name = ''
-        for ref in namespace:
-            if namespace[ref] is component:
-                name = ref
-        del module
-        del namespace
-        return name
+    def _recurseFolder(self, site, path):
+        root = site
+        for pathsegment in path:
+            if root is None:
+                break
+            root = getattr(root, pathsegment, None)
+
+        return root
 
 
 def dummyGetId():

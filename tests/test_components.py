@@ -24,10 +24,14 @@ from OFS.SimpleItem import SimpleItem
 
 from Products.Five.component import enableSite
 from Products.Five.component.interfaces import IObjectManagerSite
+from Products.GenericSetup.interfaces import IBody
 from Products.GenericSetup.testing import BodyAdapterTestCase
 from Products.GenericSetup.testing import ExportImportZCMLLayer
+from Products.GenericSetup.tests.common import DummyExportContext
+from Products.GenericSetup.tests.common import DummyImportContext
 
 from zope.app.component.hooks import setSite, clearSite, setHooks
+from zope.component import getMultiAdapter
 from zope.component import getSiteManager
 from zope.component import queryUtility
 from zope.component.globalregistry import base
@@ -50,12 +54,6 @@ class IDummyInterface(Interface):
     def verify():
         """Returns True."""
 
-class IDummyInterface2(Interface):
-    """A second dummy interface."""
-
-    def verify():
-        """Returns True."""
-
 class DummyUtility(object):
     """A dummy utility."""
 
@@ -63,16 +61,6 @@ class DummyUtility(object):
 
     def verify(self):
         return True
-
-class DummyUtility2(object):
-    """A second dummy utility."""
-
-    implements(IDummyInterface2)
-
-    def verify(self):
-        return True
-
-dummy2 = DummyUtility2()
 
 class DummyTool(SimpleItem):
     """A dummy tool."""
@@ -85,6 +73,19 @@ class DummyTool(SimpleItem):
     security.declarePublic('verify')
     def verify(self):
         return True
+
+class DummyTool2(SimpleItem):
+    """A second dummy tool."""
+    implements(IDummyInterface)
+
+    id = 'dummy_tool2'
+    meta_type = 'dummy tool2'
+    security = ClassSecurityInfo()
+
+    security.declarePublic('verify')
+    def verify(self):
+        return True
+
 
 InitializeClass(DummyTool)
 
@@ -100,12 +101,10 @@ _COMPONENTS_BODY = """\
      object="/dummy_tool"/>
   <utility name="dummy tool name2"
      interface="Products.GenericSetup.tests.test_components.IDummyInterface"
-     object="/test_folder_1_/dummy_tool"/>
+     object="/test_folder_1_/dummy_tool2"/>
   <utility name="foo"
      factory="Products.GenericSetup.tests.test_components.DummyUtility"
      interface="Products.GenericSetup.tests.test_components.IDummyInterface"/>
-  <utility component="Products.GenericSetup.tests.test_components.dummy2"
-     interface="Products.GenericSetup.tests.test_components.IDummyInterface2"/>
  </utilities>
 </componentregistry>
 """
@@ -114,6 +113,32 @@ _COMPONENTS_BODY = """\
 class ComponentRegistryXMLAdapterTests(ZopeTestCase, BodyAdapterTestCase):
 
     layer = ExportImportZCMLLayer
+
+    def test_body_get(self):
+        self._populate(self._obj)
+        context = DummyExportContext(self.app)
+        adapted = getMultiAdapter((self._obj, context), IBody)
+        self.assertEqual(adapted.body, self._BODY)
+
+    def test_body_set(self):
+        context = DummyImportContext(self.app)
+        adapted = getMultiAdapter((self._obj, context), IBody)
+        adapted.body = self._BODY
+        self._verifyImport(self._obj)
+        self.assertEqual(adapted.body, self._BODY)
+
+        # now in update mode
+        context._should_purge = False
+        adapted = getMultiAdapter((self._obj, context), IBody)
+        adapted.body = self._BODY
+        self._verifyImport(self._obj)
+        self.assertEqual(adapted.body, self._BODY)
+
+        # and again in update mode
+        adapted = getMultiAdapter((self._obj, context), IBody)
+        adapted.body = self._BODY
+        self._verifyImport(self._obj)
+        self.assertEqual(adapted.body, self._BODY)
 
     def _getTargetClass(self):
         from Products.GenericSetup.components import \
@@ -139,19 +164,15 @@ class ComponentRegistryXMLAdapterTests(ZopeTestCase, BodyAdapterTestCase):
         self.assertEqual(tool.meta_type, 'dummy tool')
         self.assertEquals(repr(util), repr(tool))
 
-        util = queryUtility(IDummyInterface2)
-        self.failUnless(IDummyInterface2.providedBy(util))
-        self.failUnless(util.verify())
-
         util = queryUtility(IDummyInterface, name='dummy tool name2')
         self.failUnless(IDummyInterface.providedBy(util))
         self.failUnless(util.verify())
-        self.assertEqual(util.meta_type, 'dummy tool')
+        self.assertEqual(util.meta_type, 'dummy tool2')
 
         # make sure we can get the tool by normal means
-        tool = getattr(self.app.test_folder_1_, 'dummy_tool2')
-        self.assertEqual(tool.meta_type, 'dummy tool')
-        self.assertEquals(repr(util), repr(tool))
+        tool = getattr(self.folder, 'dummy_tool2')
+        self.assertEqual(tool.meta_type, 'dummy tool2')
+        self.assertEquals(repr(util.aq_base), repr(tool.aq_base))
 
     def afterSetUp(self):
         BodyAdapterTestCase.setUp(self)
@@ -164,17 +185,15 @@ class ComponentRegistryXMLAdapterTests(ZopeTestCase, BodyAdapterTestCase):
 
         sm.registerUtility(DummyUtility(), IDummyInterface)
         sm.registerUtility(DummyUtility(), IDummyInterface, name=u'foo')
-        sm.registerUtility(dummy2, IDummyInterface2)
 
         tool = DummyTool()
         self.app._setObject(tool.id, tool)
         obj = self.app[tool.id]
         sm.registerUtility(obj, IDummyInterface, name=u'dummy tool name')
 
-        folder = self.app.test_folder_1_
-        tool2 = DummyTool()
-        folder._setObject('dummy_tool2', tool2)
-        obj = folder['dummy_tool2']
+        tool2 = DummyTool2()
+        self.folder._setObject(tool2.id, tool2)
+        obj = self.folder[tool2.id]
         sm.registerUtility(obj, IDummyInterface, name=u'dummy tool name2')
 
         self._obj = sm
