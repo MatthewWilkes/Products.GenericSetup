@@ -591,6 +591,8 @@ class PropertyManagerHelpers(object):
     """PropertyManager im- and export helpers.
     """
 
+    _encoding = 'utf-8'
+
     def _extractProperties(self):
         fragment = self._doc.createDocumentFragment()
 
@@ -609,20 +611,24 @@ class PropertyManagerHelpers(object):
             prop = self.context.getProperty(prop_id)
             if isinstance(prop, (tuple, list)):
                 for value in prop:
+                    if isinstance(value, str):
+                        value.decode(self._encoding)
                     child = self._doc.createElement('element')
-                    child.setAttribute('value', value)
+                    child.setAttribute('value', value.encode('utf-8'))
                     node.appendChild(child)
             else:
                 if prop_map.get('type') == 'boolean':
                     prop = str(bool(prop))
+                elif isinstance(prop, str):
+                    prop = prop.decode(self._encoding)
                 elif not isinstance(prop, basestring):
                     prop = str(prop)
-                child = self._doc.createTextNode(prop)
+                child = self._doc.createTextNode(prop.encode('utf-8'))
                 node.appendChild(child)
 
             if 'd' in prop_map.get('mode', 'wd') and not prop_id == 'title':
                 type = prop_map.get('type', 'string')
-                node.setAttribute('type', type)
+                node.setAttribute('type', str(type))
                 select_variable = prop_map.get('select_variable', None)
                 if select_variable is not None:
                     node.setAttribute('select_variable', select_variable)
@@ -677,7 +683,8 @@ class PropertyManagerHelpers(object):
             elements = []
             for sub in child.childNodes:
                 if sub.nodeName == 'element':
-                    elements.append(sub.getAttribute('value').encode('utf-8'))
+                    value = sub.getAttribute('value')
+                    elements.append(value.encode(self._encoding))
 
             if elements or prop_map.get('type') == 'multiple selection':
                 prop_value = tuple(elements) or ()
@@ -686,7 +693,7 @@ class PropertyManagerHelpers(object):
             else:
                 # if we pass a *string* to _updateProperty, all other values
                 # are converted to the right type
-                prop_value = self._getNodeText(child).encode('utf-8')
+                prop_value = self._getNodeText(child).encode(self._encoding)
 
             if not self._convertToBoolean(child.getAttribute('purge')
                                           or 'True'):
