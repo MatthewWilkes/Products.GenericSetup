@@ -347,14 +347,14 @@ class _Element(Element):
 
         for a_name in a_names:
             wrapper.write()
-            a_value = escape(attrs[a_name].value, quote=True)
+            a_value = escape(attrs[a_name].value.encode('utf-8'), quote=True)
             wrapper.queue(' %s="%s"' % (a_name, a_value))
 
         if self.childNodes:
             wrapper.queue('>')
             for node in self.childNodes:
                 if node.nodeType == Node.TEXT_NODE:
-                    data = escape(node.data)
+                    data = escape(node.data.encode('utf-8'))
                     textlines = data.splitlines()
                     if textlines:
                         wrapper.queue(textlines.pop(0))
@@ -614,21 +614,21 @@ class PropertyManagerHelpers(object):
                     if isinstance(value, str):
                         value.decode(self._encoding)
                     child = self._doc.createElement('element')
-                    child.setAttribute('value', value.encode('utf-8'))
+                    child.setAttribute('value', value)
                     node.appendChild(child)
             else:
                 if prop_map.get('type') == 'boolean':
-                    prop = str(bool(prop))
+                    prop = unicode(bool(prop))
                 elif isinstance(prop, str):
                     prop = prop.decode(self._encoding)
                 elif not isinstance(prop, basestring):
-                    prop = str(prop)
-                child = self._doc.createTextNode(prop.encode('utf-8'))
+                    prop = unicode(prop)
+                child = self._doc.createTextNode(prop)
                 node.appendChild(child)
 
             if 'd' in prop_map.get('mode', 'wd') and not prop_id == 'title':
-                type = prop_map.get('type', 'string')
-                node.setAttribute('type', str(type))
+                prop_type = prop_map.get('type', 'string')
+                node.setAttribute('type', unicode(prop_type))
                 select_variable = prop_map.get('select_variable', None)
                 if select_variable is not None:
                     node.setAttribute('select_variable', select_variable)
@@ -671,8 +671,9 @@ class PropertyManagerHelpers(object):
 
             if prop_map is None:
                 if child.hasAttribute('type'):
-                    val = child.getAttribute('select_variable')
-                    obj._setProperty(prop_id, val, child.getAttribute('type'))
+                    val = str(child.getAttribute('select_variable'))
+                    prop_type = str(child.getAttribute('type'))
+                    obj._setProperty(prop_id, val, prop_type)
                     prop_map = obj.propdict().get(prop_id, None)
                 else:
                     raise ValueError("undefined property '%s'" % prop_id)
