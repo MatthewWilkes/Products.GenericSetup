@@ -565,7 +565,10 @@ class SnapshotImportContext( BaseContext ):
             return None
 
         try:
-            return object.read()
+            data = object.read()
+            if isinstance(data, unicode):
+                data = data.encode('utf-8')
+            return data
         except AttributeError:
             return object.manage_FTPget()
 
