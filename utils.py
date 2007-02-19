@@ -37,6 +37,7 @@ from zope.component import queryMultiAdapter
 from zope.interface import implements
 from zope.interface import implementsOnly
 from zope.interface import providedBy
+from ZPublisher.HTTPRequest import default_encoding
 
 from exceptions import BadRequest
 from interfaces import IBody
@@ -591,7 +592,7 @@ class PropertyManagerHelpers(object):
     """PropertyManager im- and export helpers.
     """
 
-    _encoding = 'utf-8'
+    _encoding = default_encoding
 
     def _extractProperties(self):
         fragment = self._doc.createDocumentFragment()
