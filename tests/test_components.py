@@ -62,6 +62,7 @@ class DummyUtility(object):
     def verify(self):
         return True
 
+
 class DummyTool(SimpleItem):
     """A dummy tool."""
     implements(IDummyInterface)
@@ -73,6 +74,9 @@ class DummyTool(SimpleItem):
     security.declarePublic('verify')
     def verify(self):
         return True
+
+InitializeClass(DummyTool)
+
 
 class DummyTool2(SimpleItem):
     """A second dummy tool."""
@@ -86,8 +90,8 @@ class DummyTool2(SimpleItem):
     def verify(self):
         return True
 
+InitializeClass(DummyTool2)
 
-InitializeClass(DummyTool)
 
 _COMPONENTS_BODY = """\
 <?xml version="1.0"?>
@@ -113,6 +117,16 @@ _COMPONENTS_BODY = """\
 class ComponentRegistryXMLAdapterTests(ZopeTestCase, BodyAdapterTestCase):
 
     layer = ExportImportZCMLLayer
+
+    def _populate(self, obj):
+        obj.registerUtility(DummyUtility(), IDummyInterface)
+        obj.registerUtility(DummyUtility(), IDummyInterface, name=u'foo')
+
+        tool = self.app['dummy_tool']
+        obj.registerUtility(tool, IDummyInterface, name=u'dummy tool name')
+
+        tool2 = self.folder['dummy_tool2']
+        obj.registerUtility(tool2, IDummyInterface, name=u'dummy tool name2')
 
     def test_body_get(self):
         self._populate(self._obj)
@@ -183,18 +197,11 @@ class ComponentRegistryXMLAdapterTests(ZopeTestCase, BodyAdapterTestCase):
         setSite(self.app)
         sm = getSiteManager()
 
-        sm.registerUtility(DummyUtility(), IDummyInterface)
-        sm.registerUtility(DummyUtility(), IDummyInterface, name=u'foo')
-
         tool = DummyTool()
         self.app._setObject(tool.id, tool)
-        obj = self.app[tool.id]
-        sm.registerUtility(obj, IDummyInterface, name=u'dummy tool name')
 
         tool2 = DummyTool2()
         self.folder._setObject(tool2.id, tool2)
-        obj = self.folder[tool2.id]
-        sm.registerUtility(obj, IDummyInterface, name=u'dummy tool name2')
 
         self._obj = sm
         self._BODY = _COMPONENTS_BODY
