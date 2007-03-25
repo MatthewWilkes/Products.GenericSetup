@@ -209,3 +209,12 @@ class DummyImportContext:
 def dummy_handler( context ):
 
     pass
+
+
+# BBB: PAS tests use this
+class SecurityRequestTest(ZopeTestCase):
+
+    def setUp(self):
+        ZopeTestCase.setUp(self)
+        self.root = self.app
+
