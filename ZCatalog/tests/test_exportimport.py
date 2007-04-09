@@ -77,6 +77,7 @@ _CATALOG_UPDATE_BODY = """\
   <extra name="index_type" value="Okapi BM25 Rank"/>
   <extra name="lexicon_id" value="foo_plexicon"/>
  </index>
+ <index name="non_existing" remove="True"/>
 </object>
 """
 

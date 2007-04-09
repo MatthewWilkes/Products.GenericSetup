@@ -96,7 +96,11 @@ class ZCatalogXMLAdapter(XMLAdapterBase, ObjectManagerHelpers,
 
             idx_id = str(child.getAttribute('name'))
             if child.hasAttribute('remove'):
-                zcatalog.delIndex(idx_id)
+                # Remove index if it is there; then continue to the next
+                # index.  Removing a non existing index should not cause an
+                # error, so you can apply the profile twice without problems.
+                if idx_id in zcatalog.indexes():
+                    zcatalog.delIndex(idx_id)
                 continue
 
             if idx_id not in zcatalog.indexes():

@@ -484,7 +484,9 @@ class XMLAdapterBase(BodyAdapterBase):
         """Export the object as a file body.
         """
         self._doc.appendChild(self._exportNode())
-        return self._doc.toprettyxml(' ')
+        xml = self._doc.toprettyxml(' ')
+        self._doc.unlink()
+        return xml
 
     def _importBody(self, body):
         """Import the object from the file body.
