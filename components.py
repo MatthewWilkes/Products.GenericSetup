@@ -19,6 +19,8 @@ from zope.component import adapts
 from zope.component import getSiteManager
 from zope.component.interfaces import IComponentRegistry
 
+from Acquisition import aq_base
+
 from interfaces import ISetupEnviron
 from utils import XMLAdapterBase
 from utils import exportObjects
@@ -135,7 +137,7 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
                     # support for nested folder
                     obj = self._recurseFolder(site, path)
                     if obj is not None:
-                        self.context.registerUtility(obj, provided, name)
+                        self.context.registerUtility(aq_base(obj), provided, name)
                 else:
                     # Log an error, not aq_wrapped
                     self._logger.warning("The object %s was not acquisition "

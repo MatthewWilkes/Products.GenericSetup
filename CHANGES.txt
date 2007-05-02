@@ -2,6 +2,9 @@ GenericSetup Product Changelog
 
   GenericSetup 1.3-beta (unreleased)
 
+    - Made sure we register Acquisition free objects as utilities in the
+      components handler.
+
     - No longer read the toolset xml and update the toolset regustry on
       import context change.  Doing this only during the toolset step import
       should be sufficient.
