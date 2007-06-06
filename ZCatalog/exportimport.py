@@ -139,5 +139,11 @@ class ZCatalogXMLAdapter(XMLAdapterBase, ObjectManagerHelpers,
             if child.nodeName != 'column':
                 continue
             col = str(child.getAttribute('value'))
+            if child.hasAttribute('remove'):
+                # Remove the column if it is there
+                if col in self.context.schema()[:]:
+                    self.context.delColumn(col)
+                continue
             if col not in self.context.schema()[:]:
                 self.context.addColumn(col)
+

@@ -62,7 +62,7 @@ _CATALOG_BODY = """\
   <extra name="index_type" value="Okapi BM25 Rank"/>
   <extra name="lexicon_id" value="foo_plexicon"/>
  </index>
- <column value="eggs"/>
+%s <column value="eggs"/>
  <column value="spam"/>
 </object>
 """
@@ -78,16 +78,32 @@ _CATALOG_UPDATE_BODY = """\
   <extra name="lexicon_id" value="foo_plexicon"/>
  </index>
  <index name="non_existing" remove="True"/>
+ <column value="non_existing" remove="True"/>
+ <column value="bacon" remove="True"/>
 </object>
+"""
+
+# START SITUATION
+#
+# The catalog starts out as the _CATALOG_BODY above with the following
+# xml snippets inserted.
+
+_VOCABULARY_XML = """\
+ <object name="foo_vocabulary" meta_type="Vocabulary" deprecated="True"/>
 """
 
 _TEXT_XML = """\
  <index name="foo_text" meta_type="TextIndex" deprecated="True"/>
 """
 
-_VOCABULARY_XML = """\
- <object name="foo_vocabulary" meta_type="Vocabulary" deprecated="True"/>
+_COLUMN_XML = """\
+ <column value="bacon"/>
 """
+
+# END SITUATION
+#
+# The catalog ends as the _CATALOG_BODY above with the following
+# xml snippets and some empty strings inserted.
 
 _ZCTEXT_XML = """\
  <index name="foo_text" meta_type="ZCTextIndex">
@@ -96,7 +112,6 @@ _ZCTEXT_XML = """\
   <extra name="lexicon_id" value="foo_plexicon"/>
  </index>
 """
-
 
 class ZCatalogXMLAdapterTests(BodyAdapterTestCase):
 
@@ -153,28 +168,31 @@ class ZCatalogXMLAdapterTests(BodyAdapterTestCase):
         self._populate(self._obj)
         obj._setObject('foo_vocabulary', Vocabulary('foo_vocabulary'))
         obj.addIndex('foo_text', 'TextIndex')
+        obj.addColumn('bacon')
 
     def setUp(self):
         from Products.ZCatalog.ZCatalog import ZCatalog
 
         BodyAdapterTestCase.setUp(self)
         self._obj = ZCatalog('foo_catalog')
-        self._BODY = _CATALOG_BODY % ('', '')
+        self._BODY = _CATALOG_BODY % ('', '', '')
 
     def test_body_get_special(self):
+        # Assert that the catalog starts out the way we expect it to.
         self._populate_special(self._obj)
         context = DummySetupEnviron()
         adapted = getMultiAdapter((self._obj, context), IBody)
         self.assertEqual(adapted.body,
-                         _CATALOG_BODY % (_VOCABULARY_XML, _TEXT_XML))
+                         _CATALOG_BODY % (_VOCABULARY_XML, _TEXT_XML, _COLUMN_XML))
 
     def test_body_set_update(self):
+        # Assert that the catalog ends up the way we expect it to.
         self._populate_special(self._obj)
         context = DummySetupEnviron()
         context._should_purge = False
         adapted = getMultiAdapter((self._obj, context), IBody)
         adapted.body = _CATALOG_UPDATE_BODY
-        self.assertEqual(adapted.body, _CATALOG_BODY % ('', _ZCTEXT_XML))
+        self.assertEqual(adapted.body, _CATALOG_BODY % ('', _ZCTEXT_XML, ''))
 
 
 def test_suite():
