@@ -36,7 +36,7 @@ from zope.component import getMultiAdapter
 from zope.component import getSiteManager
 from zope.component import queryUtility
 from zope.component.globalregistry import base
-from zope.component.persistentregistry import PersistentComponents
+from five.localsitemanager.registry import PersistentComponents
 from zope.interface import implements
 from zope.interface import Interface
 
@@ -47,6 +47,7 @@ def createComponentRegistry(context):
 
     components = PersistentComponents()
     components.__bases__ = (base,)
+    components.__parent__ = aq_base(context)
     context.setSiteManager(components)
 
 class IDummyInterface(Interface):
@@ -106,7 +107,7 @@ _COMPONENTS_BODY = """\
      object="/dummy_tool"/>
   <utility name="dummy tool name2"
      interface="Products.GenericSetup.tests.test_components.IDummyInterface"
-     object="/test_folder_1_/dummy_tool2"/>
+     object="/dummy_tool2"/>
   <utility name="foo"
      factory="Products.GenericSetup.tests.test_components.DummyUtility"
      interface="Products.GenericSetup.tests.test_components.IDummyInterface"/>
@@ -126,7 +127,7 @@ class ComponentRegistryXMLAdapterTests(ZopeTestCase, BodyAdapterTestCase):
         tool = self.app['dummy_tool']
         obj.registerUtility(tool, IDummyInterface, name=u'dummy tool name')
 
-        tool2 = self.folder['dummy_tool2']
+        tool2 = self.app['dummy_tool2']
         obj.registerUtility(tool2, IDummyInterface, name=u'dummy tool name2')
 
     def test_body_get(self):
@@ -211,7 +212,7 @@ class ComponentRegistryXMLAdapterTests(ZopeTestCase, BodyAdapterTestCase):
         self.app._setObject(tool.id, tool)
 
         tool2 = DummyTool2()
-        self.folder._setObject(tool2.id, tool2)
+        self.app._setObject(tool2.id, tool2)
 
         self._obj = sm
         self._BODY = _COMPONENTS_BODY

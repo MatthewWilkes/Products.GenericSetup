@@ -20,6 +20,7 @@ from zope.component import getSiteManager
 from zope.component.interfaces import IComponentRegistry
 
 from Acquisition import aq_base
+from Acquisition import aq_parent
 
 from interfaces import ISetupEnviron
 from utils import XMLAdapterBase
@@ -129,7 +130,7 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
 
             obj_path = child.getAttribute('object')
             if obj_path:
-                site = self.environ.getSite()
+                site = aq_parent(self.context)
                 # we support registering aq_wrapped objects only for now
                 if hasattr(site, 'aq_base'):
                     # filter out empty path segments
@@ -202,7 +203,7 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
                 # if the site is acquistion wrapped as well, get the relative
                 # path to the site
                 path = '/'.join(comp.getPhysicalPath())
-                site = self.environ.getSite()
+                site = aq_parent(self.context)
                 if hasattr(site, 'aq_base'):
                     site_path = '/'.join(site.getPhysicalPath())
                     rel_path = path[len(site_path):]
