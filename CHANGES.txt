@@ -2,6 +2,10 @@ GenericSetup Product Changelog
 
   GenericSetup 1.3-beta (unreleased)
 
+    - Guard against situations where encoded text may be compared by the
+      differ.
+      (http://www.zope.org/Collectors/CMF/471)
+
     - Extend the ZCatalog import/export mechanism to allow removal of 
       metadata columns in addition to adding them.
       (http://www.zope.org/Collectors/CMF/483)

@@ -226,6 +226,6 @@ class ConfigDiff:
 
     security.declarePrivate( 'compare' )
     def compare( self ):
-        return '\n'.join( self.compareDirectories() )
+        return '\n'.join( [str(line) for line in self.compareDirectories()] )
 
 InitializeClass( ConfigDiff )
