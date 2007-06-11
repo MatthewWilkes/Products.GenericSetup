@@ -36,9 +36,14 @@ from zope.component import getMultiAdapter
 from zope.component import getSiteManager
 from zope.component import queryUtility
 from zope.component.globalregistry import base
-from five.localsitemanager.registry import PersistentComponents
 from zope.interface import implements
 from zope.interface import Interface
+
+try:
+    from five.localsitemanager.registry import PersistentComponents
+except ImportError:
+    # Avoid generating a spurious dependency
+    PersistentComponents = None
 
 _marker = []
 
@@ -220,16 +225,20 @@ class ComponentRegistryXMLAdapterTests(ZopeTestCase, BodyAdapterTestCase):
     def beforeTearDown(self):
         clearSite()
 
-
-def test_suite():
-    # reimport to make sure tests are run from Products
-    from Products.GenericSetup.tests.test_components \
-            import ComponentRegistryXMLAdapterTests
-
-    return unittest.TestSuite((
-        unittest.makeSuite(ComponentRegistryXMLAdapterTests),
-        ))
-
+if PersistentComponents is not None:
+    def test_suite():
+        # reimport to make sure tests are run from Products
+        from Products.GenericSetup.tests.test_components \
+                import ComponentRegistryXMLAdapterTests
+    
+        return unittest.TestSuite((
+            unittest.makeSuite(ComponentRegistryXMLAdapterTests),
+            ))
+else:
+    def test_suite():
+        return unittest.TestSuite()
+    
 if __name__ == '__main__':
     from Products.GenericSetup.testing import run
     run(test_suite())
+
