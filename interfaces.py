@@ -451,17 +451,31 @@ class ISetupTool( Interface ):
     def getImportContextID():
 
         """ Get the ID of the active import context.
+
+        DEPRECATED.  The idea of a stateful active import context is
+        going away.
+        """
+
+    def getBaselineContextID():
+        """ Get the ID of the base profile for this configuration.
+        """
+
+    def setImportContext( context_id ):
+
+        """ Set the ID of the active import context and update the registries.
+
+        DEPRECATED.  The idea of a stateful active import context is
+        going away.
+        """
+
+    def setBaselineContext( context_id, encoding=None):
+        """ Specify the base profile for this configuration.
         """
 
     def applyContext( context, encoding=None ):
 
         """ Update the tool from the supplied context, without modifying its
             "permanent" ID.
-        """
-
-    def setImportContext( context_id ):
-
-        """ Set the ID of the active import context and update the registries.
         """
 
     def getImportStepRegistry():
@@ -479,9 +493,13 @@ class ISetupTool( Interface ):
         """ Return the IToolsetRegistry for the tool.
         """
 
-    def runImportStep( step_id, run_dependencies=True, purge_old=None ):
+    def runImportStepFromProfile(profile_id, step_id,
+                                 run_dependencies=True, purge_old=None):
 
-        """ Execute a given setup step
+        """ Execute a given setup step from the given profile.
+
+        o 'profile_id' must be a valid ID of a registered profile;
+           otherwise, raise KeyError.
 
         o 'step_id' is the ID of the step to run.
 
@@ -500,9 +518,36 @@ class ISetupTool( Interface ):
             step
         """
 
-    def runAllImportSteps( purge_old=None ):
+    def runImportStep(step_id, run_dependencies=True, purge_old=None):
 
-        """ Run all setup steps in dependency order.
+        """ Execute a given setup step from the current
+        _import_context_id context.
+
+        o 'step_id' is the ID of the step to run.
+
+        o If 'purge_old' is True, then run the step after purging any
+          "old" setup first (this is the responsibility of the step,
+          which must check the context we supply).
+
+        o If 'run_dependencies' is True, then run any out-of-date
+          dependency steps first.
+
+        o Return a mapping, with keys:
+
+          'steps' -- a sequence of IDs of the steps run.
+
+          'messages' -- a dictionary holding messages returned from each
+            step
+
+        DEPRECATED.  Use runImportStepFromProfile instead.
+        """
+
+    def runAllImportStepsFromProfile(profile_id, purge_old=None):
+
+        """ Run all setup steps for the given profile in dependency order.
+
+        o 'profile_id' must be a valid ID of a registered profile;
+           otherwise, raise KeyError.
 
         o If 'purge_old' is True, then run each step after purging any
           "old" setup first (this is the responsibility of the step,
@@ -514,6 +559,25 @@ class ISetupTool( Interface ):
 
           'messages' -- a dictionary holding messages returned from each
             step
+        """
+
+    def runAllImportSteps(purge_old=None):
+
+        """ Run all setup steps for the _import_context_id profile in
+        dependency order.
+
+        o If 'purge_old' is True, then run each step after purging any
+          "old" setup first (this is the responsibility of the step,
+          which must check the context we supply).
+
+        o Return a mapping, with keys:
+
+          'steps' -- a sequence of IDs of the steps run.
+
+          'messages' -- a dictionary holding messages returned from each
+            step
+
+        DEPRECATED.  Use runAllImportStepsFromProfile instead.
         """
 
     def runExportStep( step_id ):
@@ -567,6 +631,12 @@ class ISetupTool( Interface ):
 
         o If 'ignore_whitespace', then suppress diffs due only to whitespace
           (c.f:  'diff -wbB')
+        """
+
+    def getProfileImportDate(profile_id):
+        """ Return the last date an extension was imported.
+
+        o The result will be a string, formated as IS0.
         """
 
 

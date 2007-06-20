@@ -14,12 +14,14 @@
 
 $Id$
 """
-
+import os
 from xml.sax import parseString
 
 from AccessControl import ClassSecurityInfo
 from Acquisition import Implicit
 from Globals import InitializeClass
+from App.FactoryDispatcher import ProductDispatcher
+import App.Product
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 from zope.interface import implements
 
@@ -29,12 +31,12 @@ from interfaces import IExportStepRegistry
 from interfaces import IToolsetRegistry
 from interfaces import IProfileRegistry
 from permissions import ManagePortal
+from metadata import ProfileMetadata
 from utils import HandlerBase
 from utils import _xmldir
 from utils import _getDottedName
 from utils import _resolveDottedName
 from utils import _extractDocstring
-
 
 class ImportStepRegistry( Implicit ):
 
@@ -550,7 +552,7 @@ class ProfileRegistry( Implicit ):
 
         self.clear()
 
-    security.declareProtected( ManagePortal, '' )
+    security.declareProtected( ManagePortal, 'getProfileInfo' )
     def getProfileInfo( self, profile_id, for_=None ):
 
         """ See IProfileRegistry.
@@ -609,6 +611,32 @@ class ProfileRegistry( Implicit ):
                , 'type': profile_type
                , 'for': for_
                }
+
+        metadata = ProfileMetadata( path )()
+
+        version = metadata.get( 'version', None )
+        if version is None and product is not None:
+            prod_name = product.split('.')[-1]
+            prod_module = getattr(App.Product.Products, prod_name, None)
+            if prod_module is not None:
+                prod_path = prod_module.__path__[0]
+
+                # Retrieve version number from any suitable version.txt
+                for fname in ('version.txt', 'VERSION.txt', 'VERSION.TXT'):
+                    try:
+                        fpath = os.path.join( prod_path, fname )
+                        fhandle = open( fpath, 'r' )
+                        version = fhandle.read().strip()
+                        fhandle.close()
+                        break
+                    except IOError:
+                        continue
+
+            if version is not None:
+                metadata[ 'version' ] = version
+
+        # metadata.xml description trumps ZCML description... awkward
+        info.update( metadata )
 
         self._profile_info[ profile_id ] = info
 

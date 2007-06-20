@@ -181,7 +181,9 @@ class ImportConfiguratorBase(Implicit):
         return self._extractNode(root)
 
     def _extractNode(self, node):
-
+        """ Please see docs/configurator.txt for information about the
+        import mapping syntax.
+        """
         nodes_map = self._getImportMapping()
         if node.nodeName not in nodes_map:
             nodes_map = self._getSharedImportMapping()

@@ -79,11 +79,15 @@ procedure, in order to pick up changes since the site was created.
    </td>
   </tr>
  </tbody>
+</table>
 
- <tbody tal:condition="options/messages | nothing">
+<table cellspacing="0" cellpadding="4"
+       tal:condition="options/messages | nothing">
+
   <tr class="list-header">
    <td colspan="4">Message Log</td>
   </tr>
+
   <tr valign="top"
       tal:repeat="item options/messages/items">
    <td tal:content="python: item[0]">STEP</td>
@@ -91,7 +95,6 @@ procedure, in order to pick up changes since the site was created.
        tal:content="structure python: item[1].replace('\n', '<br />')"
        >MESSAGE</td>
   </tr>
- </tbody>
 
 </table>
 </form>

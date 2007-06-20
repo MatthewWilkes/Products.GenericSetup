@@ -17,6 +17,8 @@ $Id$
 
 import os
 import time
+import logging
+from warnings import warn
 from cgi import escape
 
 from AccessControl import ClassSecurityInfo
@@ -28,6 +30,7 @@ from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 from zope.interface import implements
 from zope.interface import implementedBy
 
+from interfaces import BASE
 from interfaces import EXTENSION
 from interfaces import ISetupTool
 from interfaces import SKIPPED_FILES
@@ -42,6 +45,10 @@ from registry import ImportStepRegistry
 from registry import ExportStepRegistry
 from registry import ToolsetRegistry
 from registry import _profile_registry
+
+from upgrade import listUpgradeSteps
+from upgrade import listProfilesWithUpgrades
+from upgrade import _upgrade_registry
 
 from utils import _resolveDottedName
 from utils import _wwwdir
@@ -113,6 +120,7 @@ def importToolset(context):
         else:
             unwrapped = aq_base(existing)
             if not isinstance(unwrapped, tool_class):
+
                 site._delObject(tool_id)
                 site._setObject(tool_id, tool_class())
 
@@ -141,7 +149,11 @@ class SetupTool(Folder):
 
     meta_type = 'Generic Setup Tool'
 
+    _baseline_context_id = ''
+    # BBB _import_context_id is a vestige of a stateful import context
     _import_context_id = ''
+
+    _profile_upgrade_versions = {}
 
     security = ClassSecurityInfo()
 
@@ -163,21 +175,49 @@ class SetupTool(Folder):
 
         """ See ISetupTool.
         """
-        return 'ascii'
+        return 'utf-8'
 
     security.declareProtected(ManagePortal, 'getImportContextID')
     def getImportContextID(self):
 
         """ See ISetupTool.
         """
+        warn('getImportContextId, and the very concept of a stateful '
+             'active import context, is deprecated.  You can find the '
+             'base profile that was applied using getBaselineContextID.',
+             DeprecationWarning, stacklevel=2)
         return self._import_context_id
 
-    security.declareProtected(ManagePortal, 'setImportContext')
-    def setImportContext(self, context_id, encoding=None):
+    security.declareProtected(ManagePortal, 'getBaselineContextID')
+    def getBaselineContextID(self):
 
         """ See ISetupTool.
         """
+        return self._baseline_context_id
+
+    security.declareProtected(ManagePortal, 'setImportContext')
+    def setImportContext(self, context_id, encoding=None):
+        """ See ISetupTool.
+        """
+        warn('setImportContext is deprecated.  Use setBaselineContext to '
+             'specify the baseline context, and/or runImportStepsFromContext '
+             'to run the steps from a specific import context.',
+             DeprecationWarning, stacklevel=2)
         self._import_context_id = context_id
+
+        context_type = BASE  # snapshots are always baseline contexts
+        if context_id.startswith('profile-'):
+            profile_info = _profile_registry.getProfileInfo(context_id[8:])
+            context_type = profile_info['type']
+
+        if context_type == BASE:
+            self.setBaselineContext(context_id, encoding)
+
+    security.declareProtected(ManagePortal, 'setBaselineContext')
+    def setBaselineContext(self, context_id, encoding=None):
+        """ See ISetupTool.
+        """
+        self._baseline_context_id = context_id
         context = self._getImportContext(context_id)
 
         self.applyContext(context, encoding)
@@ -208,12 +248,12 @@ class SetupTool(Folder):
         """
         return self._toolset_registry
 
-    security.declareProtected(ManagePortal, 'runImportStep')
-    def runImportStep(self, step_id, run_dependencies=True, purge_old=None):
-
+    security.declareProtected(ManagePortal, 'runImportStepFromProfile')
+    def runImportStepFromProfile(self, profile_id, step_id,
+                                 run_dependencies=True, purge_old=None):
         """ See ISetupTool.
         """
-        context = self._getImportContext(self._import_context_id, purge_old)
+        context = self._getImportContext(profile_id, purge_old)
 
         info = self._import_registry.getStepMetadata(step_id)
 
@@ -240,16 +280,46 @@ class SetupTool(Folder):
 
         return { 'steps' : steps, 'messages' : messages }
 
+    security.declareProtected(ManagePortal, 'runImportStep')
+    def runImportStep(self, step_id, run_dependencies=True, purge_old=None):
+
+        """ See ISetupTool.
+        """
+        warn('The runImportStep method is deprecated.  Please use '
+             'runImportStepFromProfile instead.',
+             DeprecationWarning, stacklevel=2)
+        return self.runImportStepFromProfile(self._import_context_id,
+                                             step_id,
+                                             run_dependencies,
+                                             purge_old,
+                                             )
+
+    security.declareProtected(ManagePortal, 'runAllImportStepsFromProfile')
+    def runAllImportStepsFromProfile(self, profile_id, purge_old=None):
+
+        """ See ISetupTool.
+        """
+        __traceback_info__ = profile_id
+
+        context = self._getImportContext(profile_id, purge_old)
+
+        result = self._runImportStepsFromContext(context, purge_old=purge_old)
+        prefix = 'import-all-%s' % profile_id.replace(':', '_')
+        name = self._mangleTimestampName(prefix, 'log')
+        self._createReport(name, result['steps'], result['messages'])
+        return result
+
     security.declareProtected(ManagePortal, 'runAllImportSteps')
     def runAllImportSteps(self, purge_old=None):
 
         """ See ISetupTool.
         """
-        __traceback_info__ = self._import_context_id
-
-        context = self._getImportContext(self._import_context_id, purge_old)
-
-        return self._runImportStepsFromContext(context, purge_old=purge_old)
+        warn('The runAllImportSteps method is deprecated.  Please use '
+             'runAllImportStepsFromProfile instead.',
+             DeprecationWarning, stacklevel=2)
+        context_id = self._import_context_id
+        return self.runAllImportStepsFromProfile(self._import_context_id,
+                                                 purge_old)
 
     security.declareProtected(ManagePortal, 'runExportStep')
     def runExportStep(self, step_id):
@@ -361,7 +431,7 @@ class SetupTool(Folder):
     #   ZMI
     #
     manage_options = (Folder.manage_options[:1]
-                    + ({'label' : 'Properties',
+                    + ({'label' : 'Profiles',
                         'action' : 'manage_tool'
                        },
                        {'label' : 'Import',
@@ -370,6 +440,9 @@ class SetupTool(Folder):
                        {'label' : 'Export',
                         'action' : 'manage_exportSteps'
                        },
+                       {'label' : 'Upgrades',
+                        'action' : 'manage_upgrades'
+                        },
                        {'label' : 'Snapshots',
                         'action' : 'manage_snapshots'
                        },
@@ -387,7 +460,7 @@ class SetupTool(Folder):
     def manage_updateToolProperties(self, context_id, RESPONSE):
         """ Update the tool's settings.
         """
-        self.setImportContext(context_id)
+        self.setBaselineContext(context_id)
 
         RESPONSE.redirect('%s/manage_tool?manage_tabs_message=%s'
                          % (self.absolute_url(), 'Properties+updated.'))
@@ -396,12 +469,7 @@ class SetupTool(Folder):
     manage_importSteps = PageTemplateFile('sutImportSteps', _wwwdir)
 
     security.declareProtected(ManagePortal, 'manage_importSelectedSteps')
-    def manage_importSelectedSteps(self,
-                                   ids,
-                                   run_dependencies,
-                                   RESPONSE,
-                                   create_report=True,
-                                  ):
+    def manage_importSelectedSteps(self, ids, run_dependencies):
         """ Import the steps selected by the user.
         """
         messages = {}
@@ -417,30 +485,54 @@ class SetupTool(Folder):
 
             summary = 'Steps run: %s' % ', '.join(steps_run)
 
-            if create_report:
-                name = self._mangleTimestampName('import-selected', 'log')
-                self._createReport(name, result['steps'], result['messages'])
+            name = self._mangleTimestampName('import-selected', 'log')
+            self._createReport(name, result['steps'], result['messages'])
 
         return self.manage_importSteps(manage_tabs_message=summary,
                                        messages=messages)
 
     security.declareProtected(ManagePortal, 'manage_importSelectedSteps')
-    def manage_importAllSteps(self, RESPONSE, create_report=True):
+    def manage_importAllSteps(self):
 
         """ Import all steps.
         """
         result = self.runAllImportSteps()
         steps_run = 'Steps run: %s' % ', '.join(result['steps'])
 
-        if create_report:
-            name = self._mangleTimestampName('import-all', 'log')
-            self._createReport(name, result['steps'], result['messages'])
+        name = self._mangleTimestampName('import-all', 'log')
+        self._createReport(name, result['steps'], result['messages'])
 
         return self.manage_importSteps(manage_tabs_message=steps_run,
                                        messages=result['messages'])
 
+    security.declareProtected(ManagePortal, 'manage_importExtensions')
+    def manage_importExtensions(self, RESPONSE, profile_ids=()):
+
+        """ Import all steps for the selected extension profiles.
+        """
+        detail = {}
+        if len(profile_ids) == 0:
+            message = 'Please select one or more extension profiles.'
+            RESPONSE.redirect('%s/manage_tool?manage_tabs_message=%s'
+                                  % (self.absolute_url(), message))
+        else:
+            message = 'Imported profiles: %s' % ', '.join(profile_ids)
+        
+            for profile_id in profile_ids:
+
+                result = self.runAllImportStepsFromProfile(profile_id)
+
+                prefix = 'import-all-%s' % profile_id.replace(':', '_')
+                name = self._mangleTimestampName(prefix, 'log')
+                self._createReport(name, result['steps'], result['messages'])
+                for k, v in result['messages'].items():
+                    detail['%s:%s' % (profile_id, k)] = v
+
+            return self.manage_importSteps(manage_tabs_message=message,
+                                        messages=detail)
+
     security.declareProtected(ManagePortal, 'manage_importTarball')
-    def manage_importTarball(self, tarball, RESPONSE, create_report=True):
+    def manage_importTarball(self, tarball):
         """ Import steps from the uploaded tarball.
         """
         if getattr(tarball, 'read', None) is not None:
@@ -455,9 +547,8 @@ class SetupTool(Folder):
                                                  purge_old=True)
         steps_run = 'Steps run: %s' % ', '.join(result['steps'])
 
-        if create_report:
-            name = self._mangleTimestampName('import-all', 'log')
-            self._createReport(name, result['steps'], result['messages'])
+        name = self._mangleTimestampName('import-all', 'log')
+        self._createReport(name, result['steps'], result['messages'])
 
         return self.manage_importSteps(manage_tabs_message=steps_run,
                                        messages=result['messages'])
@@ -490,6 +581,12 @@ class SetupTool(Folder):
         RESPONSE.setHeader('Content-disposition',
                            'attachment; filename=%s' % result['filename'])
         return result['tarball']
+
+    security.declareProtected(ManagePortal, 'manage_upgrades')
+    manage_upgrades = PageTemplateFile('setup_upgrades', _wwwdir)
+
+    security.declareProtected(ManagePortal, 'upgradeStepMacro')
+    upgradeStepMacro = PageTemplateFile('upgradeStep', _wwwdir)
 
     security.declareProtected(ManagePortal, 'manage_snapshots')
     manage_snapshots = PageTemplateFile('sutSnapshots', _wwwdir)
@@ -524,6 +621,7 @@ class SetupTool(Folder):
     def listProfileInfo(self):
 
         """ Return a list of mappings describing registered profiles.
+        Base profile is listed first, extensions are sorted.
 
         o Keys include:
 
@@ -537,22 +635,61 @@ class SetupTool(Folder):
 
           'product' -- name of the registering product
         """
-        return _profile_registry.listProfileInfo()
+        base = []
+        ext = []
+        for info in _profile_registry.listProfileInfo():
+            if info.get('type', BASE) == BASE:
+                base.append(info)
+            else:
+                ext.append(info)
+        ext.sort(lambda x, y: cmp(x['id'], y['id']))
+        return base + ext
 
     security.declareProtected(ManagePortal, 'listContextInfos')
     def listContextInfos(self):
 
         """ List registered profiles and snapshots.
         """
+        def readableType(x):
+            if x is BASE:
+                return 'base'
+            elif x is EXTENSION:
+                return 'extension'
+            return 'unknown'
 
-        s_infos = [{ 'id': 'snapshot-%s' % info['id'],
-                      'title': info['title'] }
+        s_infos = [{'id': 'snapshot-%s' % info['id'],
+                     'title': info['title'],
+                     'type': 'snapshot',
+                   }
                     for info in self.listSnapshotInfo()]
-        p_infos = [{ 'id': 'profile-%s' % info['id'],
-                      'title': info['title'] }
-                    for info in self.listProfileInfo()]
+        p_infos = [{'id': 'profile-%s' % info['id'],
+                    'title': info['title'],
+                    'type': readableType(info['type']),
+                   }
+                   for info in self.listProfileInfo()]
 
         return tuple(s_infos + p_infos)
+
+    security.declareProtected(ManagePortal, 'getProfileImportDate')
+    def getProfileImportDate(self, profile_id):
+        """ See ISetupTool.
+        """
+        prefix = ('import-all-%s-' % profile_id).replace(':', '_')
+        candidates = [x for x in self.objectIds('File')
+                        if x.startswith(prefix)]
+        if len(candidates) == 0:
+            return None
+        candidates.sort()
+        last = candidates[-1]
+        stamp = last[len(prefix):-4]
+        assert(len(stamp) == 14)
+        return '%s-%s-%sT%s:%s:%sZ' % (stamp[0:4],
+                                       stamp[4:6],
+                                       stamp[6:8],
+                                       stamp[8:10],
+                                       stamp[10:12],
+                                       stamp[12:14],
+                                      )
 
     security.declareProtected(ManagePortal, 'manage_createSnapshot')
     def manage_createSnapshot(self, RESPONSE, snapshot_id=None):
@@ -609,6 +746,94 @@ class SetupTool(Folder):
                                           ignore_blanks,
                                          )
 
+    #
+    # Upgrades management
+    #
+    security.declareProtected(ManagePortal, 'getLastVersionForProfile')
+    def getLastVersionForProfile(self, profile_id):
+        """Return the last upgraded version for the specified profile.
+        """
+        version = self._profile_upgrade_versions.get(profile_id, 'unknown')
+        return version
+
+    security.declareProtected(ManagePortal, 'setLastVersionForProfile')
+    def setLastVersionForProfile(self, profile_id, version):
+        """Set the last upgraded version for the specified profile.
+        """
+        if isinstance(version, basestring):
+            version = tuple(version.split('.'))
+        prof_versions = self._profile_upgrade_versions.copy()
+        prof_versions[profile_id] = version
+        self._profile_upgrade_versions = prof_versions
+
+    security.declareProtected(ManagePortal, 'getVersionForProfile')
+    def getVersionForProfile(self, profile_id):
+        """Return the registered filesystem version for the specified
+        profile.
+        """
+        info = _profile_registry.getProfileInfo(profile_id)
+        return info.get('version', 'unknown')
+
+    security.declareProtected(ManagePortal, 'listProfilesWithUpgrades')
+    def listProfilesWithUpgrades(self):
+        return listProfilesWithUpgrades()
+
+    security.declarePrivate('_massageUpgradeInfo')
+    def _massageUpgradeInfo(self, info):
+        """Add a couple of data points to the upgrade info dictionary.
+        """
+        info = info.copy()
+        info['haspath'] = info['source'] and info['dest']
+        info['ssource'] = '.'.join(info['source'] or ('all',))
+        info['sdest'] = '.'.join(info['dest'] or ('all',))
+        return info
+
+    security.declareProtected(ManagePortal, 'listUpgrades')
+    def listUpgrades(self, profile_id, show_old=False):
+        """Get the list of available upgrades.
+        """
+        if show_old:
+            source = None
+        else:
+            source = self.getLastVersionForProfile(profile_id)
+        upgrades = listUpgradeSteps(self, profile_id, source)
+        res = []
+        for info in upgrades:
+            if type(info) == list:
+                subset = []
+                for subinfo in info:
+                    subset.append(self._massageUpgradeInfo(subinfo))
+                res.append(subset)
+            else:
+                res.append(self._massageUpgradeInfo(info))
+        return res
+
+    security.declareProtected(ManagePortal, 'manage_doUpgrades')
+    def manage_doUpgrades(self, request=None):
+        """Perform all selected upgrade steps.
+        """
+        if request is None:
+            request = self.REQUEST
+        logger = logging.getLogger('GenericSetup')
+        steps_to_run = request.form.get('upgrades', [])
+        profile_id = request.get('profile_id', '')
+        for step_id in steps_to_run:
+            step = _upgrade_registry.getUpgradeStep(profile_id, step_id)
+            if step is not None:
+                step.doStep(self)
+                msg = "Ran upgrade step %s for profile %s" % (step.title,
+                                                              profile_id)
+                logger.log(logging.INFO, msg)
+
+        # XXX should be a bit smarter about deciding when to up the
+        #     profile version
+        profile_info = _profile_registry.getProfileInfo(profile_id)
+        version = profile_info.get('version', None)
+        if version is not None:
+            self.setLastVersionForProfile(profile_id, version)
+
+        url = self.absolute_url()
+        request.RESPONSE.redirect("%s/manage_upgrades?saved=%s" % (url, profile_id))
 
     #
     #   Helper methods
@@ -806,6 +1031,10 @@ class SetupTool(Folder):
         report = '\n'.join(lines)
         if isinstance(report, unicode):
             report = report.encode('latin-1')
+
+        # BBB: ObjectManager won't allow unicode IDS
+        if isinstance(name, unicode):
+            name = name.encode('UTF-8')
 
         file = File(id=name,
                     title='',

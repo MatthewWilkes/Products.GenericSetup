@@ -1,37 +1,95 @@
 <h1 tal:replace="structure context/manage_page_header">PAGE HEADER</h1>
 <h2 tal:replace="structure context/manage_tabs">TABS</h2>
+<style type="text/css">
+.warning {
+   color: red;
+   font-weight: bold;
+}
+.info {
+   color: #446688;
+   font-style: italic;
+   margin-left: 2em;
+}
+</style>
 
-<h3> Setup Tool Properties </h3>
+<div tal:define="contexts context/listContextInfos;
+                 snaps python: [x for x in contexts if x['type'] == 'snapshot'];
+                 bases python: [x for x in contexts if x['type'] == 'base'];
+                 context_id context/getBaselineContextID;
+                 context_id_display python: context_id or '(none)';
+                 overwrite_style python: context_id != ''
+                                    and 'display: none' or 'display: block';
+                 exts python: [x for x in contexts if x['type'] == 'extension'];
+                ">
+<h3> Setup Tool Profiles </h3>
 
-<form method="post" action="manage_updateToolProperties">
+<form method="post" action=".">
 
-<table>
+ <fieldset id="baseline_fs">
+   <legend>Baseline Profile</legend>
+   
+  <p>Active baseline: <span tal:content="context_id_display">(none)</span>
+  <tal:whatever
+         tal:define="last python:context.getProfileImportDate(context_id);
+                    ">
+   <span class="info"
+         tal:condition="last">
+     Last imported <tal:x tal:content="last">TIMESTAMP</tal:x></span>
+   </tal:whatever>
+  </p>
 
- <tr valign="top">
-  <td>
-   <div class="form-label">Active site configuration:</div>
-  </td>
-  <td>
-   <select name="context_id"
-      tal:define="context_id context/getImportContextID">
+  <div tal:condition="python: context_id != ''">
+  <script type="text/javascript" lang="JavaScript">
+  function showOverwrite(e) {
+      var overwrite = document.getElementById('overwrite');
+      overwrite.style.display = 'block';
+  }
+  </script>
+  <p style="color: red"> Changing the baseline profile is potentially a
+     dangerous operation.
+     <a href="#" onclick="showOverwrite(this); return false">Click here</a>
+     if you really need to do this.
+   </p>
+  </div>
+
+  <div id="overwrite"
+       tal:attributes="style overwrite_style">
+   <select name="context_id">
     <option value="context-CONTEXT_ID"
-       tal:repeat="context_info context/listContextInfos"
+       tal:repeat="context_info bases"
        tal:attributes="selected python:context_id == context_info['id'];
                        value context_info/id"
        tal:content="context_info/title"
     >CONTEXT_TITLE</option>
    </select>
-  </td>
- </tr>
+   <input class="form-element" type="submit"
+          name="manage_updateToolProperties:method"
+          value="Update Base Profile" />
+  </div>
+ </fieldset>
 
- <tr valign="top">
-  <td />
-  <td>
-   <input class="form-element" type="submit" value=" Update " />
-  </td>
- </tr>
+ <fieldset id="extesions_fs">
+  <legend>Extension Profiles</legend>
+  <p tal:repeat="extension exts">
+  <tal:whatever
+         tal:define="fid string:extension_${extension/id};
+                     last python:context.getProfileImportDate(extension['id']);
+                    ">
+   <input type="checkbox" id="extension_0" name="profile_ids:list" value="waaa"
+          tal:attributes="id fid;
+                          value extension/id;
+                         "/>
+   <label tal:content="extension/title">TITLE</label>
+   <span class="info"
+         tal:condition="last">
+     Last imported <tal:x tal:content="last">TIMESTAMP</tal:x></span>
+   </tal:whatever>
+  </p>
+  <p><input type="submit" name="manage_importExtensions:method"
+            value="Import Selected Extensions" /></p>
+ </fieldset>
 
-</table>
 </form>
+</div>
 
 <h1 tal:replace="structure context/manage_page_footer">PAGE FOOTER</h1>

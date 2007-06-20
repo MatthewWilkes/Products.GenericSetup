@@ -13,6 +13,36 @@ GenericSetup Product Changelog
     - Made sure we register Acquisition free objects as utilities in the
       components handler.
 
+    - Profiles now support version numbers; setup tool tracks profile
+      versions during upgrades.
+
+    - Added support for nested 'upgradeStep' directives; expanded upgrade
+      step registry into a real registry object and not just a dictionary.
+
+    - Added support for 'metadata.xml' in the profile (read during
+      profile registration) to register profile description, version,
+      and dependencies.
+
+    - Deprecated runImportStep and runAllImportSteps in favor of
+      runImportStepFromProfile and runAllImportStepsFromProfile.
+
+    - Merged CPS's upgradeStep ZCML directive, w/ corresponding tool support.
+
+    - Added a "last imported" date to the list of extension profiles,
+      and to the baseline profile.
+
+    - Renamed the "Properties" tab to "Profiles".
+
+    - Removed the 'create_report' decoy in the ZMI view methods:  there was
+      never any UI for passing any value other than the default, anyway, and
+      the report objects are too useful to omit.
+
+    - Refactored the "Properties" tab to separate baseline profiles from
+      extension profiles, marking the option to reset the baseline as
+      potentially dangerous for sites which already have one.  Allow
+      importing one or more extension profiles directly (all steps) from the 
+      "Properties" tab.
+
     - No longer read the toolset xml and update the toolset regustry on
       import context change.  Doing this only during the toolset step import
       should be sufficient.

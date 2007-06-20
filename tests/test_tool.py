@@ -14,7 +14,8 @@
 
 $Id$
 """
-
+import copy
+import os
 import unittest
 import Testing
 
@@ -23,8 +24,15 @@ from StringIO import StringIO
 from Acquisition import aq_base
 from OFS.Folder import Folder
 
+from Products.Five import zcml
+
+import Products.GenericSetup
 from Products.GenericSetup import profile_registry
+from Products.GenericSetup.upgrade import listUpgradeSteps
+from Products.GenericSetup.upgrade import UpgradeStep
+from Products.GenericSetup.upgrade import _registerUpgradeStep
 from Products.GenericSetup.testing import ExportImportZCMLLayer
+from Products.GenericSetup.tests.test_zcml import dummy_upgrade_handler
 
 from common import BaseRegistryTests
 from common import DummyExportContext
@@ -68,7 +76,7 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
 
         tool = self._makeOne('setup_tool')
 
-        self.assertEqual( tool.getImportContextID(), '' )
+        self.assertEqual( tool.getBaselineContextID(), '' )
 
         import_registry = tool.getImportStepRegistry()
         self.assertEqual( len( import_registry.listSteps() ), 0 )
@@ -82,7 +90,7 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
         self.assertEqual( len( toolset_registry.listForbiddenTools() ), 0 )
         self.assertEqual( len( toolset_registry.listRequiredTools() ), 0 )
 
-    def test_getImportContextID( self ):
+    def test_getBaselineContextID( self ):
 
         from Products.GenericSetup.tool import IMPORT_STEPS_XML
         from Products.GenericSetup.tool import EXPORT_STEPS_XML
@@ -98,20 +106,20 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
         self._makeFile(TOOLSET_XML, _EMPTY_TOOLSET_XML)
 
         profile_registry.registerProfile('foo', 'Foo', '', self._PROFILE_PATH)
-        tool.setImportContext('profile-other:foo')
+        tool.setBaselineContext('profile-other:foo')
 
-        self.assertEqual( tool.getImportContextID(), 'profile-other:foo' )
+        self.assertEqual( tool.getBaselineContextID(), 'profile-other:foo' )
 
-    def test_setImportContext_invalid( self ):
+    def test_setBaselineContext_invalid( self ):
 
         tool = self._makeOne('setup_tool')
 
         self.assertRaises( KeyError
-                         , tool.setImportContext
+                         , tool.setBaselineContext
                          , 'profile-foo'
                          )
 
-    def test_setImportContext( self ):
+    def test_setBaselineContext( self ):
 
         from Products.GenericSetup.tool import IMPORT_STEPS_XML
         from Products.GenericSetup.tool import EXPORT_STEPS_XML
@@ -129,9 +137,9 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
         self._makeFile(TOOLSET_XML, _NORMAL_TOOLSET_XML)
 
         profile_registry.registerProfile('foo', 'Foo', '', self._PROFILE_PATH)
-        tool.setImportContext('profile-other:foo')
+        tool.setBaselineContext('profile-other:foo')
 
-        self.assertEqual( tool.getImportContextID(), 'profile-other:foo' )
+        self.assertEqual( tool.getBaselineContextID(), 'profile-other:foo' )
 
         import_registry = tool.getImportStepRegistry()
         self.assertEqual( len( import_registry.listSteps() ), 1 )
@@ -164,7 +172,8 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
 
         tool = self._makeOne('setup_tool').__of__( site )
 
-        self.assertRaises( ValueError, tool.runImportStep, 'nonesuch' )
+        self.assertRaises( ValueError, tool.runImportStepFromProfile,
+                           '', 'nonesuch' )
 
     def test_runImportStep_simple( self ):
 
@@ -176,7 +185,7 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
         registry = tool.getImportStepRegistry()
         registry.registerStep( 'simple', '1', _uppercaseSiteTitle )
 
-        result = tool.runImportStep( 'simple' )
+        result = tool.runImportStepFromProfile( '', 'simple' )
 
         self.assertEqual( len( result[ 'steps' ] ), 1 )
 
@@ -198,7 +207,7 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
         registry.registerStep( 'dependent', '1'
                              , _uppercaseSiteTitle, ( 'dependable', ) )
 
-        result = tool.runImportStep( 'dependent' )
+        result = tool.runImportStepFromProfile( '', 'dependent' )
 
         self.assertEqual( len( result[ 'steps' ] ), 2 )
 
@@ -223,7 +232,8 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
         registry.registerStep( 'dependent', '1'
                              , _uppercaseSiteTitle, ( 'dependable', ) )
 
-        result = tool.runImportStep( 'dependent', run_dependencies=False )
+        result = tool.runImportStepFromProfile( '', 'dependent',
+                                                run_dependencies=False )
 
         self.assertEqual( len( result[ 'steps' ] ), 1 )
 
@@ -241,7 +251,7 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
         registry = tool.getImportStepRegistry()
         registry.registerStep( 'purging', '1', _purgeIfRequired )
 
-        result = tool.runImportStep( 'purging' )
+        result = tool.runImportStepFromProfile( '', 'purging' )
 
         self.assertEqual( len( result[ 'steps' ] ), 1 )
         self.assertEqual( result[ 'steps' ][ 0 ], 'purging' )
@@ -256,7 +266,8 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
         registry = tool.getImportStepRegistry()
         registry.registerStep( 'purging', '1', _purgeIfRequired )
 
-        result = tool.runImportStep( 'purging', purge_old=True )
+        result = tool.runImportStepFromProfile( '', 'purging',
+                                                purge_old=True )
 
         self.assertEqual( len( result[ 'steps' ] ), 1 )
         self.assertEqual( result[ 'steps' ][ 0 ], 'purging' )
@@ -271,7 +282,8 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
         registry = tool.getImportStepRegistry()
         registry.registerStep( 'purging', '1', _purgeIfRequired )
 
-        result = tool.runImportStep( 'purging', purge_old=False )
+        result = tool.runImportStepFromProfile( '', 'purging',
+                                                purge_old=False )
 
         self.assertEqual( len( result[ 'steps' ] ), 1 )
         self.assertEqual( result[ 'steps' ][ 0 ], 'purging' )
@@ -289,7 +301,8 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
         registry.registerStep( 'dependent', '1'
                              , _uppercaseSiteTitle, ( 'purging', ) )
 
-        result = tool.runImportStep( 'dependent', purge_old=False )
+        result = tool.runImportStepFromProfile( '', 'dependent',
+                                                purge_old=False )
         self.failIf( site.purged )
 
     def test_runAllImportSteps_empty( self ):
@@ -297,13 +310,14 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
         site = self._makeSite()
         tool = self._makeOne('setup_tool').__of__( site )
 
-        result = tool.runAllImportSteps()
+        result = tool.runAllImportStepsFromProfile('')
 
         self.assertEqual( len( result[ 'steps' ] ), 0 )
 
     def test_runAllImportSteps_sorted_default_purge( self ):
 
         TITLE = 'original title'
+        PROFILE_ID = 'testing'
         site = self._makeSite( TITLE )
         tool = self._makeOne('setup_tool').__of__( site )
 
@@ -315,7 +329,7 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
         registry.registerStep( 'purging', '1'
                              , _purgeIfRequired )
 
-        result = tool.runAllImportSteps()
+        result = tool.runAllImportStepsFromProfile(PROFILE_ID)
 
         self.assertEqual( len( result[ 'steps' ] ), 3 )
 
@@ -334,6 +348,31 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
         self.assertEqual( site.title, TITLE.replace( ' ', '_' ).upper() )
         self.failUnless( site.purged )
 
+        prefix = 'import-all-%s' % PROFILE_ID
+        logged = [x for x in tool.objectIds('File') if x.startswith(prefix)]
+        self.assertEqual(len(logged), 1)
+
+    def test_runAllImportSteps_unicode_profile_id_creates_reports( self ):
+
+        TITLE = 'original title'
+        PROFILE_ID = u'testing'
+        site = self._makeSite( TITLE )
+        tool = self._makeOne('setup_tool').__of__( site )
+
+        registry = tool.getImportStepRegistry()
+        registry.registerStep( 'dependable', '1'
+                             , _underscoreSiteTitle, ( 'purging', ) )
+        registry.registerStep( 'dependent', '1'
+                             , _uppercaseSiteTitle, ( 'dependable', ) )
+        registry.registerStep( 'purging', '1'
+                             , _purgeIfRequired )
+
+        tool.runAllImportStepsFromProfile(PROFILE_ID)
+
+        prefix = ('import-all-%s' % PROFILE_ID).encode('UTF-8')
+        logged = [x for x in tool.objectIds('File') if x.startswith(prefix)]
+        self.assertEqual(len(logged), 1)
+
     def test_runAllImportSteps_sorted_explicit_purge( self ):
 
         site = self._makeSite()
@@ -347,7 +386,7 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
         registry.registerStep( 'purging', '1'
                              , _purgeIfRequired )
 
-        result = tool.runAllImportSteps( purge_old=True )
+        result = tool.runAllImportStepsFromProfile( '', purge_old=True )
 
         self.assertEqual( len( result[ 'steps' ] ), 3 )
 
@@ -372,7 +411,7 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
         registry.registerStep( 'purging', '1'
                              , _purgeIfRequired )
 
-        result = tool.runAllImportSteps( purge_old=False )
+        result = tool.runAllImportStepsFromProfile( '', purge_old=False )
 
         self.assertEqual( len( result[ 'steps' ] ), 3 )
 
@@ -589,6 +628,127 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
 
         self.assertEqual( export_registry.getStep( 'one' ), ONE_FUNC )
 
+    def test_listContextInfos_empty(self):
+        site = self._makeSite()
+        site.setup_tool = self._makeOne('setup_tool')
+        tool = site.setup_tool
+        infos = tool.listContextInfos()
+        self.assertEqual(len(infos), 0)
+
+    def test_listContextInfos_with_snapshot(self):
+        site = self._makeSite()
+        site.setup_tool = self._makeOne('setup_tool')
+        tool = site.setup_tool
+        tool.createSnapshot('testing')
+        infos = tool.listContextInfos()
+        self.assertEqual(len(infos), 1)
+        info = infos[0]
+        self.assertEqual(info['id'], 'snapshot-testing')
+        self.assertEqual(info['title'], 'testing')
+        self.assertEqual(info['type'], 'snapshot')
+
+    def test_listContextInfos_with_registered_base_profile(self):
+        from Products.GenericSetup.interfaces import BASE
+        profile_registry.registerProfile('foo', 'Foo', '', self._PROFILE_PATH,
+                                         'Foo', BASE)
+        site = self._makeSite()
+        site.setup_tool = self._makeOne('setup_tool')
+        tool = site.setup_tool
+        infos = tool.listContextInfos()
+        self.assertEqual(len(infos), 1)
+        info = infos[0]
+        self.assertEqual(info['id'], 'profile-Foo:foo')
+        self.assertEqual(info['title'], 'Foo')
+        self.assertEqual(info['type'], 'base')
+
+    def test_listContextInfos_with_registered_extension_profile(self):
+        from Products.GenericSetup.interfaces import EXTENSION
+        profile_registry.registerProfile('foo', 'Foo', '', self._PROFILE_PATH,
+                                         'Foo', EXTENSION)
+        site = self._makeSite()
+        site.setup_tool = self._makeOne('setup_tool')
+        tool = site.setup_tool
+        infos = tool.listContextInfos()
+        self.assertEqual(len(infos), 1)
+        info = infos[0]
+        self.assertEqual(info['id'], 'profile-Foo:foo')
+        self.assertEqual(info['title'], 'Foo')
+        self.assertEqual(info['type'], 'extension')
+
+    def test_getProfileImportDate_nonesuch(self):
+        site = self._makeSite()
+        site.setup_tool = self._makeOne('setup_tool')
+        tool = site.setup_tool
+        self.assertEqual(tool.getProfileImportDate('nonesuch'), None)
+
+    def test_getProfileImportDate_simple_id(self):
+        from OFS.Image import File
+        site = self._makeSite()
+        site.setup_tool = self._makeOne('setup_tool')
+        tool = site.setup_tool
+        filename = 'import-all-foo-20070315123456.log'
+        tool._setObject(filename, File(filename, '', ''))
+        self.assertEqual(tool.getProfileImportDate('foo'),
+                         '2007-03-15T12:34:56Z')
+
+    def test_getProfileImportDate_id_with_colon(self):
+        from OFS.Image import File
+        site = self._makeSite()
+        site.setup_tool = self._makeOne('setup_tool')
+        tool = site.setup_tool
+        filename = 'import-all-foo_bar-20070315123456.log'
+        tool._setObject(filename, File(filename, '', ''))
+        self.assertEqual(tool.getProfileImportDate('foo:bar'),
+                         '2007-03-15T12:34:56Z')
+
+    def test_profileVersioning(self):
+        site = self._makeSite()
+        site.setup_tool = self._makeOne('setup_tool')
+        tool = site.setup_tool
+        profile_id = 'dummy_profile'
+        product_name = 'GenericSetup'
+        directory = os.path.split(__file__)[0]
+        path = os.path.join(directory, 'versioned_profile')
+
+        # register profile
+        orig_profile_reg = (profile_registry._profile_info.copy(),
+                            profile_registry._profile_ids[:])
+        profile_registry.registerProfile(profile_id,
+                                         'Dummy Profile',
+                                         'This is a dummy profile',
+                                         path,
+                                         product=product_name)
+
+        # register upgrade step
+        from Products.GenericSetup.upgrade import _upgrade_registry
+        orig_upgrade_registry = copy.copy(_upgrade_registry._registry)
+        step = UpgradeStep("Upgrade", "GenericSetup:dummy_profile", '*', '1.1', '',
+                           dummy_upgrade_handler,
+                           None, "1")
+        _registerUpgradeStep(step)
+
+        # test initial states
+        profile_id = ':'.join((product_name, profile_id))
+        self.assertEqual(tool.getVersionForProfile(profile_id), '1.1')
+        self.assertEqual(tool.getLastVersionForProfile(profile_id),
+                         'unknown')
+
+        # run upgrade steps
+        request = site.REQUEST
+        request.form['profile_id'] = profile_id
+        steps = listUpgradeSteps(tool, profile_id, '1.0')
+        step_id = steps[0]['id']
+        request.form['upgrades'] = [step_id]
+        tool.manage_doUpgrades()
+        self.assertEqual(tool.getLastVersionForProfile(profile_id),
+                         ('1', '1'))
+
+        # reset ugprade registry
+        _upgrade_registry._registry = orig_upgrade_registry
+
+        # reset profile registry
+        (profile_registry._profile_info,
+         profile_registry._profile_ids) = orig_profile_reg
 
 _DEFAULT_STEP_REGISTRIES_EXPORT_XML = """\
 <?xml version="1.0"?>
@@ -652,6 +812,7 @@ _PROPERTIES_INI = """\
 [Default]
 Title=%s
 """
+
 
 def _underscoreSiteTitle( context ):
 
