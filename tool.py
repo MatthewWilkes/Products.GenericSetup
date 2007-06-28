@@ -522,9 +522,6 @@ class SetupTool(Folder):
 
                 result = self.runAllImportStepsFromProfile(profile_id)
 
-                prefix = 'import-all-%s' % profile_id.replace(':', '_')
-                name = self._mangleTimestampName(prefix, 'log')
-                self._createReport(name, result['steps'], result['messages'])
                 for k, v in result['messages'].items():
                     detail['%s:%s' % (profile_id, k)] = v
 
