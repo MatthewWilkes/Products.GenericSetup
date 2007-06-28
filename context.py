@@ -592,7 +592,7 @@ class SnapshotImportContext( BaseContext ):
         """
         try:
             snapshot = self._getSnapshotFolder()
-            object = snapshot.restrictedTraverse( path )
+            object = snapshot.restrictedTraverse( str( path ) )
         except ( AttributeError, KeyError ):
             return None
         else:
