@@ -255,6 +255,8 @@ class SetupTool(Folder):
         """
         context = self._getImportContext(profile_id, purge_old)
 
+        self.applyContext(context)
+
         info = self._import_registry.getStepMetadata(step_id)
 
         if info is None:
