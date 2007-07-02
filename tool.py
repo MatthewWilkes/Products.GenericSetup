@@ -498,11 +498,10 @@ class SetupTool(Folder):
 
         """ Import all steps.
         """
-        result = self.runAllImportSteps()
-        steps_run = 'Steps run: %s' % ', '.join(result['steps'])
+        context_id = self.getBaselineContextID()
+        result = self.runAllImportStepsFromProfile(context_id, purge_old=None)
 
-        name = self._mangleTimestampName('import-all', 'log')
-        self._createReport(name, result['steps'], result['messages'])
+        steps_run = 'Steps run: %s' % ', '.join(result['steps'])
 
         return self.manage_importSteps(manage_tabs_message=steps_run,
                                        messages=result['messages'])
