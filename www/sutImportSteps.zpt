@@ -17,8 +17,9 @@ procedure, in order to pick up changes since the site was created.
 
 <h3>Select Profile</h3>
 
-<form action="." method="POST">
-<select name="context_id">
+<form action="." method="POST" id="profileform" tal:attributes="action string:${context/absolute_url}/manage_importSteps">
+<select name="context_id"
+        onchange="document.getElementById('profileform').submit();">
  <option value=""
          tal:attributes="value base_context_id;
                          selected python:context_id==base_context_id">
