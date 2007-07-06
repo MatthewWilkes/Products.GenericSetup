@@ -481,7 +481,9 @@ class SetupTool(Folder):
         else:
             steps_run = []
             for step_id in ids:
-                result = self.runImportStep(step_id, run_dependencies)
+                result = self.runImportStepFromProfile(
+                                    self.getBaselineContextID(),
+                                    step_id, run_dependencies)
                 steps_run.extend(result['steps'])
                 messages.update(result['messages'])
 
