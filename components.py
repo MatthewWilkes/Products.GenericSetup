@@ -146,8 +146,11 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
                                          "supported right now." % obj_path)
             elif component:
                 self.context.registerUtility(component, provided, name)
-            else:
+            elif factory is not None:
                 self.context.registerUtility(factory(), provided, name)
+            else:
+                self._logger.error("Invalid utility registration for "
+                                   "interface %s" % provided)
 
     def _extractAdapters(self):
         fragment = self._doc.createDocumentFragment()
