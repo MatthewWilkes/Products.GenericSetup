@@ -13,13 +13,11 @@
 </style>
 
 <div tal:define="contexts context/listContextInfos;
-                 snaps python: [x for x in contexts if x['type'] == 'snapshot'];
                  bases python: [x for x in contexts if x['type'] == 'base'];
                  context_id context/getBaselineContextID;
                  context_id_display python: context_id or '(none)';
                  overwrite_style python: context_id != ''
                                     and 'display: none' or 'display: block';
-                 exts python: [x for x in contexts if x['type'] == 'extension'];
                 ">
 <h3> Setup Tool Profiles </h3>
 
