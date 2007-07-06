@@ -210,6 +210,8 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
                 if hasattr(site, 'aq_base'):
                     site_path = '/'.join(site.getPhysicalPath())
                     rel_path = path[len(site_path):]
+                    if not rel_path:
+                        rel_path = '/'
                 child.setAttribute('object', rel_path)
             else:
                 factory = _getDottedName(type(comp))
