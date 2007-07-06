@@ -67,28 +67,6 @@
           value="Update Base Profile" />
   </div>
  </fieldset>
-
- <fieldset id="extesions_fs">
-  <legend>Extension Profiles</legend>
-  <p tal:repeat="extension exts">
-  <tal:whatever
-         tal:define="fid string:extension_${extension/id};
-                     last python:context.getProfileImportDate(extension['id']);
-                    ">
-   <input type="checkbox" id="extension_0" name="profile_ids:list" value="waaa"
-          tal:attributes="id fid;
-                          value extension/id;
-                         "/>
-   <label tal:content="extension/title">TITLE</label>
-   <span class="info"
-         tal:condition="last">
-     Last imported <tal:x tal:content="last">TIMESTAMP</tal:x></span>
-   </tal:whatever>
-  </p>
-  <p><input type="submit" name="manage_importExtensions:method"
-            value="Import Selected Extensions" /></p>
- </fieldset>
-
 </form>
 </div>
 

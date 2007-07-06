@@ -1,3 +1,9 @@
+<tal:block define="base_context_id context/getBaselineContextID;
+                   context_id request/context_id|base_context_id;
+                   contexts context/listContextInfos;
+                   context_title python:[c['title'] for c in contexts if c['id']==context_id][0];
+                   extension_contexts python:[c for c in contexts if c['type']=='extension'];
+                   ">
 <h1 tal:replace="structure context/manage_page_header">PAGE HEADER</h1>
 <h2 tal:define="manage_tabs_message options/manage_tabs_message | nothing"
     tal:replace="structure context/manage_tabs">TABS</h2>
@@ -9,10 +15,30 @@ This tool allows one to re-run individual steps of the site setup
 procedure, in order to pick up changes since the site was created.
 </p>
 
-<h3>Available Import Steps</h3>
+<h3>Select Profile</h3>
+
+<form action="." method="POST">
+<select name="context_id">
+ <option value=""
+         tal:attributes="value base_context_id;
+                         selected python:context_id==base_context_id">
+   Current base profile</option>
+ <option value="context-CONTEXT_ID"
+    tal:repeat="context extension_contexts"
+    tal:attributes="value context/id; selected python:context_id==context['id']"
+    tal:content="context/title">CONTEXT_TITLE</option>
+</select>
+    <input class="form-element" type="submit"
+           name="manage_importSteps:method"
+           value="Switch profile" />
+</form>
+
+
+<h3>Available Import Steps for "<span tal:replace="context_title">Base profile</span>"</h3>
 
 <form action="." method="POST" enctype="multipart/form-data"
       tal:attributes="action context/absolute_url" >
+<tal:dummy define="dummy python:context.applyContextById(context_id)"/>
 <input type="hidden" name="ids:default:tokens" value="" />
 
 <table cellspacing="0" cellpadding="4">
@@ -57,6 +83,7 @@ procedure, in order to pick up changes since the site was created.
    <td />
    <td colspan="3">
 
+    <input type="hidden" name="context_id" value="" tal:attributes="value context_id"/>
     <input type="hidden" name="run_dependencies:int:default" value="0" />
     <input class="form-element" type="checkbox" id="run_dependencies"
            name="run_dependencies:boolean" value="1" checked="checked" />
@@ -100,3 +127,5 @@ procedure, in order to pick up changes since the site was created.
 </form>
 
 <h1 tal:replace="structure context/manage_page_footer">PAGE FOOTER</h1>
+</tal:block>
+

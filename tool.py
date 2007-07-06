@@ -218,9 +218,14 @@ class SetupTool(Folder):
         """ See ISetupTool.
         """
         self._baseline_context_id = context_id
-        context = self._getImportContext(context_id)
+        self.applyContextById(context_id, encoding)
 
+
+    security.declareProtected(ManagePortal, 'applyContextById')
+    def applyContextById(self, context_id, encoding=None):
+        context = self._getImportContext(context_id)
         self.applyContext(context, encoding)
+
 
     security.declareProtected(ManagePortal, 'applyContext')
     def applyContext(self, context, encoding=None):
@@ -471,7 +476,7 @@ class SetupTool(Folder):
     manage_importSteps = PageTemplateFile('sutImportSteps', _wwwdir)
 
     security.declareProtected(ManagePortal, 'manage_importSelectedSteps')
-    def manage_importSelectedSteps(self, ids, run_dependencies):
+    def manage_importSelectedSteps(self, ids, run_dependencies, context_id=None):
         """ Import the steps selected by the user.
         """
         messages = {}
@@ -479,11 +484,13 @@ class SetupTool(Folder):
             summary = 'No steps selected.'
 
         else:
+            if context_id is None:
+                context_id = self.getBaselineContextID()
             steps_run = []
             for step_id in ids:
-                result = self.runImportStepFromProfile(
-                                    self.getBaselineContextID(),
-                                    step_id, run_dependencies)
+                result = self.runImportStepFromProfile(context_id,
+                                                       step_id,
+                                                       run_dependencies)
                 steps_run.extend(result['steps'])
                 messages.update(result['messages'])
 
@@ -496,11 +503,12 @@ class SetupTool(Folder):
                                        messages=messages)
 
     security.declareProtected(ManagePortal, 'manage_importSelectedSteps')
-    def manage_importAllSteps(self):
+    def manage_importAllSteps(self, context_id=None):
 
         """ Import all steps.
         """
-        context_id = self.getBaselineContextID()
+        if context_id is None:
+            context_id = self.getBaselineContextID()
         result = self.runAllImportStepsFromProfile(context_id, purge_old=None)
 
         steps_run = 'Steps run: %s' % ', '.join(result['steps'])
