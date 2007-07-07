@@ -29,9 +29,11 @@ procedure, in order to pick up changes since the site was created.
     tal:attributes="value context/id; selected python:context_id==context['id']"
     tal:content="context/title">CONTEXT_TITLE</option>
 </select>
+  <noscript>
     <input class="form-element" type="submit"
            name="manage_importSteps:method"
            value="Switch profile" />
+  </noscript>
 </form>
 
 
