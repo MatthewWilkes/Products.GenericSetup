@@ -713,6 +713,7 @@ class SetupTool(Folder):
 
         RESPONSE.redirect('%s/manage_snapshots?manage_tabs_message=%s'
                          % (self.absolute_url(), 'Snapshot+created.'))
+        return ""
 
     security.declareProtected(ManagePortal, 'manage_showDiff')
     manage_showDiff = PageTemplateFile('sutCompare', _wwwdir)
