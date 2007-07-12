@@ -200,7 +200,7 @@ class SetupTool(Folder):
         """ See ISetupTool.
         """
         warn('setImportContext is deprecated.  Use setBaselineContext to '
-             'specify the baseline context, and/or runImportStepsFromContext '
+             'specify the baseline context, and/or runImportStepFromProfile '
              'to run the steps from a specific import context.',
              DeprecationWarning, stacklevel=2)
         self._import_context_id = context_id
