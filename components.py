@@ -129,7 +129,7 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
             factory = factory and _resolveDottedName(factory) or None
 
             obj_path = child.getAttribute('object')
-            if obj_path:
+            if not component and not factory and obj_path is not None:
                 # Get the site by either __parent__ or Acquisition
                 site = getattr(self.context, '__parent__', None)
                 if site is None:
