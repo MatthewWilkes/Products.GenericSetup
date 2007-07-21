@@ -130,27 +130,35 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
 
             obj_path = child.getAttribute('object')
             if obj_path:
-                site = aq_parent(self.context)
-                # we support registering aq_wrapped objects only for now
-                if hasattr(site, 'aq_base'):
-                    # filter out empty path segments
-                    path = [f for f in obj_path.split('/') if f]
-                    # support for nested folder
-                    obj = self._recurseFolder(site, path)
-                    if obj is not None:
-                        self.context.registerUtility(aq_base(obj), provided, name)
+                # Get the site by either __parent__ or Acquisition
+                site = getattr(self.context, '__parent__', None)
+                if site is None:
+                    site = aq_parent(self.context)
+                # Support for registering the site itself
+                if obj_path in ('', '/'):
+                    obj = site
                 else:
-                    # Log an error, not aq_wrapped
-                    self._logger.warning("The object %s was not acquisition "
-                                         "wrapped. Registering these is not "
-                                         "supported right now." % obj_path)
+                    # BBB: filter out path segments, we did claim to support
+                    # nested paths once
+                    id_ = [p for p in obj_path.split('/') if p][0]
+                    obj = getattr(site, id_, None)
+
+                if obj is not None:
+                    self.context.registerUtility(aq_base(obj), provided, name)
+                else:
+                    # Log an error, object not found
+                    self._logger.warning("The object %s was not found, while "
+                                         "trying to register an utility. The "
+                                         "provided object definition was %s. "
+                                         "The site used was: %s"
+                                         % (path, obj_path, repr(site)))
             elif component:
                 self.context.registerUtility(component, provided, name)
             elif factory is not None:
                 self.context.registerUtility(factory(), provided, name)
             else:
-                self._logger.error("Invalid utility registration for "
-                                   "interface %s" % provided)
+                self._logger.warning("Invalid utility registration for "
+                                     "interface %s" % provided)
 
     def _extractAdapters(self):
         fragment = self._doc.createDocumentFragment()
@@ -200,19 +208,10 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
                 child.setAttribute('name', name)
 
             comp = registration.component
-            # check if the component is acquisition wrapped. If it is export
+            # check if the component is acquisition wrapped. If it is, export
             # an object reference instead of a factory reference
-            if hasattr(comp, 'aq_base'):
-                # if the site is acquistion wrapped as well, get the relative
-                # path to the site
-                path = '/'.join(comp.getPhysicalPath())
-                site = aq_parent(self.context)
-                if hasattr(site, 'aq_base'):
-                    site_path = '/'.join(site.getPhysicalPath())
-                    rel_path = path[len(site_path):]
-                    if not rel_path:
-                        rel_path = '/'
-                child.setAttribute('object', rel_path)
+            if getattr(comp, 'aq_base', None) is not None:
+                child.setAttribute('object', comp.getId())
             else:
                 factory = _getDottedName(type(comp))
                 child.setAttribute('factory', factory)
@@ -220,15 +219,6 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
             fragment.appendChild(child)
 
         return fragment
-
-    def _recurseFolder(self, site, path):
-        root = site
-        for pathsegment in path:
-            if root is None:
-                break
-            root = getattr(root, pathsegment, None)
-
-        return root
 
 
 def dummyGetId():

@@ -109,10 +109,10 @@ _COMPONENTS_BODY = """\
      interface="Products.GenericSetup.tests.test_components.IDummyInterface"/>
   <utility name="dummy tool name"
      interface="Products.GenericSetup.tests.test_components.IDummyInterface"
-     object="/dummy_tool"/>
+     object="dummy_tool"/>
   <utility name="dummy tool name2"
      interface="Products.GenericSetup.tests.test_components.IDummyInterface"
-     object="/dummy_tool2"/>
+     object="dummy_tool2"/>
   <utility name="foo"
      factory="Products.GenericSetup.tests.test_components.DummyUtility"
      interface="Products.GenericSetup.tests.test_components.IDummyInterface"/>
@@ -129,10 +129,10 @@ class ComponentRegistryXMLAdapterTests(ZopeTestCase, BodyAdapterTestCase):
         obj.registerUtility(DummyUtility(), IDummyInterface)
         obj.registerUtility(DummyUtility(), IDummyInterface, name=u'foo')
 
-        tool = self.app['dummy_tool']
+        tool = aq_base(self.app['dummy_tool'])
         obj.registerUtility(tool, IDummyInterface, name=u'dummy tool name')
 
-        tool2 = self.app['dummy_tool2']
+        tool2 = aq_base(self.app['dummy_tool2'])
         obj.registerUtility(tool2, IDummyInterface, name=u'dummy tool name2')
 
     def test_body_get(self):
@@ -146,29 +146,20 @@ class ComponentRegistryXMLAdapterTests(ZopeTestCase, BodyAdapterTestCase):
         adapted = getMultiAdapter((self._obj, context), IBody)
         adapted.body = self._BODY
         self._verifyImport(self._obj)
-        # XXX The output isn't the same anymore as we have no way to
-        # differentiate between an object based utility creation and a factory 
-        # based one. Need to adjust tests in a smarter way.
-        # self.assertEqual(adapted.body, self._BODY)
+        self.assertEqual(adapted.body, self._BODY)
 
         # now in update mode
         context._should_purge = False
         adapted = getMultiAdapter((self._obj, context), IBody)
         adapted.body = self._BODY
         self._verifyImport(self._obj)
-        # XXX The output isn't the same anymore as we have no way to
-        # differentiate between an object based utility creation and a factory 
-        # based one. Need to adjust tests in a smarter way.
-        # self.assertEqual(adapted.body, self._BODY)
+        self.assertEqual(adapted.body, self._BODY)
 
         # and again in update mode
         adapted = getMultiAdapter((self._obj, context), IBody)
         adapted.body = self._BODY
         self._verifyImport(self._obj)
-        # XXX The output isn't the same anymore as we have no way to
-        # differentiate between an object based utility creation and a factory 
-        # based one. Need to adjust tests in a smarter way.
-        # self.assertEqual(adapted.body, self._BODY)
+        self.assertEqual(adapted.body, self._BODY)
 
     def _getTargetClass(self):
         from Products.GenericSetup.components import \
@@ -241,4 +232,3 @@ else:
 if __name__ == '__main__':
     from Products.GenericSetup.testing import run
     run(test_suite())
-

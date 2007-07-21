@@ -1,6 +1,11 @@
 GenericSetup Product Changelog
 
-  GenericSetup 1.3-beta (unreleased)
+  - components: Removed non-functional support for registering objects in
+    nested folders. We only support objects available in the component
+    registry's parent now. The component registry needs to be either
+    acquisition wrapped or have a __parent__ pointer to get to the parent.
+
+  GenericSetup 1.3-beta (07/12/2007)
 
     - Guard against situations where encoded text may be compared by the
       differ.
