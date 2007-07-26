@@ -17,11 +17,13 @@ $Id$
 
 from zope.component import adapts
 from zope.component import getSiteManager
+from zope.component import queryMultiAdapter
 from zope.component.interfaces import IComponentRegistry
 
 from Acquisition import aq_base
 from Acquisition import aq_parent
 
+from interfaces import IBody
 from interfaces import ISetupEnviron
 from utils import XMLAdapterBase
 from utils import exportObjects
@@ -42,15 +44,15 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
     name = 'componentregistry'
 
     def _exportNode(self):
-        node=self._doc.createElement('componentregistry')
+        node = self._doc.createElement('componentregistry')
         fragment = self._doc.createDocumentFragment()
 
-        child=self._doc.createElement('adapters')
+        child = self._doc.createElement('adapters')
         child.appendChild(self._extractAdapters())
         self._logger.info('Adapters exported.')
         fragment.appendChild(child)
 
-        child=self._doc.createElement('utilities')
+        child = self._doc.createElement('utilities')
         child.appendChild(self._extractUtilities())
         self._logger.info('Utilities exported.')
         fragment.appendChild(child)
@@ -221,9 +223,6 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
         return fragment
 
 
-def dummyGetId():
-    return ''
-
 def importComponentRegistry(context):
     """Import local components.
     """
@@ -232,12 +231,13 @@ def importComponentRegistry(context):
         logger = context.getLogger('componentregistry')
         logger.info("Can not register components, as no registry was found.")
         return
-    # XXX GenericSetup.utils.importObjects expects the object to have a getId
-    # function. We provide a dummy one for now, but this should be fixed in GS
-    # itself
-    sm.getId = dummyGetId
-    importObjects(sm, '', context)
-    del(sm.getId)
+
+    exporter = queryMultiAdapter((sm, context), IBody)
+    if exporter:
+        body = exporter.body
+        if body is not None:
+            context.writeDataFile('componentregistry.xml', body,
+                                  exporter.mime_type)
 
 def exportComponentRegistry(context):
     """Export local components.
@@ -247,9 +247,9 @@ def exportComponentRegistry(context):
         logger = context.getLogger('componentregistry')
         logger.info("Nothing to export.")
         return
-    # XXX GenericSetup.utils.exportObjects expects the object to have a getId
-    # function. We provide a dummy one for now, but this should be fixed in GS
-    # itself
-    sm.getId = dummyGetId
-    exportObjects(sm, '', context)
-    del(sm.getId)
+
+    importer = queryMultiAdapter((sm, context), IBody)
+    if importer:
+        body = context.readDataFile('componentregistry.xml')
+        if body is not None:
+            importer.body = body
