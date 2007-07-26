@@ -41,6 +41,7 @@ from zope.interface import implements
 
 from interfaces import IExportContext
 from interfaces import IImportContext
+from interfaces import ISetupEnviron
 from interfaces import IWriteLogger
 from interfaces import SKIPPED_FILES
 from interfaces import SKIPPED_SUFFIXES
@@ -95,7 +96,32 @@ class Logger:
         self._logger.log(level, msg, *args, **kwargs)
 
 
-class BaseContext( Implicit ):
+class SetupEnviron(Implicit):
+
+    """Context for body im- and exporter.
+    """
+
+    implements(ISetupEnviron)
+
+    security = ClassSecurityInfo()
+
+    def __init__(self):
+        self._should_purge = True
+
+    security.declareProtected(ManagePortal, 'getLogger')
+    def getLogger(self, name):
+        """Get a logger with the specified name, creating it if necessary.
+        """
+        return logging.getLogger('GenericSetup.%s' % name)
+
+    security.declareProtected(ManagePortal, 'shouldPurge')
+    def shouldPurge(self):
+        """When installing, should the existing setup be purged?
+        """
+        return self._should_purge
+
+
+class BaseContext(SetupEnviron):
 
     security = ClassSecurityInfo()
 
@@ -148,13 +174,6 @@ class BaseContext( Implicit ):
         """ See ISetupContext.
         """
         self._messages[:] = []
-
-    security.declareProtected( ManagePortal, 'shouldPurge' )
-    def shouldPurge( self ):
-
-        """ See ISetupContext.
-        """
-        return self._should_purge
 
 
 class DirectoryImportContext( BaseContext ):

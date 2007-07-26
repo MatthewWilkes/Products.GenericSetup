@@ -1,0 +1,14 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+  <adapter factory=".components.ComponentsSetupSchemaAdapter"/>
+
+  <browser:page
+      for="Products.Five.component.interfaces.IObjectManagerSite"
+      name="components_xmlconfig.html"
+      class=".components.ComponentsSetupView"
+      permission="five.ManageSite"
+      />
+
+</configure>
