@@ -232,12 +232,11 @@ def importComponentRegistry(context):
         logger.info("Can not register components, as no registry was found.")
         return
 
-    exporter = queryMultiAdapter((sm, context), IBody)
-    if exporter:
-        body = exporter.body
+    importer = queryMultiAdapter((sm, context), IBody)
+    if importer:
+        body = context.readDataFile('componentregistry.xml')
         if body is not None:
-            context.writeDataFile('componentregistry.xml', body,
-                                  exporter.mime_type)
+            importer.body = body
 
 def exportComponentRegistry(context):
     """Export local components.
@@ -248,8 +247,9 @@ def exportComponentRegistry(context):
         logger.info("Nothing to export.")
         return
 
-    importer = queryMultiAdapter((sm, context), IBody)
-    if importer:
-        body = context.readDataFile('componentregistry.xml')
+    exporter = queryMultiAdapter((sm, context), IBody)
+    if exporter:
+        body = exporter.body
         if body is not None:
-            importer.body = body
+            context.writeDataFile('componentregistry.xml', body,
+                                  exporter.mime_type)
