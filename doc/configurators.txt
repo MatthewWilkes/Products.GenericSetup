@@ -1,3 +1,6 @@
+WARNING: PLEASE DON'T USE THE CONFIGURATOR PATTERN. THE RELATED BASE CLASSES
+WILL BECOME DEPRECATED AS SOON AS GENERICSETUP ITSELF NO LONGER USES THEM.
+
 The Products.GenericSetup.utils.ImportConfiguratorBase class provides
 a convenient shortcut for defining how an XML file should be parsed
 and converted to a python dictionary.  To use this, create a subclass

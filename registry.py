@@ -16,6 +16,7 @@ $Id$
 """
 import os
 from xml.sax import parseString
+from xml.sax.handler import ContentHandler
 
 from AccessControl import ClassSecurityInfo
 from Acquisition import Implicit
@@ -32,11 +33,11 @@ from interfaces import IToolsetRegistry
 from interfaces import IProfileRegistry
 from permissions import ManagePortal
 from metadata import ProfileMetadata
-from utils import HandlerBase
 from utils import _xmldir
 from utils import _getDottedName
 from utils import _resolveDottedName
 from utils import _extractDocstring
+
 
 class ImportStepRegistry( Implicit ):
 
@@ -539,6 +540,7 @@ class ToolsetRegistry( Implicit ):
 
 InitializeClass( ToolsetRegistry )
 
+
 class ProfileRegistry( Implicit ):
 
     """ Track registered profiles.
@@ -650,7 +652,31 @@ InitializeClass( ProfileRegistry )
 
 _profile_registry = ProfileRegistry()
 
-class _ImportStepRegistryParser( HandlerBase ):
+
+#
+#   XML parser
+#
+
+class _HandlerBase(ContentHandler):
+
+    _MARKER = object()
+
+    def _extract(self, attrs, key):
+        result = attrs.get(key, self._MARKER)
+
+        if result is self._MARKER:
+            return None
+
+        return self._encode(result)
+
+    def _encode(self, content):
+        if self._encoding is None:
+            return content
+
+        return content.encode(self._encoding)
+
+
+class _ImportStepRegistryParser(_HandlerBase):
 
     security = ClassSecurityInfo()
     security.declareObjectPrivate()
@@ -720,7 +746,8 @@ class _ImportStepRegistryParser( HandlerBase ):
 
 InitializeClass( _ImportStepRegistryParser )
 
-class _ExportStepRegistryParser( HandlerBase ):
+
+class _ExportStepRegistryParser(_HandlerBase):
 
     security = ClassSecurityInfo()
     security.declareObjectPrivate()
@@ -778,7 +805,7 @@ class _ExportStepRegistryParser( HandlerBase ):
 InitializeClass( _ExportStepRegistryParser )
 
 
-class _ToolsetParser( HandlerBase ):
+class _ToolsetParser(_HandlerBase):
 
     security = ClassSecurityInfo()
     security.declareObjectPrivate()
@@ -810,6 +837,5 @@ class _ToolsetParser( HandlerBase ):
 
         else:
             raise ValueError, 'Unknown element %s' % name
-
 
 InitializeClass( _ToolsetParser )

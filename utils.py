@@ -34,6 +34,7 @@ from Globals import InitializeClass
 from Globals import package_home
 from OFS.interfaces import IOrderedContainer
 from zope.component import queryMultiAdapter
+from zope.deprecation import deprecated
 from zope.interface import implements
 from zope.interface import implementsOnly
 from zope.interface import providedBy
@@ -123,6 +124,10 @@ def _extractDocstring( func, default_title, default_description ):
     return title, description
 
 
+deprecated('HandlerBase',
+           'SAX based XML parsing is no longer supported by GenericSetup. '
+           'HandlerBase will be removed in GenericSetup 1.5.')
+
 class HandlerBase( ContentHandler ):
 
     _encoding = None
@@ -155,7 +160,12 @@ class HandlerBase( ContentHandler ):
         return content.encode( self._encoding )
 
 
+##############################################################################
+# WARNING: PLEASE DON'T USE THE CONFIGURATOR PATTERN. THE RELATED BASE CLASSES
+# WILL BECOME DEPRECATED AS SOON AS GENERICSETUP ITSELF NO LONGER USES THEM.
+
 class ImportConfiguratorBase(Implicit):
+    # old code, will become deprecated
     """ Synthesize data from XML description.
     """
     security = ClassSecurityInfo()
@@ -268,6 +278,7 @@ InitializeClass(ImportConfiguratorBase)
 
 
 class ExportConfiguratorBase(Implicit):
+    # old code, will become deprecated
     """ Synthesize XML description.
     """
     security = ClassSecurityInfo()
@@ -287,6 +298,8 @@ class ExportConfiguratorBase(Implicit):
 
 InitializeClass(ExportConfiguratorBase)
 
+#
+##############################################################################
 
 class _LineWrapper:
 
