@@ -11,4 +11,11 @@
       permission="five.ManageSite"
       />
 
+  <browser:page
+      for="Products.Five.component.interfaces.IObjectManagerSite"
+      name="manage_components"
+      class=".components.ComponentsSetupTab"
+      permission="five.ManageSite"
+      />
+
 </configure>

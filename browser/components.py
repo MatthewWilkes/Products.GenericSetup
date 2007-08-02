@@ -15,6 +15,7 @@
 $Id$
 """
 
+from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from Products.Five.component.interfaces import IObjectManagerSite
 from Products.Five.formlib.formbase import PageEditForm
 from zope.component import adapts
@@ -69,3 +70,15 @@ class ComponentsSetupView(PageEditForm):
         super(ComponentsSetupView,
               self).setUpWidgets(ignore_request=ignore_request)
         self.widgets['body'].height = 24
+
+
+class ComponentsSetupTab(ComponentsSetupView):
+
+    """Components setup ZMI tab for IObjectManagerSite.
+    """
+
+    base_template = PageEditForm.template
+
+    template = ViewPageTemplateFile('components.pt')
+
+    label = None
