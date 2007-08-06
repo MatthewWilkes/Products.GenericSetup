@@ -15,6 +15,8 @@
 $Id$
 """
 
+from operator import itemgetter
+
 from zope.component import adapts
 from zope.component import getSiteManager
 from zope.component import queryMultiAdapter
@@ -165,27 +167,26 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
     def _extractAdapters(self):
         fragment = self._doc.createDocumentFragment()
 
-        # We get back a generator but in order to have a consistent order
-        # which is needed for the tests we convert to a sorted list
-        registrations = [reg for reg in self.context.registeredAdapters()]
-        registrations.sort()
+        registrations = [ {'factory': _getDottedName(reg.factory),
+                           'provided': _getDottedName(reg.provided),
+                           'required': reg.required,
+                           'name': reg.name}
+                          for reg in self.context.registeredAdapters() ]
+        registrations.sort(key=itemgetter('name'))
+        registrations.sort(key=itemgetter('provided'))
 
-        for registration in registrations:
+        for reg_info in registrations:
             child = self._doc.createElement('adapter')
 
-            factory = _getDottedName(registration.factory)
-            provided = _getDottedName(registration.provided)
-            name = _getDottedName(registration.name)
-
             for_ = u''
-            for interface in registration.required:
+            for interface in reg_info['required']:
                 for_ = for_ + _getDottedName(interface) + u'\n           '
 
-            child.setAttribute('factory', factory)
-            child.setAttribute('provides', provided)
+            child.setAttribute('factory', reg_info['factory'])
+            child.setAttribute('provides', reg_info['provided'])
             child.setAttribute('for_', for_.strip())
-            if name:
-                child.setAttribute('name', name)
+            if reg_info['name']:
+                child.setAttribute('name', reg_info['name'])
 
             fragment.appendChild(child)
 
@@ -194,22 +195,22 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
     def _extractUtilities(self):
         fragment = self._doc.createDocumentFragment()
 
-        # We get back a generator but in order to have a consistent order
-        # which is needed for the tests we convert to a sorted list
-        registrations = [reg for reg in self.context.registeredUtilities()]
-        registrations.sort()
+        registrations = [ {'component': reg.component,
+                           'provided': _getDottedName(reg.provided),
+                           'name': reg.name}
+                          for reg in self.context.registeredUtilities() ]
+        registrations.sort(key=itemgetter('name'))
+        registrations.sort(key=itemgetter('provided'))
 
-        for registration in registrations:
+        for reg_info in registrations:
             child = self._doc.createElement('utility')
 
-            provided = _getDottedName(registration.provided)
-            child.setAttribute('interface', provided)
+            child.setAttribute('interface', reg_info['provided'])
 
-            name = _getDottedName(registration.name)
-            if name:
-                child.setAttribute('name', name)
+            if reg_info['name']:
+                child.setAttribute('name', reg_info['name'])
 
-            comp = registration.component
+            comp = reg_info['component']
             # check if the component is acquisition wrapped. If it is, export
             # an object reference instead of a factory reference
             if getattr(comp, 'aq_base', None) is not None:
