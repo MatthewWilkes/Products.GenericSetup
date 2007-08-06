@@ -10,6 +10,9 @@
    font-weight: bold;
    vertical-align: top;
  }
+.widget textarea {
+   width: 600px;
+ }
 </style>
 
 <br />
