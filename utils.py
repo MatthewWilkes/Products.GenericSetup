@@ -64,9 +64,33 @@ def _getDottedName( named ):
         return str( named )
 
     try:
-        return '%s.%s' % ( named.__module__, named.__name__ )
+        dotted = '%s.%s' % (named.__module__, named.__name__)
     except AttributeError:
-        raise ValueError, 'Cannot compute dotted name: %s' % named
+        raise ValueError('Cannot compute dotted name: %s' % named)
+
+    # remove leading underscore names if possible
+
+    # Step 1: check if there is a short version
+    short_dotted = '.'.join([ n for n in dotted.split('.')
+                              if not n.startswith('_') ])
+    if short_dotted == dotted:
+        return dotted
+
+    # Step 2: check if short version can be resolved
+    try:
+        short_resolved = _resolveDottedName(short_dotted)
+    except (ValueError, ImportError):
+        return dotted
+
+    # Step 3: check if long version resolves to the same object
+    try:
+        resolved = _resolveDottedName(dotted)
+    except (ValueError, ImportError):
+        raise ValueError('Cannot compute dotted name: %s' % named)
+    if short_resolved is not resolved:
+        return dotted
+
+    return short_dotted
 
 def _resolveDottedName( dotted ):
 
