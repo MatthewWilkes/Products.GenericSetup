@@ -118,7 +118,15 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
                                          provided=provided,
                                          name=name)
 
+    def _getSite(self):
+        # Get the site by either __parent__ or Acquisition
+        site = getattr(self.context, '__parent__', None)
+        if site is None:
+            site = aq_parent(self.context)
+        return site
+
     def _initUtilities(self, node):
+        site = self._getSite()
         for child in node.childNodes:
             if child.nodeName != 'utility':
                 continue
@@ -134,10 +142,6 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
 
             obj_path = child.getAttribute('object')
             if not component and not factory and obj_path is not None:
-                # Get the site by either __parent__ or Acquisition
-                site = getattr(self.context, '__parent__', None)
-                if site is None:
-                    site = aq_parent(self.context)
                 # Support for registering the site itself
                 if obj_path in ('', '/'):
                     obj = site
@@ -201,6 +205,7 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
                           for reg in self.context.registeredUtilities() ]
         registrations.sort(key=itemgetter('name'))
         registrations.sort(key=itemgetter('provided'))
+        site = aq_base(self._getSite())
 
         for reg_info in registrations:
             child = self._doc.createElement('utility')
@@ -214,7 +219,10 @@ class ComponentRegistryXMLAdapter(XMLAdapterBase):
             # check if the component is acquisition wrapped. If it is, export
             # an object reference instead of a factory reference
             if getattr(comp, 'aq_base', None) is not None:
-                child.setAttribute('object', comp.getId())
+                if aq_base(comp) is site:
+                    child.setAttribute('object', '')
+                else:
+                    child.setAttribute('object', comp.getId())
             else:
                 factory = _getDottedName(type(comp))
                 child.setAttribute('factory', factory)

@@ -21,6 +21,9 @@ GenericSetup Product README
 
       - (x) properties of the site object
 
+      - (x) placeful utilities and adapters registered in the local
+            site manager. Placeless utilities can only be imported.
+
   Extending The Tool
 
     Third-party products extend the tool by registering handlers for
