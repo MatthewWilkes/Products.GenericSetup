@@ -111,7 +111,10 @@ class ImportStepRegistry( Implicit ):
         if info is None:
             return default
 
-        return info.copy()
+        result = info.copy()
+        result['invalid'] =  _resolveDottedName( result[ 'handler' ] ) is None
+
+        return result
 
     security.declareProtected( ManagePortal, 'listStepMetadata' )
     def listStepMetadata( self ):
@@ -171,7 +174,8 @@ class ImportStepRegistry( Implicit ):
           - Attempting to register an older one after a newer one results
             in a KeyError.
 
-        o 'handler' should implement IImportPlugin.
+        o 'handler' is the dottoed name of a handler which should implement
+           IImportPlugin.
 
         o 'dependencies' is a tuple of step ids which have to run before
           this step in order to be able to run at all. Registration of
@@ -192,16 +196,23 @@ class ImportStepRegistry( Implicit ):
             raise KeyError( 'Existing registration for step %s, version %s'
                           % ( id, already[ 'version' ] ) )
 
+        if not isinstance(handler, str):
+            handler = _getDottedName( handler )
+
         if title is None or description is None:
 
-            t, d = _extractDocstring( handler, id, '' )
+            method = _resolveDottedName(handler)
+            if method is None:
+                t,d = id, ''
+            else:
+                t, d = _extractDocstring( method, id, '' )
 
             title = title or t
             description = description or d
 
         info = { 'id'           : id
                , 'version'      : version
-               , 'handler'      : _getDottedName( handler )
+               , 'handler'      : handler
                , 'dependencies' : dependencies
                , 'title'        : title
                , 'description'  : description
@@ -326,7 +337,10 @@ class ExportStepRegistry( Implicit ):
         if info is None:
             return default
 
-        return info.copy()
+        result = info.copy()
+        result['invalid'] =  _resolveDottedName( result[ 'handler' ] ) is None
+
+        return result
 
     security.declareProtected( ManagePortal, 'listStepMetadata' )
     def listStepMetadata( self ):
@@ -370,7 +384,8 @@ class ExportStepRegistry( Implicit ):
 
         o 'id' is the unique identifier for this step
 
-        o 'step' should implement IExportPlugin.
+        o 'handler' is the dottoed name of a handler which should implement
+           IImportPlugin.
 
         o 'title' is a one-line UI description for this step.
           If None, the first line of the documentation string of the step
@@ -380,15 +395,22 @@ class ExportStepRegistry( Implicit ):
           If None, the remaining line of the documentation string of
           the step is used, or default to ''.
         """
+        if not isinstance(handler, str):
+            handler = _getDottedName( handler )
+
         if title is None or description is None:
 
-            t, d = _extractDocstring( handler, id, '' )
+            method = _resolveDottedName(handler)
+            if method is None:
+                t,d = id, ''
+            else:
+                t, d = _extractDocstring( method, id, '' )
 
             title = title or t
             description = description or d
 
         info = { 'id'           : id
-               , 'handler'      : _getDottedName( handler )
+               , 'handler'      : handler
                , 'title'        : title
                , 'description'  : description
                }

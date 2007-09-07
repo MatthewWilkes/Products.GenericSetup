@@ -38,12 +38,17 @@ def ONE_FUNC( context ): pass
 def TWO_FUNC( context ): pass
 def THREE_FUNC( context ): pass
 def FOUR_FUNC( context ): pass
+def DOC_FUNC( site ):
+    """This is the first line.
+
+    This is the second line.
+    """
 
 ONE_FUNC_NAME = '%s.%s' % ( __name__, ONE_FUNC.__name__ )
 TWO_FUNC_NAME = '%s.%s' % ( __name__, TWO_FUNC.__name__ )
 THREE_FUNC_NAME = '%s.%s' % ( __name__, THREE_FUNC.__name__ )
 FOUR_FUNC_NAME = '%s.%s' % ( __name__, FOUR_FUNC.__name__ )
-
+DOC_FUNC_NAME = '%s.%s' % ( __name__, DOC_FUNC.__name__ )
 
 #==============================================================================
 #   SSR tests
@@ -91,49 +96,35 @@ class ImportStepRegistryTests( BaseRegistryTests
 
     def test_registerStep_docstring( self ):
 
-        def func_with_doc( site ):
-            """This is the first line.
-
-            This is the second line.
-            """
-        FUNC_NAME = '%s.%s' % ( __name__, func_with_doc.__name__ )
-
         registry = self._makeOne()
 
         registry.registerStep( id='docstring'
                              , version='1'
-                             , handler=func_with_doc
+                             , handler=DOC_FUNC
                              , dependencies=()
                              )
 
         info = registry.getStepMetadata( 'docstring' )
         self.assertEqual( info[ 'id' ], 'docstring' )
-        self.assertEqual( info[ 'handler' ], FUNC_NAME )
+        self.assertEqual( info[ 'handler' ], DOC_FUNC_NAME )
         self.assertEqual( info[ 'dependencies' ], () )
         self.assertEqual( info[ 'title' ], 'This is the first line.' )
         self.assertEqual( info[ 'description' ] , 'This is the second line.' )
 
     def test_registerStep_docstring_override( self ):
 
-        def func_with_doc( site ):
-            """This is the first line.
-
-            This is the second line.
-            """
-        FUNC_NAME = '%s.%s' % ( __name__, func_with_doc.__name__ )
-
         registry = self._makeOne()
 
         registry.registerStep( id='docstring'
                              , version='1'
-                             , handler=func_with_doc
+                             , handler=DOC_FUNC
                              , dependencies=()
                              , title='Title'
                              )
 
         info = registry.getStepMetadata( 'docstring' )
         self.assertEqual( info[ 'id' ], 'docstring' )
-        self.assertEqual( info[ 'handler' ], FUNC_NAME )
+        self.assertEqual( info[ 'handler' ], DOC_FUNC_NAME )
         self.assertEqual( info[ 'dependencies' ], () )
         self.assertEqual( info[ 'title' ], 'Title' )
         self.assertEqual( info[ 'description' ] , 'This is the second line.' )
@@ -171,7 +162,7 @@ class ImportStepRegistryTests( BaseRegistryTests
 
         registry = self._makeOne()
 
-        registry.registerStep( id='one', version='1', handler=ONE_FUNC )
+        registry.registerStep( id='one', version='1', handler=ONE_FUNC_NAME )
 
         self.assertRaises( KeyError
                          , registry.registerStep
@@ -180,7 +171,7 @@ class ImportStepRegistryTests( BaseRegistryTests
                          , handler=ONE_FUNC
                          )
 
-        registry.registerStep( id='one', version='1', handler=ONE_FUNC )
+        registry.registerStep( id='one', version='1', handler=ONE_FUNC_NAME )
 
         info_list = registry.listStepMetadata()
         self.assertEqual( len( info_list ), 1 )
@@ -632,7 +623,7 @@ class ExportStepRegistryTests( BaseRegistryTests
     def test_registerStep_simple( self ):
 
         registry = self._makeOne()
-        registry.registerStep( 'one', ONE_FUNC )
+        registry.registerStep( 'one', ONE_FUNC_NAME )
         info = registry.getStepMetadata( 'one', {} )
 
         self.assertEqual( info[ 'id' ], 'one' )
@@ -642,38 +633,24 @@ class ExportStepRegistryTests( BaseRegistryTests
 
     def test_registerStep_docstring( self ):
 
-        def func_with_doc( site ):
-            """This is the first line.
-
-            This is the second line.
-            """
-        FUNC_NAME = '%s.%s' % ( __name__, func_with_doc.__name__ )
-
         registry = self._makeOne()
-        registry.registerStep( 'one', func_with_doc )
+        registry.registerStep( 'one', DOC_FUNC )
         info = registry.getStepMetadata( 'one', {} )
 
         self.assertEqual( info[ 'id' ], 'one' )
-        self.assertEqual( info[ 'handler' ], FUNC_NAME )
+        self.assertEqual( info[ 'handler' ], DOC_FUNC_NAME )
         self.assertEqual( info[ 'title' ], 'This is the first line.' )
         self.assertEqual( info[ 'description' ] , 'This is the second line.' )
 
     def test_registerStep_docstring_with_override( self ):
 
-        def func_with_doc( site ):
-            """This is the first line.
-
-            This is the second line.
-            """
-        FUNC_NAME = '%s.%s' % ( __name__, func_with_doc.__name__ )
-
         registry = self._makeOne()
-        registry.registerStep( 'one', func_with_doc
+        registry.registerStep( 'one', DOC_FUNC
                                , description='Description' )
         info = registry.getStepMetadata( 'one', {} )
 
         self.assertEqual( info[ 'id' ], 'one' )
-        self.assertEqual( info[ 'handler' ], FUNC_NAME )
+        self.assertEqual( info[ 'handler' ], DOC_FUNC_NAME )
         self.assertEqual( info[ 'title' ], 'This is the first line.' )
         self.assertEqual( info[ 'description' ], 'Description' )
 

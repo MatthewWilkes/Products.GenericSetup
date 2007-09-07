@@ -62,7 +62,8 @@ procedure, in order to pick up changes since the site was created.
   <tr valign="top"
       tal:define="info python: registry.getStepMetadata( step_id );"
       tal:attributes="class python:
-                     repeat[ 'step_id' ].odd and 'row-normal' or 'row-hilite'" >
+                     repeat[ 'step_id' ].odd and 'row-normal' or 'row-hilite';
+                     style python:info['invalid'] and 'background: red' or None" >
    <td class="list-item" width="16">
     <input type="checkbox" name="ids:list" value="STEP_ID"
            tal:attributes="value step_id" />

@@ -3,6 +3,11 @@ GenericSetup Product Changelog
 
   GenericSetup 1.3.2 (unreleased)
 
+    - Ignore import and export step handlers that we can not resolve.
+
+    - Restore the import context after running steps from a profile
+      so we do not break on nested calls.
+
     - components: Provide log output when purging utilities or adapters.
 
     - components: Fixed an undefined variable name in a log message.

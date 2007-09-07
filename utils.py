@@ -115,14 +115,17 @@ def _resolveDottedName( dotted ):
             del parts_copy[ -1 ]
 
             if not parts_copy:
-                raise
+                return None
 
     parts = parts[ 1: ] # Funky semantics of __import__'s return value
 
     obj = module
 
     for part in parts:
-        obj = getattr( obj, part )
+        try:
+            obj = getattr( obj, part )
+        except AttributeError:
+            return None
 
     return obj
 

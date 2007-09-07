@@ -50,6 +50,7 @@ from upgrade import listUpgradeSteps
 from upgrade import listProfilesWithUpgrades
 from upgrade import _upgrade_registry
 
+from utils import _getDottedName
 from utils import _resolveDottedName
 from utils import _wwwdir
 
@@ -162,7 +163,7 @@ class SetupTool(Folder):
         self._import_registry = ImportStepRegistry()
         self._export_registry = ExportStepRegistry()
         self._export_registry.registerStep('step_registries',
-                                           exportStepRegistries,
+                                           _getDottedName(exportStepRegistries),
                                            'Export import / export steps.',
                                           )
         self._toolset_registry = ToolsetRegistry()
@@ -258,6 +259,7 @@ class SetupTool(Folder):
                                  run_dependencies=True, purge_old=None):
         """ See ISetupTool.
         """
+        old_context = self._import_context_id
         context = self._getImportContext(profile_id, purge_old)
 
         self.applyContext(context)
@@ -265,6 +267,7 @@ class SetupTool(Folder):
         info = self._import_registry.getStepMetadata(step_id)
 
         if info is None:
+            self._import_context_id = old_context
             raise ValueError, 'No such import step: %s' % step_id
 
         dependencies = info.get('dependencies', ())
@@ -284,6 +287,8 @@ class SetupTool(Folder):
         message_list.extend( ['%s: %s' % x[1:] for x in context.listNotes()] )
         messages[step_id] = '\n'.join(message_list)
         steps.append(step_id)
+
+        self._import_context_id = old_context
 
         return { 'steps' : steps, 'messages' : messages }
 
@@ -308,12 +313,16 @@ class SetupTool(Folder):
         """
         __traceback_info__ = profile_id
 
+        old_context = self._import_context_id
         context = self._getImportContext(profile_id, purge_old)
 
         result = self._runImportStepsFromContext(context, purge_old=purge_old)
         prefix = 'import-all-%s' % profile_id.replace(':', '_')
         name = self._mangleTimestampName(prefix, 'log')
         self._createReport(name, result['steps'], result['messages'])
+
+        self._import_context_id = old_context
+
         return result
 
     security.declareProtected(ManagePortal, 'runAllImportSteps')
@@ -356,7 +365,9 @@ class SetupTool(Folder):
             handler = self._export_registry.getStep(step_id)
 
             if handler is None:
-                raise ValueError('Invalid export step: %s' % step_id)
+                logger = logging.getLogger('GenericSetup')
+                logger.error('Step %s has an invalid handler' % step_id)
+                continue
 
             messages[step_id] = handler(context)
 
@@ -910,8 +921,7 @@ class SetupTool(Folder):
 
             id = step_info['id']
             version = step_info['version']
-            handler = _resolveDottedName(step_info['handler'])
-
+            handler = step_info['handler']
             dependencies = tuple(step_info.get('dependencies', ()))
             title = step_info.get('title', id)
             description = ''.join(step_info.get('description', []))
@@ -940,8 +950,7 @@ class SetupTool(Folder):
         for step_info in info_list:
 
             id = step_info['id']
-            handler = _resolveDottedName(step_info['handler'])
-
+            handler = step_info['handler']
             title = step_info.get('title', id)
             description = ''.join(step_info.get('description', []))
 
@@ -957,11 +966,18 @@ class SetupTool(Folder):
         """ Run a single import step, using a pre-built context.
         """
         __traceback_info__ = step_id
+        marker = object()
 
         handler = self._import_registry.getStep(step_id)
 
-        if handler is None:
+        if handler is marker:
             raise ValueError('Invalid import step: %s' % step_id)
+
+        if handler is None:
+            msg = 'Step %s has an invalid import handler' % step_id
+            logger = logging.getLogger('GenericSetup')
+            logger.error(msg)
+            return 'ERROR: ' + msg
 
         return handler(context)
 
@@ -972,15 +988,22 @@ class SetupTool(Folder):
         """
         context = TarballExportContext(self)
         messages = {}
+        marker = object()
 
         for step_id in steps:
 
-            handler = self._export_registry.getStep(step_id)
+            handler = self._export_registry.getStep(step_id, marker)
 
-            if handler is None:
+            if handler is marker:
                 raise ValueError('Invalid export step: %s' % step_id)
 
-            messages[step_id] = handler(context)
+            if handler is None:
+                msg = 'Step %s has an invalid import handler' % step_id
+                logger = logging.getLogger('GenericSetup')
+                logger.error(msg)
+                messages[step_id] = msg
+            else:
+                messages[step_id] = handler(context)
 
         return { 'steps' : steps
                , 'messages' : messages
