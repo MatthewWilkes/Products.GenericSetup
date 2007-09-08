@@ -21,7 +21,6 @@ from xml.sax.handler import ContentHandler
 from AccessControl import ClassSecurityInfo
 from Acquisition import Implicit
 from Globals import InitializeClass
-from App.FactoryDispatcher import ProductDispatcher
 import App.Product
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 from zope.interface import implements
@@ -39,13 +38,7 @@ from utils import _resolveDottedName
 from utils import _extractDocstring
 
 
-class ImportStepRegistry( Implicit ):
-
-    """ Manage knowledge about steps to create / configure site.
-
-    o Steps are composed together to define a site profile.
-    """
-    implements(IImportStepRegistry)
+class BaseStepRegistry( Implicit ):
 
     security = ClassSecurityInfo()
 
@@ -56,44 +49,9 @@ class ImportStepRegistry( Implicit ):
     security.declareProtected( ManagePortal, 'listSteps' )
     def listSteps( self ):
 
-        """ Return a sequence of IDs of registered steps.
-
-        o Order is not significant.
+        """ Return a list of registered step IDs.
         """
         return self._registered.keys()
-
-    security.declareProtected( ManagePortal, 'sortSteps' )
-    def sortSteps( self ):
-
-        """ Return a sequence of registered step IDs
-
-        o Sequence is sorted topologically by dependency, with the dependent
-          steps *after* the steps they depend on.
-        """
-        return self._computeTopologicalSort()
-
-    security.declareProtected( ManagePortal, 'checkComplete' )
-    def checkComplete( self ):
-
-        """ Return a sequence of ( node, edge ) tuples for unsatisifed deps.
-        """
-        result = []
-        seen = {}
-
-        graph = self._computeTopologicalSort()
-
-        for node in graph:
-
-            dependencies = self.getStepMetadata( node )[ 'dependencies' ]
-
-            for dependency in dependencies:
-
-                if seen.get( dependency ) is None:
-                    result.append( ( node, dependency ) )
-
-            seen[ node ] = 1
-
-        return result
 
     security.declareProtected( ManagePortal, 'getStepMetadata' )
     def getStepMetadata( self, key, default=None ):
@@ -139,7 +97,7 @@ class ImportStepRegistry( Implicit ):
     security.declarePrivate( 'getStep' )
     def getStep( self, key, default=None ):
 
-        """ Return the IImportPlugin registered for 'key'.
+        """ Return the I(Export|Import)Plugin registered for 'key'.
 
         o Return 'default' if no such step is registered.
         """
@@ -150,6 +108,57 @@ class ImportStepRegistry( Implicit ):
             return default
 
         return _resolveDottedName( info[ 'handler' ] )
+
+    security.declarePrivate( 'clear' )
+    def clear( self ):
+
+        self._registered = {}
+
+InitializeClass( BaseStepRegistry )
+
+class ImportStepRegistry( BaseStepRegistry ):
+
+    """ Manage knowledge about steps to create / configure site.
+
+    o Steps are composed together to define a site profile.
+    """
+    implements(IImportStepRegistry)
+
+    security = ClassSecurityInfo()
+
+
+    security.declareProtected( ManagePortal, 'sortSteps' )
+    def sortSteps( self ):
+
+        """ Return a sequence of registered step IDs
+
+        o Sequence is sorted topologically by dependency, with the dependent
+          steps *after* the steps they depend on.
+        """
+        return self._computeTopologicalSort()
+
+    security.declareProtected( ManagePortal, 'checkComplete' )
+    def checkComplete( self ):
+
+        """ Return a sequence of ( node, edge ) tuples for unsatisifed deps.
+        """
+        result = []
+        seen = {}
+
+        graph = self._computeTopologicalSort()
+
+        for node in graph:
+
+            dependencies = self.getStepMetadata( node )[ 'dependencies' ]
+
+            for dependency in dependencies:
+
+                if seen.get( dependency ) is None:
+                    result.append( ( node, dependency ) )
+
+            seen[ node ] = 1
+
+        return result
 
     security.declarePrivate( 'registerStep' )
     def registerStep( self
@@ -235,11 +244,6 @@ class ImportStepRegistry( Implicit ):
 
         return parser._parsed
 
-    security.declarePrivate( 'clear' )
-    def clear( self ):
-
-        self._registered = {}
-
     #
     #   Helper methods
     #
@@ -290,7 +294,7 @@ class ImportStepRegistry( Implicit ):
 InitializeClass( ImportStepRegistry )
 
 
-class ExportStepRegistry( Implicit ):
+class ExportStepRegistry( BaseStepRegistry ):
 
     """ Registry of known site-configuration export steps.
 
@@ -311,71 +315,6 @@ class ExportStepRegistry( Implicit ):
     implements(IExportStepRegistry)
 
     security = ClassSecurityInfo()
-
-    def __init__( self ):
-
-        self.clear()
-
-    security.declareProtected( ManagePortal, 'listSteps' )
-    def listSteps( self ):
-
-        """ Return a list of registered step IDs.
-        """
-        return self._registered.keys()
-
-    security.declareProtected( ManagePortal, 'getStepMetadata' )
-    def getStepMetadata( self, key, default=None ):
-
-        """ Return a mapping of metadata for the step identified by 'key'.
-
-        o Return 'default' if no such step is registered.
-
-        o The 'handler' metadata is available via 'getStep'.
-        """
-        info = self._registered.get( key )
-
-        if info is None:
-            return default
-
-        result = info.copy()
-        result['invalid'] =  _resolveDottedName( result[ 'handler' ] ) is None
-
-        return result
-
-    security.declareProtected( ManagePortal, 'listStepMetadata' )
-    def listStepMetadata( self ):
-
-        """ Return a sequence of mappings describing registered steps.
-
-        o Steps will be alphabetical by ID.
-        """
-        step_ids = self.listSteps()
-        step_ids.sort()
-        return [ self.getStepMetadata( x ) for x in step_ids ]
-
-    security.declareProtected( ManagePortal, 'generateXML' )
-    def generateXML( self ):
-
-        """ Return a round-trippable XML representation of the registry.
-
-        o 'handler' values are serialized using their dotted names.
-        """
-        return self._exportTemplate()
-
-    security.declarePrivate( 'getStep' )
-    def getStep( self, key, default=None ):
-
-        """ Return the IExportPlugin registered for 'key'.
-
-        o Return 'default' if no such step is registered.
-        """
-        marker = object()
-        info = self._registered.get( key, marker )
-
-        if info is marker:
-            return default
-
-        return _resolveDottedName( info[ 'handler' ] )
 
     security.declarePrivate( 'registerStep' )
     def registerStep( self, id, handler, title=None, description=None ):
@@ -431,11 +370,6 @@ class ExportStepRegistry( Implicit ):
         parseString( text, parser )
 
         return parser._parsed
-
-    security.declarePrivate( 'clear' )
-    def clear( self ):
-
-        self._registered = {}
 
     #
     #   Helper methods
