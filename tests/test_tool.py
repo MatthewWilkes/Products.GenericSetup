@@ -24,9 +24,6 @@ from StringIO import StringIO
 from Acquisition import aq_base
 from OFS.Folder import Folder
 
-from Products.Five import zcml
-
-import Products.GenericSetup
 from Products.GenericSetup import profile_registry
 from Products.GenericSetup.upgrade import listUpgradeSteps
 from Products.GenericSetup.upgrade import UpgradeStep
