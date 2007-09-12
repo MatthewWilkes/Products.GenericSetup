@@ -16,36 +16,30 @@ $Id$
 """
 
 import unittest
-from Testing.ZopeTestCase import ZopeTestCase
+import Testing
 
 from AccessControl import ClassSecurityInfo
 from Acquisition import aq_base
 from Globals import InitializeClass
+from OFS.Folder import Folder
 from OFS.SimpleItem import SimpleItem
-
 from Products.Five.component import enableSite
 from Products.Five.component.interfaces import IObjectManagerSite
-from Products.GenericSetup.interfaces import IBody
-from Products.GenericSetup.testing import BodyAdapterTestCase
-from Products.GenericSetup.testing import ExportImportZCMLLayer
-from Products.GenericSetup.tests.common import DummyExportContext
-from Products.GenericSetup.tests.common import DummyImportContext
-
 from zope.app.component.hooks import setSite, clearSite, setHooks
-from zope.component import getMultiAdapter
 from zope.component import getSiteManager
 from zope.component import queryUtility
 from zope.component.globalregistry import base
 from zope.interface import implements
 from zope.interface import Interface
 
+from Products.GenericSetup.testing import BodyAdapterTestCase
+from Products.GenericSetup.testing import ExportImportZCMLLayer
+
 try:
     from five.localsitemanager.registry import PersistentComponents
 except ImportError:
     # Avoid generating a spurious dependency
     PersistentComponents = None
-
-_marker = []
 
 def createComponentRegistry(context):
     enableSite(context, iface=IObjectManagerSite)
@@ -121,50 +115,24 @@ _COMPONENTS_BODY = """\
 """
 
 
-class ComponentRegistryXMLAdapterTests(ZopeTestCase, BodyAdapterTestCase):
+class ComponentRegistryXMLAdapterTests(BodyAdapterTestCase):
 
     layer = ExportImportZCMLLayer
-
-    def _populate(self, obj):
-        obj.registerUtility(DummyUtility(), IDummyInterface)
-        obj.registerUtility(DummyUtility(), IDummyInterface, name=u'foo')
-
-        tool = aq_base(self.app['dummy_tool'])
-        obj.registerUtility(tool, IDummyInterface, name=u'dummy tool name')
-
-        tool2 = aq_base(self.app['dummy_tool2'])
-        obj.registerUtility(tool2, IDummyInterface, name=u'dummy tool name2')
-
-    def test_body_get(self):
-        self._populate(self._obj)
-        context = DummyExportContext(self.app)
-        adapted = getMultiAdapter((self._obj, context), IBody)
-        self.assertEqual(adapted.body, self._BODY)
-
-    def test_body_set(self):
-        context = DummyImportContext(self.app)
-        adapted = getMultiAdapter((self._obj, context), IBody)
-        adapted.body = self._BODY
-        self._verifyImport(self._obj)
-        self.assertEqual(adapted.body, self._BODY)
-
-        # now in update mode
-        context._should_purge = False
-        adapted = getMultiAdapter((self._obj, context), IBody)
-        adapted.body = self._BODY
-        self._verifyImport(self._obj)
-        self.assertEqual(adapted.body, self._BODY)
-
-        # and again in update mode
-        adapted = getMultiAdapter((self._obj, context), IBody)
-        adapted.body = self._BODY
-        self._verifyImport(self._obj)
-        self.assertEqual(adapted.body, self._BODY)
 
     def _getTargetClass(self):
         from Products.GenericSetup.components import \
             ComponentRegistryXMLAdapter
         return ComponentRegistryXMLAdapter
+
+    def _populate(self, obj):
+        obj.registerUtility(DummyUtility(), IDummyInterface)
+        obj.registerUtility(DummyUtility(), IDummyInterface, name=u'foo')
+
+        tool = aq_base(obj.aq_parent['dummy_tool'])
+        obj.registerUtility(tool, IDummyInterface, name=u'dummy tool name')
+
+        tool2 = aq_base(obj.aq_parent['dummy_tool2'])
+        obj.registerUtility(tool2, IDummyInterface, name=u'dummy tool name2')
 
     def _verifyImport(self, obj):
         util = queryUtility(IDummyInterface, name=u'foo')
@@ -181,7 +149,7 @@ class ComponentRegistryXMLAdapterTests(ZopeTestCase, BodyAdapterTestCase):
         self.assertEqual(util.meta_type, 'dummy tool')
 
         # make sure we can get the tool by normal means
-        tool = getattr(self.app, 'dummy_tool')
+        tool = getattr(obj.aq_parent, 'dummy_tool')
         self.assertEqual(tool.meta_type, 'dummy tool')
         self.assertEquals(repr(aq_base(util)), repr(aq_base(tool)))
 
@@ -191,29 +159,28 @@ class ComponentRegistryXMLAdapterTests(ZopeTestCase, BodyAdapterTestCase):
         self.assertEqual(util.meta_type, 'dummy tool2')
 
         # make sure we can get the tool by normal means
-        tool = getattr(self.folder, 'dummy_tool2')
+        tool = getattr(obj.aq_parent, 'dummy_tool2')
         self.assertEqual(tool.meta_type, 'dummy tool2')
         self.assertEquals(repr(aq_base(util)), repr(aq_base(tool)))
 
-    def afterSetUp(self):
-        BodyAdapterTestCase.setUp(self)
-
+    def setUp(self):
         # Create and enable a local component registry
-        createComponentRegistry(self.app)
+        site = Folder()
+        createComponentRegistry(site)
         setHooks()
-        setSite(self.app)
+        setSite(site)
         sm = getSiteManager()
 
         tool = DummyTool()
-        self.app._setObject(tool.id, tool)
+        site._setObject(tool.id, tool)
 
         tool2 = DummyTool2()
-        self.app._setObject(tool2.id, tool2)
+        site._setObject(tool2.id, tool2)
 
         self._obj = sm
         self._BODY = _COMPONENTS_BODY
 
-    def beforeTearDown(self):
+    def tearDown(self):
         clearSite()
 
 if PersistentComponents is not None:
@@ -221,14 +188,14 @@ if PersistentComponents is not None:
         # reimport to make sure tests are run from Products
         from Products.GenericSetup.tests.test_components \
                 import ComponentRegistryXMLAdapterTests
-    
+
         return unittest.TestSuite((
             unittest.makeSuite(ComponentRegistryXMLAdapterTests),
             ))
 else:
     def test_suite():
         return unittest.TestSuite()
-    
+
 if __name__ == '__main__':
     from Products.GenericSetup.testing import run
     run(test_suite())
