@@ -59,7 +59,7 @@ _METADATA_XML = """<?xml version="1.0"?>
 <metadata>
   <version>1.0</version>
   <dependencies>
-    <dependency>profile-bar</dependency>
+    <dependency>profile-other:bar</dependency>
   </dependencies>
 </metadata>
 """
@@ -70,6 +70,7 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
     layer = ExportImportZCMLLayer
 
     _PROFILE_PATH = '/tmp/STT_test'
+    _PROFILE_PATH2 = '/tmp/STT_test2'
 
     def afterSetUp(self):
         self._profile_registry_info = profile_registry._profile_info
@@ -527,18 +528,16 @@ class SetupToolTests(FilesystemTestBase, TarballTester, ConformsToISetupTool):
         tool = self._makeOne('setup_tool').__of__( site )
 
         profile_registry.registerProfile('foo', 'Foo', '', self._PROFILE_PATH)
-        profile_registry.registerProfile('bar', 'Bar', '', self._PROFILE_PATH)
+        profile_registry.registerProfile('bar', 'Bar', '', self._PROFILE_PATH2)
 
         _imported = []
-        def _runImportStepsFromContext(context, steps=None, purge_old=None, profile_id=None):
-            _imported.append(profile_id)
-            return dict(steps=[], messages="")
+        def applyContext(context):
+            _imported.append(context._profile_path)
 
-        tool._runImportStepsFromContext=_runImportStepsFromContext
-        import pdb ; pdb.set_trace()
+        tool.applyContext=applyContext
         result = tool.runAllImportStepsFromProfile('profile-other:foo',
                                                    ignore_dependencies=False)
-        self.assertEqual(_imported, ["profile-other:bar", "profile-other:foo"])
+        self.assertEqual(_imported, [self._PROFILE_PATH2, self._PROFILE_PATH])
 
 
     def test_runExportStep_nonesuch( self ):

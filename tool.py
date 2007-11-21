@@ -866,7 +866,10 @@ class SetupTool(Folder):
 
     security.declareProtected(ManagePortal, 'getDependenciesForProfile')
     def getDependenciesForProfile(self, profile_id):
-        return self.getProfileInfo( profile_id ).get('dependencies', ())
+        try:
+            return self.getProfileInfo( profile_id ).get('dependencies', ())
+        except KeyError:
+            return ()
 
 
     security.declareProtected(ManagePortal, 'listProfilesWithUpgrades')
@@ -1115,7 +1118,7 @@ class SetupTool(Folder):
                         continue
                     self._runImportStepsFromContext(steps=steps,
                                                     purge_old=purge_old,
-                                                    profile_id=profile_id,
+                                                    profile_id=dependency,
                                                     ignore_dependencies=ignore_dependencies,
                                                     seen=seen)
 
