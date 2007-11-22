@@ -365,8 +365,8 @@ class SetupTool(Folder):
     def runAllImportStepsFromProfile(self,
                                      profile_id,
                                      purge_old=None,
-                                     archive=None,
-                                     ignore_dependencies=False):
+                                     ignore_dependencies=False,
+                                     archive=None):
 
         """ See ISetupTool.
         """
@@ -618,7 +618,7 @@ class SetupTool(Folder):
         if getattr(tarball, 'read', None) is not None:
             tarball = tarball.read()
 
-        result = self.runAllImportStepsFromProfile(None, True, tarball)
+        result = self.runAllImportStepsFromProfile(None, True, archive=tarball)
 
         steps_run = 'Steps run: %s' % ', '.join(result['steps'])
 
