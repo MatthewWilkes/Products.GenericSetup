@@ -1105,22 +1105,26 @@ class SetupTool(Folder):
                                    archive=None,
                                    ignore_dependencies=False,
                                    seen=None):
-        if seen is None:
-            seen=set()
-        seen.add( profile_id )
+
+        results = []
 
         if not ignore_dependencies:
+            if seen is None:
+                seen=set()
+            seen.add( profile_id )
+
             dependencies = self.getDependenciesForProfile( profile_id )
             for dependency in dependencies:
                 if dependency not in seen:
                     if not self.profileExists( dependency ):
                         warn("Profile %s depends on unknown profile %s" % (profile_id, dependency))
                         continue
-                    self._runImportStepsFromContext(steps=steps,
+                    res = self._runImportStepsFromContext(steps=steps,
                                                     purge_old=purge_old,
                                                     profile_id=dependency,
                                                     ignore_dependencies=ignore_dependencies,
                                                     seen=seen)
+                    results.append( res )
 
         context = self._getImportContext(profile_id, purge_old, archive)
         self.applyContext(context)
@@ -1140,7 +1144,22 @@ class SetupTool(Folder):
 
         event.notify(ProfileImportedEvent(self, profile_id, steps, True))
 
-        return { 'steps' : steps, 'messages' : messages }
+        results.append({'steps' : steps, 'messages' : messages })
+
+        data = { 'steps' : [], 'messages' : {}}
+        for result in results:
+            for step in result['steps']:
+                if step not in data['steps']:
+                    data['steps'].append(step)
+
+            for (step, msg) in result['messages'].items():
+                if step in data['messages']:
+                    data['messages'][step]+="\n"+msg
+                else:
+                    data['messages'][step]=msg
+        data['steps'] = list(data['steps'])
+
+        return data
 
     security.declarePrivate('_mangleTimestampName')
     def _mangleTimestampName(self, prefix, ext=None):
