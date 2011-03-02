@@ -68,7 +68,6 @@ class IRegisterProfileDirective(Interface):
         required=False)
 
 
-_profile_regs = []
 def registerProfile(_context, name=u'default', title=None, description=None,
                     directory=None, provides=BASE, for_=None):
     """ Add a new profile to the registry.
@@ -82,8 +81,6 @@ def registerProfile(_context, name=u'default', title=None, description=None,
 
     if description is None:
         description = u''
-
-    _profile_regs.append('%s:%s' % (product, name))
 
     _context.action(
         discriminator=('registerProfile', product, name),
@@ -381,18 +378,6 @@ class upgradeSteps(object):
 #### cleanup
 
 def cleanUpProfiles():
-    global _profile_regs
-    for profile_id in _profile_regs:
-        try:
-            del _profile_registry._profile_info[profile_id]
-        except KeyError:
-            pass
-        try:
-            _profile_registry._profile_ids.remove(profile_id)
-        except ValueError:
-            pass
-
-    _profile_regs = []
     _upgrade_registry.clear()
 
 

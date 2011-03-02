@@ -65,9 +65,7 @@ def test_simpleRegisterProfile():
 
       >>> from Products.GenericSetup.registry import _profile_registry
       >>> profile_id = 'Products.GenericSetup:default'
-      >>> profile_id in _profile_registry._profile_ids
-      True
-      >>> info = _profile_registry._profile_info[profile_id]
+      >>> info = _profile_registry.getProfileInfo(profile_id)
       >>> info['id']
       u'Products.GenericSetup:default'
       >>> info['title']
@@ -88,10 +86,6 @@ def test_simpleRegisterProfile():
 
       >>> from zope.testing.cleanup import cleanUp
       >>> cleanUp()
-      >>> profile_id in _profile_registry._profile_ids
-      False
-      >>> profile_id in _profile_registry._profile_info
-      False
     """
 
 def test_registerProfile():
@@ -117,9 +111,7 @@ def test_registerProfile():
 
       >>> from Products.GenericSetup.registry import _profile_registry
       >>> profile_id = 'Products.GenericSetup:default'
-      >>> profile_id in _profile_registry._profile_ids
-      True
-      >>> info = _profile_registry._profile_info[profile_id]
+      >>> info = _profile_registry.getProfileInfo(profile_id)
       >>> info['id']
       u'Products.GenericSetup:default'
       >>> info['title']
@@ -140,10 +132,6 @@ def test_registerProfile():
 
       >>> from zope.testing.cleanup import cleanUp
       >>> cleanUp()
-      >>> profile_id in _profile_registry._profile_ids
-      False
-      >>> profile_id in _profile_registry._profile_info
-      False
     """
 
 def test_registerUpgradeStep(self):
@@ -325,7 +313,7 @@ def test_registerUpgradeSteps(self):
       True
       >>> step3['step'].purge
       True
-      
+
     First one listed should be second in the registry due to sortkey:
 
       >>> steps = profile_steps[1]
