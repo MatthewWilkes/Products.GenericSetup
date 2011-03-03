@@ -11,8 +11,6 @@
 #
 ##############################################################################
 """ GenericSetup product interfaces
-
-$Id$
 """
 
 from zope.interface import Attribute
@@ -850,4 +848,12 @@ class IComponentsHandlerBlacklist(Interface):
 
 class IProfile(Interface):
     """ Named profile.
+    """
+
+class IImportStep(Interface):
+    """ Named import step.
+    """
+
+class IExportStep(Interface):
+    """ Named export step.
     """

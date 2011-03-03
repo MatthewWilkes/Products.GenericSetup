@@ -113,11 +113,8 @@ class IExportStepDirective(Interface):
         required=True)
 
 
-_export_step_regs = []
 
 def exportStep(context, name, handler, title=None, description=None):
-    global _export_step_regs
-    _export_step_regs.append(name)
 
     context.action(
         discriminator=('exportStep', name),
@@ -162,8 +159,6 @@ class IImportStepDependsDirective(Interface):
         required=True)
 
 
-_import_step_regs = []
-
 class importStep:
 
     def __init__(self, context, name, title, description, handler):
@@ -181,8 +176,6 @@ class importStep:
         self.dependencies += (name,)
 
     def __call__(self):
-        global _import_step_regs
-        _import_step_regs.append(self.name)
 
         self.context.action(
             discriminator=self.discriminator,
@@ -382,24 +375,10 @@ def cleanUpProfiles():
 
 
 def cleanUpImportSteps():
-    global _import_step_regs
-    for name in _import_step_regs:
-        try:
-            _import_step_registry.unregisterStep(name)
-        except KeyError:
-            pass
-
-    _import_step_regs = []
+    pass
 
 def cleanUpExportSteps():
-    global _export_step_regs
-    for name in _export_step_regs:
-        try:
-            _export_step_registry.unregisterStep(name)
-        except KeyError:
-            pass
-
-    _export_step_regs = []
+    pass
 
 from zope.testing.cleanup import addCleanUp
 addCleanUp(cleanUpProfiles)

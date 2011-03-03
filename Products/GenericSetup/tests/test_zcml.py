@@ -362,8 +362,6 @@ class ImportStepTests(unittest.TestCase):
                                  handler="Products.GenericSetup.tests.test_zcml.dummy_importstep_handler">
                              </genericsetup:importStep>
                             </configure>""")
-        from Products.GenericSetup.zcml import _import_step_regs
-        self.assertEqual(_import_step_regs, [u'name'])
         self.assertEqual( _import_step_registry.listSteps(), [u'name'])
         data=_import_step_registry.getStepMetadata(u'name')
         self.assertEqual(data["handler"],
@@ -412,8 +410,6 @@ class ExportStepTests(unittest.TestCase):
                                  />
                               </configure>
                               """)
-        from Products.GenericSetup.zcml import _export_step_regs
-        self.assertEqual(_export_step_regs, [u'name'])
         self.assertEqual( _export_step_registry.listSteps(), [u'name'])
         data=_export_step_registry.getStepMetadata(u'name')
         self.assertEqual(data["handler"],
